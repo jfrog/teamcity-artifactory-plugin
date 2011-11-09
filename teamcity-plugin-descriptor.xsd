@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema version="1.0"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            elementFormDefault="qualified"
+  >
+
+  <xsd:element name="teamcity-plugin" type="TeamCityPluginDescriptor"/>
+
+  <xsd:complexType name="TeamCityPluginDescriptor">
+    <xsd:sequence>
+      <xsd:element name="info">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+            <xsd:element name="display-name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+            <xsd:element name="version" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+            <xsd:element name="description" minOccurs="0" maxOccurs="1" type="xsd:string"/>
+            <xsd:element name="download-url" minOccurs="0" maxOccurs="1" type="xsd:string"/>
+            <xsd:element name="email" minOccurs="0" maxOccurs="1" type="xsd:string"/>
+            <xsd:element name="vendor" minOccurs="0" maxOccurs="1">
+              <xsd:complexType>
+                <xsd:sequence>
+                  <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                  <xsd:element name="url" minOccurs="0" maxOccurs="1" type="xsd:string"/>
+                  <xsd:element name="logo" minOccurs="0" maxOccurs="1" type="xsd:string"/>
+                  <!-- to resolved to web resources-->
+                </xsd:sequence>
+              </xsd:complexType>
+            </xsd:element>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="requirements" minOccurs="0" maxOccurs="1">
+        <xsd:complexType>
+          <xsd:attribute name="min-build" type="xsd:long" use="optional"/>
+          <xsd:attribute name="max-build" type="xsd:long" use="optional"/>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="deployment" minOccurs="0" maxOccurs="1">
+        <xsd:complexType>
+          <xsd:attribute name="use-separate-classloader" type="xsd:boolean" default="false" use="optional"/>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="parameters" minOccurs="0" maxOccurs="1">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="parameter" minOccurs="0" maxOccurs="unbounded">
+              <xsd:complexType>
+                <xsd:simpleContent>
+                  <xsd:extension base="xsd:string">
+                    <xsd:attribute name="name" type="xsd:string"/>
+                  </xsd:extension>
+                </xsd:simpleContent>
+              </xsd:complexType>
+            </xsd:element>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

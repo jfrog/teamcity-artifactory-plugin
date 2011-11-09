@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2010 JFrog Ltd.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<teamcity-plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:noNamespaceSchemaLocation="urn:shemas-jetbrains-com:teamcity-plugin-v1-xml">
+    <info>
+        <name>artifactory</name>
+        <display-name>Artifactory</display-name>
+        <version>${plugin.version}</version>
+        <description>
+            <![CDATA[Provides seamless integration between Artifactory and TeamCity to support fully traceable and reproducible build artifacts management.]]>
+        </description>
+        <download-url>http://repo.jfrog.org/artifactory/libs-releases-local/org/jfrog/teamcity/teamcity-artifactory-plugin/${plugin.version}/teamcity-artifactory-plugin-${plugin.version}.zip</download-url>
+        <email>teamcity@jfrog.org</email>
+        <vendor>
+            <name>JFrog Ltd.</name>
+            <url>http://wiki.jfrog.org/confluence/display/RTF/TeamCity+Artifactory+Plug-in</url>
+            <logo>http://www.jfrog.org/images/logos/jfrog.logo.teamcity.png</logo>
+        </vendor>
+    </info>
+    <deployment use-separate-classloader="false"/>
+</teamcity-plugin>
