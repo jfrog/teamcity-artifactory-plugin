@@ -1,0 +1,6 @@
+Artifactory Plugin for TeamCity
+
+===  Integrate TeamCity and Artifactory to publish, resolve, promote and release traceable build artifacts 
+
+For more information please visit: http://wiki.jfrog.org/confluence/display/RTF/TeamCity+Artifactory+Plug-in
+
