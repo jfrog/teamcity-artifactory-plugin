@@ -1,4 +1,4 @@
-Artifactory Plugin for TeamCity
+=  Artifactory Plugin for TeamCity
 
 ===  Integrate TeamCity and Artifactory to publish, resolve, promote and release traceable build artifacts 
 
