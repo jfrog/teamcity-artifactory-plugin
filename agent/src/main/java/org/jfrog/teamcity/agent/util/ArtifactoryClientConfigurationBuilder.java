@@ -109,7 +109,10 @@ public abstract class ArtifactoryClientConfigurationBuilder {
     private static void addClientProperties(Map<String, String> runParameters,
             ArtifactoryClientConfiguration clientConf) {
         clientConf.setContextUrl(runParameters.get(RunnerParameterKeys.URL));
-        clientConf.setTimeout(Integer.valueOf(runParameters.get(RunnerParameterKeys.TIMEOUT)));
+        String timeout = runParameters.get(RunnerParameterKeys.TIMEOUT);
+        if (StringUtils.isNotBlank(timeout)) {
+            clientConf.setTimeout(Integer.valueOf(timeout));
+        }
         clientConf.publisher.setRepoKey(runParameters.get(RunnerParameterKeys.TARGET_REPO));
         String resolvingRepo = runParameters.get(RunnerParameterKeys.RESOLVING_REPO);
         if (StringUtils.isNotBlank(resolvingRepo)) {

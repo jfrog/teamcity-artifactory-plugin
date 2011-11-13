@@ -47,8 +47,8 @@ public class IvyBuildInfoAgentListener extends AgentLifeCycleAdapter {
                 String skipLogMessage = runnerParameters.get(PROP_SKIP_LOG_MESSAGE);
                 if (StringUtils.isNotBlank(skipLogMessage)) {
                     runner.getBuild().getBuildLogger().warning(skipLogMessage);
-                    return;
                 }
+                return;
             }
 
             File pluginsDirectory = runner.getBuild().getAgentConfiguration().getAgentPluginsDirectory();
