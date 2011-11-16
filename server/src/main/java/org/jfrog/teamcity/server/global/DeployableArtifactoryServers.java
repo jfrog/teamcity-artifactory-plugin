@@ -21,7 +21,7 @@ import com.google.common.collect.Maps;
 import jetbrains.buildServer.log.Loggers;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.client.ArtifactoryBuildInfoClient;
-import org.jfrog.build.client.ArtifactoryHttpClient;
+import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.client.VersionCompatibilityType;
 import org.jfrog.build.client.VersionException;
 import org.jfrog.teamcity.api.DeployableServerId;
@@ -166,7 +166,7 @@ public class DeployableArtifactoryServers {
                         client.setProxyConfiguration(proxyInfo.getHost(), proxyInfo.getPort(), proxyInfo.getUsername(),
                                 proxyInfo.getPassword());
                     }
-                    ArtifactoryHttpClient.Version version = client.verifyCompatibleArtifactoryVersion();
+                    ArtifactoryVersion version = client.verifyCompatibleArtifactoryVersion();
                     return version.hasAddons();
                 } catch (VersionException ve) {
                     return false;
@@ -208,10 +208,10 @@ public class DeployableArtifactoryServers {
                         client.setProxyConfiguration(proxyInfo.getHost(), proxyInfo.getPort(), proxyInfo.getUsername(),
                                 proxyInfo.getPassword());
                     }
-                    ArtifactoryHttpClient.Version serverVersion = client.verifyCompatibleArtifactoryVersion();
+                    ArtifactoryVersion serverVersion = client.verifyCompatibleArtifactoryVersion();
 
                     boolean compatible = serverVersion.
-                            isAtLeast(new ArtifactoryHttpClient.Version(ConstantValues.MINIMAL_ARTIFACTORY_VERSION));
+                            isAtLeast(new ArtifactoryVersion(ConstantValues.MINIMAL_ARTIFACTORY_VERSION));
                     return compatible ? "true" : "false";
                 } catch (VersionException ve) {
                     VersionCompatibilityType versionCompatibilityType = ve.getVersionCompatibilityType();
