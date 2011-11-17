@@ -108,7 +108,7 @@ public abstract class ArtifactoryClientConfigurationBuilder {
 
     private static void addClientProperties(Map<String, String> runParameters,
             ArtifactoryClientConfiguration clientConf) {
-        clientConf.setContextUrl(runParameters.get(RunnerParameterKeys.URL));
+        clientConf.publisher.setContextUrl(runParameters.get(RunnerParameterKeys.URL));
         String timeout = runParameters.get(RunnerParameterKeys.TIMEOUT);
         if (StringUtils.isNotBlank(timeout)) {
             clientConf.setTimeout(Integer.valueOf(timeout));
