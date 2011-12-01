@@ -37,7 +37,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <plugin.version>${project.version}</plugin.version>
         <teamcity.version>6.5.5</teamcity.version>
-        <build.info.version>2.0.x-SNAPSHOT</build.info.version>
+        <build.info.version>2.0.4</build.info.version>
     </properties>
 
     <developers>
@@ -226,7 +226,7 @@
             <dependency>
                 <groupId>org.jfrog.buildinfo</groupId>
                 <artifactId>build-info-extractor-ivy</artifactId>
-                <version>2.0.2</version>
+                <version>2.0.3</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.ant</groupId>
@@ -245,12 +245,12 @@
             <dependency>
                 <groupId>org.jfrog.buildinfo</groupId>
                 <artifactId>build-info-extractor-gradle</artifactId>
-                <version>2.0.x-SNAPSHOT</version>
+                <version>2.0.7</version>
             </dependency>
             <dependency>
                 <groupId>org.jfrog.buildinfo</groupId>
                 <artifactId>build-info-extractor-maven3</artifactId>
-                <version>2.0.x-SNAPSHOT</version>
+                <version>2.0.5</version>
             </dependency>
             <dependency>
                 <groupId>org.tmatesoft.svnkit</groupId>
