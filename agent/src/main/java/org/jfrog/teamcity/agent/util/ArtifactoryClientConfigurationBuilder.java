@@ -119,6 +119,11 @@ public abstract class ArtifactoryClientConfigurationBuilder {
         if (StringUtils.isNotBlank(resolvingRepo)) {
             clientConf.resolver.setContextUrl(serverUrl);
             clientConf.resolver.setRepoKey(resolvingRepo);
+            String resolverUsername = runParameters.get(RunnerParameterKeys.RESOLVER_USERNAME);
+            if (StringUtils.isNotBlank(resolverUsername)) {
+                clientConf.resolver.setUsername(resolverUsername);
+                clientConf.resolver.setPassword(runParameters.get(RunnerParameterKeys.RESOLVER_PASSWORD));
+            }
         }
         clientConf.publisher.setIvy(Boolean.valueOf(runParameters.get(RunnerParameterKeys.PUBLISH_IVY_DESCRIPTORS)));
         clientConf.publisher.setMaven(
@@ -127,12 +132,6 @@ public abstract class ArtifactoryClientConfigurationBuilder {
         if (StringUtils.isNotBlank(deployerUsername)) {
             clientConf.publisher.setUsername(deployerUsername);
             clientConf.publisher.setPassword(runParameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD));
-        }
-
-        String resolverUsername = runParameters.get(RunnerParameterKeys.RESOLVER_USERNAME);
-        if (StringUtils.isNotBlank(resolverUsername)) {
-            clientConf.resolver.setUsername(resolverUsername);
-            clientConf.resolver.setPassword(runParameters.get(RunnerParameterKeys.RESOLVER_PASSWORD));
         }
 
         boolean deployArtifacts = Boolean.valueOf(runParameters.get(RunnerParameterKeys.DEPLOY_ARTIFACTS));
