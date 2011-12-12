@@ -18,6 +18,8 @@ public class RunnerParameterKeys {
     public final static String OVERRIDE_DEFAULT_DEPLOYER = PREFIX + "overrideDefaultDeployerCredentials";
     public final static String DEPLOYER_USERNAME = PREFIX + "deployerUsername";
     public final static String DEPLOYER_PASSWORD = "secure:" + PREFIX + "deployerPassword";
+    public final static String RESOLVER_USERNAME = PREFIX + "resolverUsername";
+    public final static String RESOLVER_PASSWORD = "secure:" + PREFIX + "resolverPassword";
     public final static String DEPLOY_ARTIFACTS = PREFIX + "deployArtifacts";
     public final static String DEPLOY_INCLUDE_PATTERNS = PREFIX + "deployIncludePatterns";
     public final static String DEPLOY_EXCLUDE_PATTERNS = PREFIX + "deployExcludePatterns";

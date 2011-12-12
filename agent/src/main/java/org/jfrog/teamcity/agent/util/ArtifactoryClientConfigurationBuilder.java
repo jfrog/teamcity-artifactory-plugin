@@ -129,6 +129,12 @@ public abstract class ArtifactoryClientConfigurationBuilder {
             clientConf.publisher.setPassword(runParameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD));
         }
 
+        String resolverUsername = runParameters.get(RunnerParameterKeys.RESOLVER_USERNAME);
+        if (StringUtils.isNotBlank(resolverUsername)) {
+            clientConf.resolver.setUsername(resolverUsername);
+            clientConf.resolver.setPassword(runParameters.get(RunnerParameterKeys.RESOLVER_PASSWORD));
+        }
+
         boolean deployArtifacts = Boolean.valueOf(runParameters.get(RunnerParameterKeys.DEPLOY_ARTIFACTS));
         clientConf.publisher.setPublishArtifacts(deployArtifacts);
         if (deployArtifacts) {

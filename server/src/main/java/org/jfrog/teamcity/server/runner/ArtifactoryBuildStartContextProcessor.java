@@ -92,6 +92,10 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
             runnerContext.addRunnerParameter(RunnerParameterKeys.DEPLOYER_USERNAME, preferredDeploying.getUsername());
             runnerContext.addRunnerParameter(RunnerParameterKeys.DEPLOYER_PASSWORD, preferredDeploying.getPassword());
 
+            CredentialsBean preferredResolving = CredentialsHelper.getPreferredResolvingCredentials(serverConfig);
+            runnerContext.addRunnerParameter(RunnerParameterKeys.RESOLVER_USERNAME, preferredResolving.getUsername());
+            runnerContext.addRunnerParameter(RunnerParameterKeys.RESOLVER_PASSWORD, preferredResolving.getPassword());
+
             runnerContext.addRunnerParameter(RunnerParameterKeys.TIMEOUT, Integer.toString(serverConfig.getTimeout()));
 
             //TODO: [by yl] See how we can get a nicer build name...
