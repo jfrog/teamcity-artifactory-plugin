@@ -16,9 +16,6 @@
 
 package org.jfrog.teamcity.agent.release.vcs;
 
-import java.io.File;
-import java.io.IOException;
-
 /**
  * An interface for SCM actions required in the release process.
  *
@@ -27,9 +24,4 @@ import java.io.IOException;
 public interface ScmManager {
 
     String COMMENT_PREFIX = "[artifactory-release] ";
-
-    void commitWorkingCopy(File workingCopy, String commitMessage) throws IOException, InterruptedException;
-
-    void createTag(File workingCopy, String tagUrl, String commitMessage)
-            throws IOException, InterruptedException;
 }

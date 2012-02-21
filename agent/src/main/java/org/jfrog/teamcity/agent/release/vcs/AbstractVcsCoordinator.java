@@ -92,6 +92,6 @@ public abstract class AbstractVcsCoordinator implements VcsCoordinator {
                 "VCS roots.");
     }
 
-    public void edit(File file, boolean releaseVersion) throws IOException, InterruptedException {
+    public void edit(File file) throws IOException {
     }
 }

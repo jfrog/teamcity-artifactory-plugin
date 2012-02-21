@@ -70,5 +70,5 @@ public interface VcsCoordinator {
      *
      * @param file The file that is about to be modified.
      */
-    void edit(File file, boolean releaseVersion) throws IOException, InterruptedException;
+    void edit(File file) throws IOException, InterruptedException;
 }

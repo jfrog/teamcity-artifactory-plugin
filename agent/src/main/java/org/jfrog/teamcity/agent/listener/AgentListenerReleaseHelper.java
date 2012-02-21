@@ -128,7 +128,7 @@ public class AgentListenerReleaseHelper {
             PomTransformer transformer = new PomTransformer(pomEntry.getKey(), versionsByModule,
                     releaseParams.isSvn() ? releaseParams.getTagUrl() : null, releaseVersion);
 
-            vcsCoordinator.edit(pomEntry.getValue(), releaseVersion);
+            vcsCoordinator.edit(pomEntry.getValue());
             modified |= transformer.transform(pomEntry.getValue());
         }
         return modified;
@@ -160,7 +160,7 @@ public class AgentListenerReleaseHelper {
                 modulesByName.put(propertyKey, version);
             }
         }
-        vcsCoordinator.edit(gradlePropertiesFile, releaseVersion);
+        vcsCoordinator.edit(gradlePropertiesFile);
         return new PropertiesTransformer(gradlePropertiesFile, modulesByName).transform();
     }
 }
