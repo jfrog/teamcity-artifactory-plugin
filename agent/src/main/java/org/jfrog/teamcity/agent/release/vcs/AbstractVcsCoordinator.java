@@ -23,8 +23,10 @@ import jetbrains.buildServer.vcs.VcsRootEntry;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.teamcity.agent.release.ReleaseParameters;
 import org.jfrog.teamcity.agent.release.vcs.git.GitCoordinator;
+import org.jfrog.teamcity.agent.release.vcs.perforce.PerforceCoordinator;
 import org.jfrog.teamcity.agent.release.vcs.svn.SubversionCoordinator;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -51,7 +53,10 @@ public abstract class AbstractVcsCoordinator implements VcsCoordinator {
         if (releaseParameters.isGit()) {
             return new GitCoordinator(runner);
         }
-        throw new UnsupportedOperationException("Unable to find supported VCS (Subversion or Git).");
+        if (releaseParameters.isPerforce()) {
+            return new PerforceCoordinator(runner);
+        }
+        throw new UnsupportedOperationException("Unable to find supported VCS (Subversion, Git or Perforce).");
     }
 
     protected void log(String message) {
@@ -75,7 +80,7 @@ public abstract class AbstractVcsCoordinator implements VcsCoordinator {
      * @return The first configured vcs repository with the fiven name
      * @throws IllegalArgumentException If no vcs configuration found with the given name
      */
-    protected VcsRoot getFirstSvnRoot(String name) {
+    protected VcsRoot getFirstVcsRoot(String name) {
         AgentRunningBuild build = runner.getBuild();
         for (VcsRootEntry entry : build.getVcsRootEntries()) {
             VcsRoot root = entry.getVcsRoot();
@@ -85,5 +90,8 @@ public abstract class AbstractVcsCoordinator implements VcsCoordinator {
         }
         throw new IllegalStateException("Cannot operate release management on a build with no Subversion " +
                 "VCS roots.");
+    }
+
+    public void edit(File file, boolean releaseVersion) throws IOException, InterruptedException {
     }
 }

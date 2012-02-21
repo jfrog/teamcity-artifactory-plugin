@@ -59,9 +59,9 @@ public class GitCoordinator extends AbstractVcsCoordinator {
     }
 
     public void prepare() throws IOException {
-        VcsRoot firstSvnRoot = getFirstSvnRoot(ConstantValues.Git.VCS_NAME);
+        VcsRoot firstVcsRoot = getFirstVcsRoot(ConstantValues.Git.VCS_NAME);
 
-        gitProps = firstSvnRoot.getProperties();
+        gitProps = firstVcsRoot.getProperties();
 
         releaseBranch = releaseParameters.getReleaseBranch();
 

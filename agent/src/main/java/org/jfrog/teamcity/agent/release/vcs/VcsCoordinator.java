@@ -16,6 +16,7 @@
 
 package org.jfrog.teamcity.agent.release.vcs;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -43,7 +44,7 @@ public interface VcsCoordinator {
     /**
      * Called after a successful release build.
      */
-    void afterSuccessfulReleaseVersionBuild() throws IOException;
+    void afterSuccessfulReleaseVersionBuild() throws IOException, InterruptedException;
 
     /**
      * Called before changing to next development version.
@@ -55,7 +56,7 @@ public interface VcsCoordinator {
      *
      * @param modified
      */
-    void afterDevelopmentVersionChange(boolean modified) throws IOException;
+    void afterDevelopmentVersionChange(boolean modified) throws IOException, InterruptedException;
 
     /**
      * Called after the build has completed and the result was finalized.
@@ -63,4 +64,11 @@ public interface VcsCoordinator {
      * @param successful True if the build finished successfully
      */
     void buildCompleted(boolean successful) throws IOException;
+
+    /**
+     * Called before a file is modified.
+     *
+     * @param file The file that is about to be modified.
+     */
+    void edit(File file, boolean releaseVersion) throws IOException, InterruptedException;
 }

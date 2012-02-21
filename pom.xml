@@ -269,6 +269,11 @@
                 <version>3.0</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>com.perforce</groupId>
+                <artifactId>p4java</artifactId>
+                <version>2011.1.297684</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

@@ -103,7 +103,7 @@ public class AgentListenerReleaseHelper {
     }
 
     private boolean changePomVersions(BuildRunnerContext runner, BuildProgressLogger logger,
-            ReleaseParameters releaseParams, boolean releaseVersion) throws IOException {
+            ReleaseParameters releaseParams, boolean releaseVersion) throws IOException, InterruptedException {
         logger.progressStarted("[RELEASE] Changing versions in POM files");
         String pomLocation = runner.getRunnerParameters().get(ConstantValues.MAVEN_PARAM_POM_LOCATION);
         pomLocation = StringUtils.isNotBlank(pomLocation) ? pomLocation : "pom.xml";
@@ -127,6 +127,8 @@ public class AgentListenerReleaseHelper {
         for (Map.Entry<ModuleName, File> pomEntry : projectPoms.entrySet()) {
             PomTransformer transformer = new PomTransformer(pomEntry.getKey(), versionsByModule,
                     releaseParams.isSvn() ? releaseParams.getTagUrl() : null, releaseVersion);
+
+            vcsCoordinator.edit(pomEntry.getValue(), releaseVersion);
             modified |= transformer.transform(pomEntry.getValue());
         }
         return modified;
@@ -158,6 +160,7 @@ public class AgentListenerReleaseHelper {
                 modulesByName.put(propertyKey, version);
             }
         }
+        vcsCoordinator.edit(gradlePropertiesFile, releaseVersion);
         return new PropertiesTransformer(gradlePropertiesFile, modulesByName).transform();
     }
 }

@@ -138,6 +138,10 @@
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.perforce</groupId>
+            <artifactId>p4java</artifactId>
+        </dependency>
     </dependencies>
 
     <profiles>

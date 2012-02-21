@@ -116,7 +116,7 @@ public abstract class BaseReleaseManagementTab extends SimpleCustomTab {
         List<VcsRootInstance> roots = buildType.getVcsRootInstances();
         for (VcsRootInstance vcsRootInstance : roots) {
             String vcsName = vcsRootInstance.getVcsName();
-            if ("svn".equals(vcsName) || "jetbrains.git".equals(vcsName)) {
+            if ("svn".equals(vcsName) || "jetbrains.git".equals(vcsName) || "perforce".equals(vcsName)) {
                 return true;
             }
         }

@@ -16,6 +16,7 @@ public class ReleaseManagementParameterKeys {
     public final static String PER_MODULE_NEXT_DEVELOPMENT_VERSION_PREFIX = PREFIX + "nextDevelopmentVersion_";
     public final static String NO_VERSION_CHANGE = PREFIX + "noVersionChange";
     public final static String GIT_VCS = PREFIX + "gitVcs";
+    public final static String PERFORCE_VCS = PREFIX + "perforceVcs";
     public final static String CREATE_RELEASE_BRANCH = PREFIX + "createReleaseBranch";
     public final static String RELEASE_BRANCH = PREFIX + "releaseBranch";
     public final static String SVN_VCS = PREFIX + "svnVcs";

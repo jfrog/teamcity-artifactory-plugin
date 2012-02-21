@@ -120,6 +120,10 @@ public class ReleaseParameters {
         return getBoolean(ReleaseManagementParameterKeys.GIT_VCS);
     }
 
+    public boolean isPerforce() {
+        return getBoolean(ReleaseManagementParameterKeys.PERFORCE_VCS);
+    }
+
     private boolean getBoolean(String key) {
         return Boolean.valueOf(buildParams.get(key));
     }

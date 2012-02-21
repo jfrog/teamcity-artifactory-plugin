@@ -24,7 +24,7 @@ import org.jfrog.teamcity.agent.release.vcs.AbstractVcsCoordinator;
 import java.io.IOException;
 
 /**
- * Subversion scm coordinator. Interacts with the {@link SvnManager} to fulfill the release process.
+ * Subversion scm coordinator. Interacts with the {@link SubversionManager} to fulfill the release process.
  *
  * @author Yossi Shaul
  */
@@ -38,7 +38,7 @@ public class SubversionCoordinator extends AbstractVcsCoordinator {
     }
 
     public void prepare() {
-        VcsRoot firstSvnRoot = getFirstSvnRoot("svn");
+        VcsRoot firstSvnRoot = getFirstVcsRoot("svn");
         subversion = new SubversionManager(runner, firstSvnRoot.getProperties());
         subversion.prepare();
     }

@@ -95,24 +95,27 @@ public abstract class BaseReleaseManagementController extends BaseFormXmlControl
         List<VcsRootInstance> roots = buildType.getVcsRootInstances();
         boolean gitVcs = false;
         boolean svnVcs = false;
+        boolean perforceVcs = false;
 
         for (VcsRootInstance vcsRootInstance : roots) {
             String vcsName = vcsRootInstance.getVcsName();
             gitVcs = "jetbrains.git".equals(vcsName);
             svnVcs = "svn".equals(vcsName);
-            if (gitVcs || svnVcs) {
+            perforceVcs = "perforce".equals(vcsName);
+            if (gitVcs || svnVcs || perforceVcs) {
                 break;
             }
         }
 
-        if (!gitVcs && !svnVcs) {
+        if (!gitVcs && !svnVcs && !perforceVcs) {
             errors.addError("runError",
-                    "Promotion can only be performed on builds configured with a Git or Subversion VCS root.");
+                    "Promotion can only be performed on builds configured with a Git, Subversion or Perforce VCS root.");
             return;
         }
 
         customParameters.put(ReleaseManagementParameterKeys.GIT_VCS, Boolean.toString(gitVcs));
         customParameters.put(ReleaseManagementParameterKeys.SVN_VCS, Boolean.toString(svnVcs));
+        customParameters.put(ReleaseManagementParameterKeys.PERFORCE_VCS, Boolean.toString(perforceVcs));
 
         handleVersioning(request, customParameters, errors);
 
