@@ -16,14 +16,10 @@
 
 package org.jfrog.teamcity.common;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -31,16 +27,15 @@ import java.util.Map;
  *
  * @author Evgeny Goldin
  */
-public class BuildItemsHelper
+public class BuildDependenciesHelper
 {
-    public static Map<String, Map<String, List<BuildDependencyPattern>>> getBuildItemsPatternMapping ( String buildItemsPropertyValue ) {
+    public static BuildDependenciesMapping getBuildDependenciesMapping ( String buildItemsPropertyValue ) {
+
+        BuildDependenciesMapping mapping = new BuildDependenciesMapping();
 
         if ( StringUtils.isBlank( buildItemsPropertyValue )) {
-            return Collections.emptyMap();
+            return mapping;
         }
-
-        // Mapping of build names to builds map (see "buildsMap" below).
-        Map<String, Map<String, List<BuildDependencyPattern>>> patternsMap = Maps.newHashMap();
 
         List<String> patternLines = PublishedItemsHelper.parsePatternsFromProperty( buildItemsPropertyValue );
         for ( String patternLine : patternLines ) {
@@ -72,28 +67,13 @@ public class BuildItemsHelper
                                          PublishedItemsHelper.removeDoubleDotsFromPattern( FilenameUtils.separatorsToUnix( splitPattern[ 1 ].trim())) :
                                          "";
 
-            if ( StringUtils.isBlank( pattern ) || StringUtils.isBlank( buildName ) || StringUtils.isBlank( buildNumber )) {
+            if ( StringUtils.isBlank( buildName ) || StringUtils.isBlank( buildNumber ) || StringUtils.isBlank( pattern )) {
                 continue;
             }
 
-            // Mapping of build number to dependency patterns.
-            Map<String, List<BuildDependencyPattern>> buildsMap = patternsMap.get( buildName );
-
-            if ( buildsMap == null ) {
-                patternsMap.put( buildName, Maps.<String, List<BuildDependencyPattern>>newHashMap());
-                buildsMap = patternsMap.get( buildName );
-            }
-
-            List<BuildDependencyPattern> patterns = buildsMap.get( buildNumber );
-
-            if ( patterns == null ) {
-                buildsMap.put( buildNumber, Lists.<BuildDependencyPattern>newArrayList());
-                patterns = buildsMap.get( buildNumber );
-            }
-
-            patterns.add( new BuildDependencyPattern( pattern, targetDirectory ));
+            mapping.addBuildDependency( buildName, buildNumber, new BuildDependencyPattern( pattern, targetDirectory ));
         }
 
-        return patternsMap;
+        return mapping;
     }
 }

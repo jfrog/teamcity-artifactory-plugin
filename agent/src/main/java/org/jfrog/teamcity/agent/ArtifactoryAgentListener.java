@@ -16,16 +16,10 @@
 
 package org.jfrog.teamcity.agent;
 
+import static org.jfrog.teamcity.common.ConstantValues.*;
 import com.google.common.collect.Lists;
 import jetbrains.buildServer.ExtensionHolder;
-import jetbrains.buildServer.agent.AgentLifeCycleAdapter;
-import jetbrains.buildServer.agent.AgentLifeCycleListener;
-import jetbrains.buildServer.agent.AgentRunningBuildEx;
-import jetbrains.buildServer.agent.BuildAgent;
-import jetbrains.buildServer.agent.BuildFinishedStatus;
-import jetbrains.buildServer.agent.BuildInterruptReason;
-import jetbrains.buildServer.agent.BuildProgressLogger;
-import jetbrains.buildServer.agent.BuildRunnerContext;
+import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.apache.commons.lang.StringUtils;
@@ -39,14 +33,13 @@ import org.jfrog.teamcity.common.RunnerParameterKeys;
 import java.util.List;
 import java.util.Map;
 
-import static org.jfrog.teamcity.common.ConstantValues.PROP_SKIP_LOG_MESSAGE;
-
 public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
 
-    private ExtensionHolder extensionsLocator;
-    private List<Dependency> publishedDependencies = Lists.newArrayList();
+    private ExtensionHolder              extensionsLocator;
+    private List<Dependency>             publishedDependencies = Lists.newArrayList();
+    private List<Dependency>             buildDependencies     = Lists.newArrayList();
     private AgentListenerBuildInfoHelper buildInfoHelper;
-    private AgentListenerReleaseHelper releaseHelper;
+    private AgentListenerReleaseHelper   releaseHelper;
 
     public ArtifactoryAgentListener(@NotNull EventDispatcher<AgentLifeCycleListener> dispatcher,
             @NotNull ExtensionHolder extensionsLocator) {
@@ -74,10 +67,11 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
         }
 
         publishedDependencies.clear();
+        buildDependencies.clear();
 
         buildInfoHelper = new AgentListenerBuildInfoHelper(extensionsLocator);
         try {
-            buildInfoHelper.beforeRunnerStart(runner, publishedDependencies);
+            buildInfoHelper.beforeRunnerStart( runner, publishedDependencies, buildDependencies );
         } catch (RuntimeException re) {
             logException(runner, re);
         }

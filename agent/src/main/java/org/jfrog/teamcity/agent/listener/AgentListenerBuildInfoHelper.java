@@ -57,7 +57,7 @@ public class AgentListenerBuildInfoHelper {
         this.extensionHolder = extensionHolder;
     }
 
-    public void beforeRunnerStart(BuildRunnerContext runner, List<Dependency> dependencies) {
+    public void beforeRunnerStart(BuildRunnerContext runner, List<Dependency> publishedDependencies, List<Dependency> buildDependencies ) {
         Map<String, String> runnerParams = runner.getRunnerParameters();
         /**
          * This method handles the generic build info dependency publication which is not applicable to gradle or ant
@@ -68,8 +68,8 @@ public class AgentListenerBuildInfoHelper {
         }
 
         runner.addRunnerParameter(BUILD_STARTED, new Date().getTime() + "");
-        retrievePublishedDependencies( runner, dependencies );
-        retrieveBuildDependencies( runner, dependencies );
+        retrievePublishedDependencies( runner, publishedDependencies );
+        retrieveBuildDependencies( runner, buildDependencies );
     }
 
     private void retrievePublishedDependencies ( BuildRunnerContext runner, List<Dependency> dependencies )
