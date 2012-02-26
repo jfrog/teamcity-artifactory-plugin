@@ -16,15 +16,11 @@
 
 package org.jfrog.teamcity.agent.listener;
 
+import static org.jfrog.teamcity.common.ConstantValues.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import jetbrains.buildServer.ExtensionHolder;
-import jetbrains.buildServer.agent.AgentRunningBuild;
-import jetbrains.buildServer.agent.ArtifactsPreprocessor;
-import jetbrains.buildServer.agent.ArtifactsPublisher;
-import jetbrains.buildServer.agent.BuildFinishedStatus;
-import jetbrains.buildServer.agent.BuildProgressLogger;
-import jetbrains.buildServer.agent.BuildRunnerContext;
+import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.agent.impl.artifacts.ArtifactsBuilder;
 import jetbrains.buildServer.agent.impl.artifacts.ArtifactsCollection;
 import jetbrains.buildServer.log.Loggers;
@@ -38,10 +34,7 @@ import org.jfrog.build.client.IncludeExcludePatterns;
 import org.jfrog.build.client.PatternMatcher;
 import org.jfrog.build.extractor.BuildInfoExtractor;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
-import org.jfrog.teamcity.agent.GenericBuildInfoExtractor;
-import org.jfrog.teamcity.agent.LoggingArtifactsBuilderAdapter;
-import org.jfrog.teamcity.agent.MavenBuildInfoExtractor;
-import org.jfrog.teamcity.agent.PublishedDependenciesRetriever;
+import org.jfrog.teamcity.agent.*;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
 import org.jfrog.teamcity.common.RunTypeUtils;
@@ -52,8 +45,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-import static org.jfrog.teamcity.common.ConstantValues.*;
 
 /**
  * @author Noam Y. Tenne
@@ -77,11 +68,33 @@ public class AgentListenerBuildInfoHelper {
         }
 
         runner.addRunnerParameter(BUILD_STARTED, new Date().getTime() + "");
+        retrievePublishedDependencies( runner, dependencies );
+        retrieveBuildDependencies( runner, dependencies );
+    }
+
+    private void retrievePublishedDependencies ( BuildRunnerContext runner, List<Dependency> dependencies )
+    {
         PublishedDependenciesRetriever dependenciesRetriever = new PublishedDependenciesRetriever(runner);
         try {
             dependenciesRetriever.appendDependencies(dependencies);
         } catch (Exception e) {
             String errorMessage = "Error occurred while resolving published dependencies: " + e.getMessage();
+            BuildProgressLogger logger = runner.getBuild().getBuildLogger();
+            Loggers.AGENT.error(errorMessage, e);
+            logger.buildFailureDescription(errorMessage);
+            logger.exception(e);
+            throw new RuntimeException(errorMessage, e);
+        }
+    }
+
+    private void retrieveBuildDependencies ( BuildRunnerContext runner, List<Dependency> dependencies )
+    {
+        BuildDependenciesRetriever dependenciesRetriever = new BuildDependenciesRetriever(runner);
+
+        try {
+            dependenciesRetriever.appendDependencies(dependencies);
+        } catch (Exception e) {
+            String errorMessage = "Error occurred while resolving build dependencies: " + e.getMessage();
             BuildProgressLogger logger = runner.getBuild().getBuildLogger();
             Loggers.AGENT.error(errorMessage, e);
             logger.buildFailureDescription(errorMessage);
