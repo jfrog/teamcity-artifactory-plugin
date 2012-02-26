@@ -37,6 +37,7 @@ public class RunnerParameterKeys {
     public final static String PUBLISH_IVY_DESCRIPTORS = PREFIX + "publishIvyDescriptors";
     public final static String PUBLISHED_ARTIFACTS = PREFIX + "publishedArtifacts";
     public final static String PUBLISHED_DEPENDENCIES = PREFIX + "publishedDependencies";
+    public final static String BUILD_DEPENDENCIES = PREFIX + "buildDependencies";
     public final static String ENABLE_RELEASE_MANAGEMENT = PREFIX + "enableReleaseManagement";
     public final static String VCS_TAG_BASE_URL_OR_NAME = PREFIX + "vcsTagsBaseUrlOrName";
     public final static String GIT_RELEASE_BRANCH_NAME_PREFIX = PREFIX + "gitReleaseBranchNamePrefix";

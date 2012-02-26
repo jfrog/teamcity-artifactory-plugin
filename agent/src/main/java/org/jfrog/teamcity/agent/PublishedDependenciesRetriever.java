@@ -16,6 +16,7 @@
 
 package org.jfrog.teamcity.agent;
 
+import static org.jfrog.teamcity.common.ConstantValues.*;
 import jetbrains.buildServer.agent.BuildProgressLogger;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.log.Loggers;
@@ -35,8 +36,6 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static org.jfrog.teamcity.common.ConstantValues.*;
 
 /**
  * @author Noam Y. Tenne
@@ -63,6 +62,7 @@ public class PublishedDependenciesRetriever {
 
         //Don't run if no published dependency patterns were entered
         String selectedPublishedDependencies = runnerParams.get(RunnerParameterKeys.PUBLISHED_DEPENDENCIES);
+        String selectedBuildDependencies     = runnerParams.get(RunnerParameterKeys.BUILD_DEPENDENCIES);
         if (StringUtils.isBlank(selectedPublishedDependencies) ||
                 selectedPublishedDependencies.equals(ConstantValues.DISABLED_MESSAGE)) {
             return;
