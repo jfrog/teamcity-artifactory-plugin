@@ -60,6 +60,8 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').disabled = true;
                 $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').value = '${disabledMessage}';
+                $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').disabled = true;
+                $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '${disabledMessage}';
 
                 BS.Util.hide($('targetRepo.container'));
                 BS.Util.hide($('version.warning.container'));
@@ -81,6 +83,7 @@
                 BS.Util.hide($('disableAutoLicenseDiscovery.container'));
                 BS.Util.hide($('publishedArtifacts.container'));
                 BS.Util.hide($('publishedDependencies.container'));
+                BS.Util.hide($('buildDependencies.container'));
             } else {
 
                 if (!foundExistingConfig) {
@@ -128,6 +131,7 @@
                 if (!BS.local.isActivateIvyIntegrationSelected()) {
                     BS.Util.show($('publishedArtifacts.container'));
                     BS.Util.show($('publishedDependencies.container'));
+                    BS.Util.show($('buildDependencies.container'));
                 }
             }
             BS.MultilineProperties.updateVisible();
@@ -164,7 +168,9 @@
                 BS.Util.hide($('publishedArtifacts.container'));
                 $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
                 BS.Util.hide($('publishedDependencies.container'));
+                BS.Util.hide($('buildDependencies.container'));
                 $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').value = '';
+                $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '';
             } else {
                 BS.Util.hide('deployArtifacts.container');
                 $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = false;
@@ -176,6 +182,7 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.artifactPattern').value = '';
                 BS.Util.show($('publishedArtifacts.container'));
                 BS.Util.show($('publishedDependencies.container'));
+                BS.Util.show($('buildDependencies.container'));
             }
             BS.local.toggleDeployArtifactsSelection();
             BS.MultilineProperties.updateVisible();

@@ -54,9 +54,9 @@
         <props:multilineProperty name="org.jfrog.artifactory.selectedDeployableServer.publishedDependencies"
                                  linkTitle="Edit downloaded artifacts" cols="49" rows="3" expanded="true"/>
     <span class="smallNote">
-    New line or comma separated paths to artifacts that will be downloaded from Artifactory.
-    Supports ant-style wildcards like <kbd>repo-key:dir/*/bob/*.zip</kbd> (** wilcards are not supported)
-    and target directories like <kbd>repo-key:*.zip=>winFiles, repo-key:unix/distro.tgz=>linuxFiles</kbd>,
+    New line or comma separated paths to deployed artifacts that will be downloaded from Artifactory.
+    Supports ant-style wildcards like <kbd>repo-key:dir/*/bob/*.zip</kbd> (** wilcards are not supported),
+    requires target directories to be specified like <kbd>repo-key:*.zip=>winFiles, repo-key:unix/distro.tgz=>linuxFiles</kbd>,
     where <kbd>winFiles</kbd> and <kbd>linuxFiles</kbd> are target directories. Target directories can either be
     absolute or relative to the working directory.<br/>
     Artifacts can be downloaded conditionally based on their property values in Artifactory. For example, to
@@ -65,5 +65,30 @@
                                  target="_blank">documentation</a>.
     </span>
         <span id="error_org.jfrog.artifactory.selectedDeployableServer.publishedDependencies" class="error"/>
+    </td>
+</tr>
+
+<tr class="noBorder" id="buildDependencies.container"
+    style="${shouldDisplay ? '' : 'display: none;'}">
+    <th>
+        <label for="org.jfrog.artifactory.selectedDeployableServer.buildDependencies">
+            Custom build dependencies:
+        </label>
+    </th>
+    <td>
+        <props:multilineProperty name="org.jfrog.artifactory.selectedDeployableServer.buildDependencies"
+                                 linkTitle="Edit downloaded artifacts" cols="49" rows="3" expanded="true"/>
+    <span class="smallNote">
+    New line or comma separated paths to build artifacts that will be downloaded from Artifactory.
+    Supports ant-style wildcards like <kbd>repo-key:dir/*/bob/*.zip</kbd> (** wilcards are not supported),
+    requires target directories to be specified like <kbd>repo-key:*.zip=>winFiles, repo-key:unix/distro.tgz=>linuxFiles</kbd>,
+    where <kbd>winFiles</kbd> and <kbd>linuxFiles</kbd> are target directories. Target directories can either be
+    absolute or relative to the working directory.<br/>
+    Artifacts can be downloaded conditionally based on their property values in Artifactory. For example, to
+    download all zip files marked as production ready: <kbd>repo-key:dir/*/bob/*.zip;status+=prod</kbd>. For more
+    details see the plug-in's <a href="http://wiki.jfrog.org/confluence/display/RTF/TeamCity+Artifactory+Plug-in"
+                                 target="_blank">documentation</a>.
+    </span>
+        <span id="error_org.jfrog.artifactory.selectedDeployableServer.buildDependencies" class="error"/>
     </td>
 </tr>

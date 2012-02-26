@@ -49,6 +49,8 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').disabled = true;
                 $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').value = '${disabledMessage}';
+                $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').disabled = true;
+                $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '${disabledMessage}';
 
                 BS.Util.hide($('targetRepo.container'));
                 BS.Util.hide($('version.warning.container'));
@@ -63,6 +65,7 @@
                 BS.Util.hide($('disableAutoLicenseDiscovery.container'));
                 BS.Util.hide($('publishedArtifacts.container'));
                 BS.Util.hide($('publishedDependencies.container'));
+                BS.Util.hide($('buildDependencies.container'));
             } else {
                 if (!foundExistingConfig) {
                     $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked =
@@ -91,6 +94,7 @@
 
                 BS.Util.show($('publishedArtifacts.container'));
                 BS.Util.show($('publishedDependencies.container'));
+                BS.Util.show($('buildDependencies.container'));
             }
             BS.MultilineProperties.updateVisible();
         }

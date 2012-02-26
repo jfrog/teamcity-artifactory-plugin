@@ -73,6 +73,8 @@ BS.local = {
             $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
             $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').disabled = true;
             $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').value = '${disabledMessage}';
+            $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').disabled = true;
+            $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '${disabledMessage}';
             $('org.jfrog.artifactory.selectedDeployableServer.enableReleaseManagement').checked = false;
             $('org.jfrog.artifactory.selectedDeployableServer.vcsTagsBaseUrlOrName').value = '';
             $('org.jfrog.artifactory.selectedDeployableServer.gitReleaseBranchNamePrefix').value = '';
@@ -104,6 +106,7 @@ BS.local = {
             BS.Util.hide($('licenseViolationRecipients.container'));
             BS.Util.hide($('publishedArtifacts.container'));
             BS.Util.hide($('publishedDependencies.container'));
+            BS.Util.hide($('buildDependencies.container'));
             BS.Util.hide($('enableReleaseManagement.container'));
             BS.Util.hide($('vcsTagsBaseUrlOrName.container'));
             BS.Util.hide($('gitReleaseBranchNamePrefix.container'));
@@ -173,6 +176,7 @@ BS.local = {
             if (!BS.local.isActivateGradleIntegrationSelected()) {
                 BS.Util.show($('publishedArtifacts.container'));
                 BS.Util.show($('publishedDependencies.container'));
+                BS.Util.show($('buildDependencies.container'));
             }
 
             if (publishBuildInfo) {
@@ -238,7 +242,9 @@ BS.local = {
             BS.Util.hide($('publishedArtifacts.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
             BS.Util.hide($('publishedDependencies.container'));
+            BS.Util.hide($('buildDependencies.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').value = '';
+            $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '';
             BS.Util.show($('resolvingRepo.container'));
             BS.Util.show($('publishBuildInfo.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
@@ -258,7 +264,9 @@ BS.local = {
             BS.Util.show($('publishedArtifacts.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
             BS.Util.show($('publishedDependencies.container'));
+            BS.Util.show($('buildDependencies.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').value = '';
+            $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '';
             BS.Util.hide($('resolvingRepo.container'));
             BS.Util.hide($('publishBuildInfo.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = false;
