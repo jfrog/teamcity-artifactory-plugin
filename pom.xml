@@ -37,7 +37,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <plugin.version>${project.version}</plugin.version>
         <teamcity.version>6.5.5</teamcity.version>
-        <build.info.version>2.0.6</build.info.version>
+        <build.info.version>2.0.x-SNAPSHOT</build.info.version>
     </properties>
 
     <developers>
