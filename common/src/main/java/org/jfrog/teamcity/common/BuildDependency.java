@@ -10,7 +10,8 @@ import java.util.List;
 
 
 /**
- * Build dependency pattern - a combination of Artifactory pattern and target directory.
+ * Build dependency, as converted from user input like
+ * "libs-release-local:com/goldin/plugins/gradle/0.1.1/*.jar;status+=prod@gradle-plugins :: Build :: Gradle#LATEST => many-jars-build"
  */
 public class BuildDependency
 {
@@ -19,21 +20,23 @@ public class BuildDependency
     private       String        buildNumberResponse;              // "5"
     private final List<Pattern> patterns = Lists.newLinkedList(); // "libs-release-local:com/plugins/gradle/0.1.1/*.jar;status+=prod"
     private final String        targetDirectory;                  //
-    private       PatternResult patternResult;                    //
 
 
     public static class Pattern {
 
-        public final String artifactoryPattern; // "libs-release-local:com/plugins/gradle/0.1.1/*.jar"
-        public final String matrixParameters;   // "status+=prod"
+        private final String        artifactoryPattern; // "libs-release-local:com/plugins/gradle/0.1.1/*.jar"
+        private final String        matrixParameters;   // "status+=prod"
+        private       PatternResult patternResult;      // Pattern result as received from Artifactory
 
         public Pattern ( String artifactoryPattern, String matrixParameters ) {
             this.artifactoryPattern = artifactoryPattern;
             this.matrixParameters   = matrixParameters;
         }
 
-        public String getArtifactoryPattern (){ return this.artifactoryPattern; }
-        public String getMatrixParameters   (){ return this.matrixParameters;   }
+        public String        getArtifactoryPattern (){ return this.artifactoryPattern; }
+        public String        getMatrixParameters   (){ return this.matrixParameters;   }
+        public PatternResult getPatternResult      (){ return this.patternResult;      }
+        public void          setPatternResult      ( PatternResult patternResult ) { this.patternResult = patternResult; }
     }
 
 
@@ -57,8 +60,6 @@ public class BuildDependency
     public void          setBuildNumberResponse ( String buildNumberResponse ) { this.buildNumberResponse = buildNumberResponse; }
     public List<Pattern> getPatterns            () { return Collections.unmodifiableList( this.patterns ); }
     public String        getTargetDirectory     () { return this.targetDirectory; }
-    public PatternResult getPatternResult       () { return this.patternResult; }
-    public void          setPatternResult       ( PatternResult patternResult ){ this.patternResult = patternResult; }
 
 
     public void addPattern ( String pattern )

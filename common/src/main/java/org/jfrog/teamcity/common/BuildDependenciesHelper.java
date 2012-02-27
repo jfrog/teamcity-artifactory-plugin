@@ -23,6 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.builder.dependency.BuildPatternArtifactsRequestBuilder;
 import org.jfrog.build.api.dependency.BuildPatternArtifacts;
 import org.jfrog.build.api.dependency.BuildPatternArtifactsRequest;
+import org.jfrog.build.api.dependency.PatternResult;
 
 import java.util.Collections;
 import java.util.List;
@@ -123,8 +124,8 @@ public class BuildDependenciesHelper
         for ( BuildDependency dependency : buildDependencies )
         {
             BuildPatternArtifactsRequestBuilder builder = new BuildPatternArtifactsRequestBuilder().
-                                                          buildName( dependency.getBuildName()).
-                                                          buildNumber( dependency.getBuildNumberRequest());
+                                                          buildName( dependency.getBuildName() ).
+                                                          buildNumber( dependency.getBuildNumberRequest() );
 
             for ( BuildDependency.Pattern p : dependency.getPatterns()) {
                 builder.pattern( p.getArtifactoryPattern());
@@ -137,9 +138,50 @@ public class BuildDependenciesHelper
     }
 
 
-    public static void applyBuildPatternArtifacts ( List<BuildDependency>       buildDependencies,
-                                                    List<BuildPatternArtifacts> artifacts ){
+    public static void applyBuildArtifacts ( List<BuildDependency>       buildDependencies,
+                                             List<BuildPatternArtifacts> buildArtifacts ){
 
-        int j = 5;
+        verifySameSize( buildDependencies, buildArtifacts );
+
+        for ( int j = 0; j < buildDependencies.size(); j++ ) {
+
+            BuildDependency       dependency = buildDependencies.get( j );
+            BuildPatternArtifacts artifacts  = buildArtifacts.get( j );
+
+            if ( ! dependency.getBuildName().equals( artifacts.getBuildName())) {
+                throw new IllegalArgumentException(
+                    String.format( "Build names don't match: [%s] != [%s]", dependency.getBuildName(), artifacts.getBuildName()));
+            }
+
+            dependency.setBuildNumberResponse( artifacts.getBuildNumber());
+
+            List<BuildDependency.Pattern> dependencyPatterns = dependency.getPatterns();
+            List<PatternResult>           patternResults     = artifacts.getPatternResults();
+
+            verifySameSize( dependencyPatterns, patternResults );
+
+            for ( int k = 0; k < dependencyPatterns.size(); k++ ) {
+                BuildDependency.Pattern p      = dependencyPatterns.get( k );
+                PatternResult           result = patternResults.get( k );
+                p.setPatternResult( result );
+            }
+        }
+    }
+
+
+    /**
+     * Verifies both lists are of the same size.
+     *
+     * @param l1 first list to check
+     * @param l2 second list to check
+     *
+     * @throws IllegalArgumentException if lists are of different sizes.
+     */
+    private static void verifySameSize ( List l1, List l2 ) {
+
+        if ( l1.size() != l2.size() ) {
+            throw new IllegalArgumentException(
+                String.format( "List sizes don't match: [%s] != [%s]", l1.size(), l2.size()));
+        }
     }
 }

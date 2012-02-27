@@ -73,7 +73,7 @@ public class BuildDependenciesRetriever extends DependenciesRetriever
 
         List<BuildPatternArtifactsRequest> artifactsRequests = BuildDependenciesHelper.toArtifactsRequests( buildDependencies );
         List<BuildPatternArtifacts>        artifacts         = getClient().retrievePatternArtifacts( artifactsRequests );
-        BuildDependenciesHelper.applyBuildPatternArtifacts( buildDependencies, artifacts );
+        BuildDependenciesHelper.applyBuildArtifacts( buildDependencies, artifacts );
 
         logger.progressMessage( "Finished resolving Build Info build dependencies." );
         logger.progressFinished();
