@@ -84,6 +84,9 @@ public class BuildDependenciesRetriever
 
             if ( ! mapping.isEmpty()) {
                 logger.progressStarted( "Beginning to resolve Build Info build dependencies from " + serverUrl );
+
+                String requstJson = mapping.toJson();
+
                 logger.progressMessage( "Finished resolving Build Info build dependencies." );
                 logger.progressFinished();
             }

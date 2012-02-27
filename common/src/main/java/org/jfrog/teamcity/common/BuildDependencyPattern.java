@@ -4,7 +4,7 @@ package org.jfrog.teamcity.common;
 import org.apache.commons.lang.StringUtils;
 
 /**
- * Build dependency pattern - a combination of pattern and target directory.
+ * Build dependency pattern - a combination of Artifactory pattern and target directory.
  */
 public class BuildDependencyPattern
 {
