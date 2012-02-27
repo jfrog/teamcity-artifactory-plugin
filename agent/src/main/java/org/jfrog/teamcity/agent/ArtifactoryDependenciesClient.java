@@ -27,6 +27,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.type.TypeReference;
 import org.jfrog.build.api.dependency.BuildPatternArtifacts;
 import org.jfrog.build.api.dependency.BuildPatternArtifactsRequest;
 import org.jfrog.build.client.ArtifactoryHttpClient;
@@ -91,26 +92,28 @@ public class ArtifactoryDependenciesClient
         stringEntity.setContentType( "application/vnd.org.jfrog.artifactory+json" );
         post.setEntity( stringEntity );
 
-        List outputs = readResponse( httpClient.getHttpClient().execute( post ),
-                                     List.class,
-                                     "Failed to retrieve build artifacts report" );
-        return null;
-    }
 
+        List<BuildPatternArtifacts> artifacts = readResponse( httpClient.getHttpClient().execute( post ),
+                                                              new TypeReference<List<BuildPatternArtifacts>>(){},
+                                                              "Failed to retrieve build artifacts report" );
+        return artifacts;
+    }
 
 
 
     public PatternResultFileSet searchArtifactsByPattern(String pattern) throws IOException {
         PreemptiveHttpClient client = httpClient.getHttpClient();
 
-        String patternSearchUrl = artifactoryUrl + "/api/search/pattern?pattern=" + pattern;
-        return readResponse( client.execute( new HttpGet( patternSearchUrl )),
-                             PatternResultFileSet.class,
-                             "Failed to search artifact by the pattern '" + pattern + "'" );
+        String               url    = artifactoryUrl + "/api/search/pattern?pattern=" + pattern;
+        PatternResultFileSet result = readResponse( client.execute( new HttpGet( url )),
+                                                    new TypeReference<PatternResultFileSet>(){},
+                                                    "Failed to search artifact by the pattern '" + pattern + "'" );
+        return result;
     }
 
 
-    private <T> T readResponse( HttpResponse response, Class<T> valueType, String errorMessage ) throws IOException {
+
+    private <T> T readResponse( HttpResponse response, TypeReference<T> valueType, String errorMessage ) throws IOException {
 
         if ( response.getStatusLine().getStatusCode() == HttpStatus.SC_OK ) {
             HttpEntity entity = response.getEntity();
@@ -121,6 +124,7 @@ public class ArtifactoryDependenciesClient
             InputStream content = entity.getContent();
             try {
                 JsonParser parser = httpClient.createJsonParser( content );
+                // http://wiki.fasterxml.com/JacksonDataBinding
                 return parser.readValueAs( valueType );
             }
             finally {

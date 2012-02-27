@@ -20,6 +20,7 @@ import jetbrains.buildServer.agent.BuildRunnerContext;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildPatternArtifacts;
+import org.jfrog.build.api.dependency.BuildPatternArtifactsRequest;
 import org.jfrog.teamcity.common.BuildDependenciesHelper;
 import org.jfrog.teamcity.common.BuildDependenciesMapping;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
@@ -70,7 +71,9 @@ public class BuildDependenciesRetriever extends DependenciesRetriever
 
         logger.progressStarted( "Beginning to resolve Build Info build dependencies from " + serverUrl );
 
-        final List<BuildPatternArtifacts> outputs = getClient().retrievePatternArtifacts( mapping.toBuildRequests());
+        final List<BuildPatternArtifactsRequest> artifactsRequests = mapping.toBuildRequests();
+        final List<BuildPatternArtifacts>        artifacts         = getClient().retrievePatternArtifacts( artifactsRequests );
+        mapping.applyBuildPatternArtifacts( artifacts );
 
         logger.progressMessage( "Finished resolving Build Info build dependencies." );
         logger.progressFinished();
