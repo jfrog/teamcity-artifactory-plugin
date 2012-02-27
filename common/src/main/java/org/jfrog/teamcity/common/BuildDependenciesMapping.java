@@ -3,7 +3,9 @@ package org.jfrog.teamcity.common;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.jfrog.build.api.builder.dependency.BuildOutputsRequestBuilder;
+import org.jfrog.build.api.dependency.BuildOutputs;
 import org.jfrog.build.api.dependency.BuildOutputsRequest;
+import org.jfrog.build.api.dependency.PatternResult;
 import org.jfrog.build.client.JsonSerializer;
 
 import java.io.IOException;
@@ -95,5 +97,39 @@ public class BuildDependenciesMapping
 
         String json = new JsonSerializer<List<BuildOutputsRequest>>().toJSON( requests );
         return json;
+    }
+
+
+    /**
+     * Applies build outputs received from Artifactory.
+     *
+     * @param outputs build outputs received from Artifactory.
+     */
+    public void applyBuildOutputs( List<BuildOutputs> outputs ) {
+
+        for ( BuildOutputs build : outputs ) {
+
+            final String name   = build.getBuildName();
+            final String number = build.getBuildNumber();
+
+            if (( mapping.get( name ) == null ) || ( mapping.get( name ).get( number ) == null )) {
+                throw new IllegalArgumentException(
+                    String.format( "No mapping data available for build [%s], number [%s]", name, number  ));
+            }
+
+            final List<BuildDependencyPattern> patterns       = mapping.get( name ).get( number );
+            final List<PatternResult>          patternResults = build.getPatternResults();
+            final int                          size           = patterns.size();
+            final int                          resultSize     = patternResults.size();
+
+            if ( size != resultSize ) {
+                throw new IllegalArgumentException(
+                    String.format( "Pattern results size [%s] doesn't match the one in mapping [%s]", resultSize, size ));
+            }
+
+            for ( int j = 0; j < size; j++ ) {
+                patterns.get( j ).setPatternResult( patternResults.get( j ));
+            }
+        }
     }
 }
