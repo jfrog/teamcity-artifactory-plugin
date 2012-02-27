@@ -22,7 +22,7 @@ import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildPatternArtifacts;
 import org.jfrog.build.api.dependency.BuildPatternArtifactsRequest;
 import org.jfrog.teamcity.common.BuildDependenciesHelper;
-import org.jfrog.teamcity.common.BuildDependenciesMapping;
+import org.jfrog.teamcity.common.BuildDependency;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.io.IOException;
@@ -51,29 +51,29 @@ public class BuildDependenciesRetriever extends DependenciesRetriever
             return;
         }
 
-        String buildDependencies = runnerParams.get( RunnerParameterKeys.BUILD_DEPENDENCIES );
+        String buildDependenciesParam = runnerParams.get( RunnerParameterKeys.BUILD_DEPENDENCIES );
 
         /**
          * Don't run if no build dependency patterns were specified.
          */
-        if ( ! dependencyEnabled( buildDependencies )) {
+        if ( ! dependencyEnabled( buildDependenciesParam )) {
             return;
         }
 
-        BuildDependenciesMapping mapping = BuildDependenciesHelper.getBuildDependenciesMapping( buildDependencies );
+        List<BuildDependency> buildDependencies = BuildDependenciesHelper.getBuildDependencies( buildDependenciesParam );
 
         /**
          * Don't run if dependencies mapping came out to be empty.
          */
-        if ( mapping.isEmpty()) {
+        if ( buildDependencies.isEmpty()) {
             return;
         }
 
         logger.progressStarted( "Beginning to resolve Build Info build dependencies from " + serverUrl );
 
-        final List<BuildPatternArtifactsRequest> artifactsRequests = mapping.toBuildRequests();
-        final List<BuildPatternArtifacts>        artifacts         = getClient().retrievePatternArtifacts( artifactsRequests );
-        mapping.applyBuildPatternArtifacts( artifacts );
+        List<BuildPatternArtifactsRequest> artifactsRequests = BuildDependenciesHelper.toArtifactsRequests( buildDependencies );
+        List<BuildPatternArtifacts>        artifacts         = getClient().retrievePatternArtifacts( artifactsRequests );
+        BuildDependenciesHelper.applyBuildPatternArtifacts( buildDependencies, artifacts );
 
         logger.progressMessage( "Finished resolving Build Info build dependencies." );
         logger.progressFinished();

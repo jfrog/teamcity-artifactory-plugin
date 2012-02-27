@@ -92,7 +92,6 @@ public class ArtifactoryDependenciesClient
         stringEntity.setContentType( "application/vnd.org.jfrog.artifactory+json" );
         post.setEntity( stringEntity );
 
-
         List<BuildPatternArtifacts> artifacts = readResponse( httpClient.getHttpClient().execute( post ),
                                                               new TypeReference<List<BuildPatternArtifacts>>(){},
                                                               "Failed to retrieve build artifacts report" );
@@ -112,7 +111,17 @@ public class ArtifactoryDependenciesClient
     }
 
 
-
+    /**
+     * Reads HTTP response and converts it to object of the type specified.
+     *
+     * @param response     response to read
+     * @param valueType    response object type
+     * @param errorMessage error message to throw in case of error
+     * @param <T>          response object type
+     * @return response object converted from HTTP Json reponse to the type specified.
+     *
+     * @throws IOException if reading or converting response fails.
+     */
     private <T> T readResponse( HttpResponse response, TypeReference<T> valueType, String errorMessage ) throws IOException {
 
         if ( response.getStatusLine().getStatusCode() == HttpStatus.SC_OK ) {
@@ -121,14 +130,16 @@ public class ArtifactoryDependenciesClient
                 return null;
             }
 
-            InputStream content = entity.getContent();
+            InputStream content = null;
+
             try {
+                content           = entity.getContent();
                 JsonParser parser = httpClient.createJsonParser( content );
                 // http://wiki.fasterxml.com/JacksonDataBinding
                 return parser.readValueAs( valueType );
             }
             finally {
-                IOUtils.closeQuietly( content );
+                if ( content != null ) { IOUtils.closeQuietly( content ); }
             }
         }
         else {

@@ -16,10 +16,17 @@
 
 package org.jfrog.teamcity.common;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jfrog.build.api.builder.dependency.BuildPatternArtifactsRequestBuilder;
+import org.jfrog.build.api.dependency.BuildPatternArtifacts;
+import org.jfrog.build.api.dependency.BuildPatternArtifactsRequest;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -29,15 +36,32 @@ import java.util.List;
  */
 public class BuildDependenciesHelper
 {
-    public static BuildDependenciesMapping getBuildDependenciesMapping ( String buildItemsPropertyValue ) {
 
-        BuildDependenciesMapping mapping = new BuildDependenciesMapping();
+    public static List<BuildDependency> getBuildDependencies ( String buildItemsPropertyValue ) {
 
         if ( StringUtils.isBlank( buildItemsPropertyValue )) {
-            return mapping;
+            return Collections.emptyList();
         }
 
+        // Build name => build number => build dependency
+        Map<String, Map<String, BuildDependency>> buildsMap         = buildsMap( buildItemsPropertyValue );
+        List<BuildDependency>                     buildDependencies = Lists.newLinkedList();
+
+        for ( Map<String, BuildDependency> m : buildsMap.values()) {
+            for ( BuildDependency bd : m.values()){
+                buildDependencies.add( bd );
+            }
+        }
+
+        return buildDependencies;
+    }
+
+
+    private static Map<String, Map<String, BuildDependency>> buildsMap ( String buildItemsPropertyValue )
+    {
+        Map<String, Map<String, BuildDependency>> buildsMap = Maps.newHashMap();
         List<String> patternLines = PublishedItemsHelper.parsePatternsFromProperty( buildItemsPropertyValue );
+
         for ( String patternLine : patternLines ) {
 
             /**
@@ -51,7 +75,7 @@ public class BuildDependenciesHelper
                 continue;
             }
 
-            String dependency = FilenameUtils.separatorsToUnix( splitPattern[ 0 ].trim());
+            String dependency = FilenameUtils.separatorsToUnix( splitPattern[ 0 ].trim() );
             int index1        = dependency.lastIndexOf( '@' );
             int index2        = dependency.lastIndexOf( '#' );
             boolean lineIsOk  = ( index1 > 0 ) && ( index2 > index1 ) && ( index2 < ( dependency.length() - 1 ));
@@ -71,9 +95,51 @@ public class BuildDependenciesHelper
                 continue;
             }
 
-            mapping.addBuildDependency( buildName, buildNumber, new BuildDependencyPattern( pattern, targetDirectory ));
+            Map<String, BuildDependency> numbersMap = buildsMap.get( buildName );
+
+            if ( numbersMap == null ) {
+                buildsMap.put( buildName, Maps.<String, BuildDependency>newHashMap());
+                numbersMap = buildsMap.get( buildName );
+            }
+
+            BuildDependency buildDependency = numbersMap.get( buildNumber );
+
+            if ( buildDependency == null ) {
+                numbersMap.put( buildNumber, new BuildDependency( buildName, buildNumber, pattern, targetDirectory ));
+            }
+            else {
+                buildDependency.addPattern( pattern );
+            }
         }
 
-        return mapping;
+        return buildsMap;
+    }
+
+
+    public static List<BuildPatternArtifactsRequest> toArtifactsRequests ( List<BuildDependency> buildDependencies )
+    {
+        List<BuildPatternArtifactsRequest> artifactsRequests = Lists.newLinkedList();
+
+        for ( BuildDependency dependency : buildDependencies )
+        {
+            BuildPatternArtifactsRequestBuilder builder = new BuildPatternArtifactsRequestBuilder().
+                                                          buildName( dependency.getBuildName()).
+                                                          buildNumber( dependency.getBuildNumberRequest());
+
+            for ( BuildDependency.Pattern p : dependency.getPatterns()) {
+                builder.pattern( p.getArtifactoryPattern());
+            }
+
+            artifactsRequests.add( builder.build());
+        }
+
+        return artifactsRequests;
+    }
+
+
+    public static void applyBuildPatternArtifacts ( List<BuildDependency>       buildDependencies,
+                                                    List<BuildPatternArtifacts> artifacts ){
+
+        int j = 5;
     }
 }
