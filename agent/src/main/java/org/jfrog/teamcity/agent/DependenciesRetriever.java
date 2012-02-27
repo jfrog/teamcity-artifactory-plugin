@@ -39,6 +39,12 @@ public abstract class DependenciesRetriever
     }
 
 
+    @Override
+    protected void finalize () throws Throwable {
+        this.client.shutdown();
+    }
+
+
     /**
      * Determines if server URL is set.
      *

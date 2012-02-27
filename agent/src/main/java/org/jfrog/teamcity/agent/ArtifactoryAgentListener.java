@@ -28,16 +28,18 @@ import org.jfrog.build.api.Dependency;
 import org.jfrog.teamcity.agent.listener.AgentListenerBuildInfoHelper;
 import org.jfrog.teamcity.agent.listener.AgentListenerReleaseHelper;
 import org.jfrog.teamcity.agent.release.ReleaseParameters;
+import org.jfrog.teamcity.common.BuildDependency;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.util.List;
 import java.util.Map;
 
+
 public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
 
     private ExtensionHolder              extensionsLocator;
     private List<Dependency>             publishedDependencies = Lists.newArrayList();
-    private List<Dependency>             buildDependencies     = Lists.newArrayList();
+    private List<BuildDependency>        buildDependencies     = Lists.newArrayList();
     private AgentListenerBuildInfoHelper buildInfoHelper;
     private AgentListenerReleaseHelper   releaseHelper;
 
@@ -68,21 +70,25 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
 
         publishedDependencies.clear();
         buildDependencies.clear();
+        buildInfoHelper = new AgentListenerBuildInfoHelper( extensionsLocator );
 
-        buildInfoHelper = new AgentListenerBuildInfoHelper(extensionsLocator);
         try {
             buildInfoHelper.beforeRunnerStart( runner, publishedDependencies, buildDependencies );
-        } catch (RuntimeException re) {
-            logException(runner, re);
+        }
+        catch ( RuntimeException e ) {
+            logException( runner, e );
         }
 
         releaseHelper = new AgentListenerReleaseHelper();
+
         try {
             releaseHelper.beforeRunnerStart(runner);
-        } catch (Exception e) {
-            logException(runner, e);
+        }
+        catch ( Exception e ) {
+            logException( runner, e );
         }
     }
+
 
     @Override
     public void runnerFinished(@NotNull BuildRunnerContext runner, @NotNull BuildFinishedStatus buildStatus) {

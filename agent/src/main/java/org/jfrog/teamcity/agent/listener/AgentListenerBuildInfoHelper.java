@@ -37,6 +37,7 @@ import org.jfrog.build.extractor.BuildInfoExtractorUtils;
 import org.jfrog.teamcity.agent.*;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
+import org.jfrog.teamcity.common.BuildDependency;
 import org.jfrog.teamcity.common.RunTypeUtils;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
@@ -57,7 +58,9 @@ public class AgentListenerBuildInfoHelper {
         this.extensionHolder = extensionHolder;
     }
 
-    public void beforeRunnerStart(BuildRunnerContext runner, List<Dependency> publishedDependencies, List<Dependency> buildDependencies ) {
+    public void beforeRunnerStart( BuildRunnerContext    runner,
+                                   List<Dependency>      publishedDependencies,
+                                   List<BuildDependency> buildDependencies ) {
         Map<String, String> runnerParams = runner.getRunnerParameters();
         /**
          * This method handles the generic build info dependency publication which is not applicable to gradle or ant
@@ -67,9 +70,10 @@ public class AgentListenerBuildInfoHelper {
             return;
         }
 
-        runner.addRunnerParameter(BUILD_STARTED, new Date().getTime() + "");
+        runner.addRunnerParameter( BUILD_STARTED, String.valueOf( new Date().getTime()));
+
         retrievePublishedDependencies( runner, publishedDependencies );
-        retrieveBuildDependencies( runner, buildDependencies );
+        retrieveBuildDependencies    ( runner, buildDependencies );
     }
 
     private void retrievePublishedDependencies ( BuildRunnerContext runner, List<Dependency> dependencies )
@@ -87,12 +91,12 @@ public class AgentListenerBuildInfoHelper {
         }
     }
 
-    private void retrieveBuildDependencies ( BuildRunnerContext runner, List<Dependency> dependencies )
+    private void retrieveBuildDependencies ( BuildRunnerContext runner, List<BuildDependency> buildDependencies )
     {
         BuildDependenciesRetriever dependenciesRetriever = new BuildDependenciesRetriever(runner);
 
         try {
-            dependenciesRetriever.appendDependencies(dependencies);
+            dependenciesRetriever.appendDependencies( buildDependencies );
         } catch (Exception e) {
             String errorMessage = "Error occurred while resolving build dependencies: " + e.getMessage();
             BuildProgressLogger logger = runner.getBuild().getBuildLogger();

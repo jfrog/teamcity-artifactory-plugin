@@ -18,7 +18,6 @@ package org.jfrog.teamcity.agent;
 
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildPatternArtifacts;
 import org.jfrog.build.api.dependency.BuildPatternArtifactsRequest;
 import org.jfrog.build.api.dependency.PatternArtifact;
@@ -44,7 +43,7 @@ public class BuildDependenciesRetriever extends DependenciesRetriever
     }
 
 
-    public void appendDependencies( List<Dependency> dependencies ) throws IOException {
+    public void appendDependencies( List<BuildDependency> buildDependencies ) throws IOException {
 
         /**
          * Don't run if no server was configured
@@ -62,7 +61,7 @@ public class BuildDependenciesRetriever extends DependenciesRetriever
             return;
         }
 
-        List<BuildDependency> buildDependencies = BuildDependenciesHelper.getBuildDependencies( buildDependenciesParam );
+        buildDependencies.addAll( BuildDependenciesHelper.getBuildDependencies( buildDependenciesParam ));
 
         /**
          * Don't run if dependencies mapping came out to be empty.
