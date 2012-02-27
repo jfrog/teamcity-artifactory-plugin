@@ -11,6 +11,7 @@ import org.jfrog.build.api.dependency.PatternResult;
 public class BuildDependencyPattern
 {
     private final String  pattern;
+    private final String  matrixParameters;
     private final String  targetDirectory;
     private PatternResult patternResult;
 
@@ -24,8 +25,10 @@ public class BuildDependencyPattern
             throw new NullPointerException( "Target directory is null" ); // Can be empty, though.
         }
 
-        this.pattern         = pattern;
-        this.targetDirectory = targetDirectory;
+        int j                 = pattern.lastIndexOf( ';' );
+        this.pattern          = ( j > 0 ) ? pattern.substring( 0,  j ) : pattern;
+        this.matrixParameters = ( j > 0 ) ? pattern.substring( j + 1 ) : "";
+        this.targetDirectory  = targetDirectory;
     }
 
 
@@ -40,7 +43,7 @@ public class BuildDependencyPattern
     @Override
     public String toString ()
     {
-        return String.format( "Pattern [%s], pattern result [%s], target directory [%s]",
-                              this.pattern, this.patternResult, this.targetDirectory );
+        return String.format( "Pattern [%s], matrix parameters [%s], pattern result [%s], target directory [%s]",
+                              this.pattern, this.matrixParameters, this.patternResult, this.targetDirectory );
     }
 }

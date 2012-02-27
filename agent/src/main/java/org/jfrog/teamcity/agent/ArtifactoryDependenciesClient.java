@@ -82,10 +82,10 @@ public class ArtifactoryDependenciesClient
      *
      * @throws IOException
      */
-    public List<BuildPatternArtifacts> retreiveBuildPatternArtifacts( List<BuildPatternArtifactsRequest> requests ) throws IOException
+    public List<BuildPatternArtifacts> retrievePatternArtifacts ( List<BuildPatternArtifactsRequest> requests ) throws IOException
     {
         final String       json     = new JsonSerializer<List<BuildPatternArtifactsRequest>>().toJSON( requests );
-        final HttpPost     post     = new HttpPost( artifactoryUrl + "/api/outputs" );
+        final HttpPost     post     = new HttpPost( artifactoryUrl + "/api/build/patternArtifacts" );
 
         StringEntity stringEntity = new StringEntity( json );
         stringEntity.setContentType( "application/vnd.org.jfrog.artifactory+json" );

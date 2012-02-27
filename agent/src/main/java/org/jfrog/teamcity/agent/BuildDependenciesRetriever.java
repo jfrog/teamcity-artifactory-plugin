@@ -70,7 +70,7 @@ public class BuildDependenciesRetriever extends DependenciesRetriever
 
         logger.progressStarted( "Beginning to resolve Build Info build dependencies from " + serverUrl );
 
-        final List<BuildPatternArtifacts> outputs = getClient().retreiveBuildPatternArtifacts( mapping.toBuildRequests());
+        final List<BuildPatternArtifacts> outputs = getClient().retrievePatternArtifacts( mapping.toBuildRequests());
 
         logger.progressMessage( "Finished resolving Build Info build dependencies." );
         logger.progressFinished();
