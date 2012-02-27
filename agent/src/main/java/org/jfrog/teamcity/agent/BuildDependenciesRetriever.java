@@ -21,10 +21,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildPatternArtifacts;
 import org.jfrog.build.api.dependency.BuildPatternArtifactsRequest;
+import org.jfrog.build.api.dependency.PatternArtifact;
 import org.jfrog.teamcity.common.BuildDependenciesHelper;
 import org.jfrog.teamcity.common.BuildDependency;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -72,10 +74,37 @@ public class BuildDependenciesRetriever extends DependenciesRetriever
         logger.progressStarted( "Beginning to resolve Build Info build dependencies from " + serverUrl );
 
         List<BuildPatternArtifactsRequest> artifactsRequests = BuildDependenciesHelper.toArtifactsRequests( buildDependencies );
-        List<BuildPatternArtifacts>        artifacts         = getClient().retrievePatternArtifacts( artifactsRequests );
+        List<BuildPatternArtifacts>        artifacts         = client.retrievePatternArtifacts( artifactsRequests );
         BuildDependenciesHelper.applyBuildArtifacts( buildDependencies, artifacts );
+
+        try     { downloadBuildDependencies( buildDependencies ); }
+        finally { client.shutdown(); }
 
         logger.progressMessage( "Finished resolving Build Info build dependencies." );
         logger.progressFinished();
+    }
+
+
+    private void downloadBuildDependencies ( List<BuildDependency> buildDependencies ) throws IOException
+    {
+
+        for ( BuildDependency dependency : buildDependencies ) {
+
+            for ( BuildDependency.Pattern pattern : dependency.getPatterns()) {
+
+                for ( PatternArtifact artifact : pattern.getPatternResult().getPatternArtifacts()) {
+
+                    String uri = artifact.getUri() +
+                                 (( pattern.getMatrixParameters().length() > 0 ) ? ";" + pattern.getMatrixParameters() : "" );
+
+                    String fileName = uri.substring( uri.lastIndexOf( '/' ) + 1 );
+                    File   destFile = new File( targetDir( pattern.getTargetDirectory()), fileName );
+
+                    logger.progressMessage( "Downloading '" + uri + "' ..." );
+                    client.downloadArtifact( uri, destFile );
+                    logger.progressMessage( "Successfully downloaded '" + uri + "' into '" + destFile.getAbsolutePath() + "'" );
+                }
+            }
+        }
     }
 }

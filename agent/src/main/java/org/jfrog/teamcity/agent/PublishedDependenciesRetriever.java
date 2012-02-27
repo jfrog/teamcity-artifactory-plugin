@@ -17,17 +17,14 @@
 package org.jfrog.teamcity.agent;
 
 import jetbrains.buildServer.agent.BuildRunnerContext;
-import jetbrains.buildServer.log.Loggers;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.Dependency;
-import org.jfrog.build.api.builder.DependencyBuilder;
 import org.jfrog.teamcity.agent.api.PatternResultFileSet;
 import org.jfrog.teamcity.common.PublishedItemsHelper;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -76,32 +73,22 @@ public class PublishedDependenciesRetriever extends DependenciesRetriever {
     private void downloadDependencies( Map<String, String> patternPairs,
                                        List<Dependency> dependencies) throws IOException {
 
-        ArtifactoryDependenciesClient client = getClient();
-
         try {
             for (Map.Entry<String, String> patternPair : patternPairs.entrySet()) {
-                handleDependencyPatternPair(dependencies, client, patternPair);
+                handleDependencyPatternPair(dependencies, patternPair);
             }
         } finally {
             client.shutdown();
         }
     }
 
-    private void handleDependencyPatternPair(List<Dependency> dependencies, ArtifactoryDependenciesClient client,
-            Map.Entry<String, String> patternPair) throws IOException {
+    private void handleDependencyPatternPair( List<Dependency>          dependencies,
+                                              Map.Entry<String, String> patternPair ) throws IOException {
+
         String sourcePattern = patternPair.getKey();
-        String pattern = extractPatternFromSource(sourcePattern);
-        String matrixParams = extractMatrixParamsFromSource(sourcePattern);
-
-        String targetPath = patternPair.getValue();
-
-        File workingDir;
-        File targetPathFile = new File(targetPath);
-        if (targetPathFile.isAbsolute()) {
-            workingDir = targetPathFile;
-        } else {
-            workingDir = new File(runnerContext.getWorkingDirectory(), targetPath);
-        }
+        String pattern       = extractPatternFromSource(sourcePattern);
+        String matrixParams  = extractMatrixParamsFromSource(sourcePattern);
+        File   workingDir    = targetDir( patternPair.getValue());
 
         logger.progressMessage("Resolving published dependencies with pattern " + sourcePattern);
 
@@ -110,45 +97,8 @@ public class PublishedDependenciesRetriever extends DependenciesRetriever {
 
         logger.progressMessage("Found " + filesToDownload.size() + " dependencies.");
 
-        for (String fileToDownload : filesToDownload) {
-            downloadDependency(dependencies, client, matrixParams, workingDir, fileSet, fileToDownload);
-        }
-    }
-
-    private void downloadDependency(List<Dependency> dependencies, ArtifactoryDependenciesClient client,
-            String matrixParams, File workingDir, PatternResultFileSet fileSet, String fileToDownload)
-            throws IOException {
-        StringBuilder downloadUriBuilder = new StringBuilder(fileSet.getRepoUri()).append("/").
-                append(fileToDownload);
-        String downloadUri = downloadUriBuilder.toString();
-        String downloadUriWithParams = downloadUriBuilder.append(matrixParams).toString();
-
-        File dest = new File(workingDir, fileToDownload);
-        logger.progressMessage("Downloading " + downloadUriWithParams + "...");
-
-        try {
-            client.downloadArtifact(downloadUriWithParams, dest);
-
-            logger.progressMessage("Successfully downloaded '" + downloadUriWithParams + "' into '" +
-                    dest.getAbsolutePath() + "'");
-
-            logger.progressMessage("Retrieving checksums...");
-            String md5 = client.downloadChecksum(downloadUri, "md5");
-            String sha1 = client.downloadChecksum(downloadUri, "sha1");
-
-            DependencyBuilder builder = new DependencyBuilder()
-                    .id(fileToDownload)
-                    .md5(md5)
-                    .sha1(sha1);
-            dependencies.add(builder.build());
-        } catch (FileNotFoundException fnfe) {
-            dest.delete();
-            String warningMessage = "Error occurred while resolving published dependency: " + fnfe.getMessage();
-            logger.warning(warningMessage);
-            Loggers.AGENT.warn(warningMessage);
-        } catch (IOException ioe) {
-            dest.delete();
-            throw ioe;
+        for ( String fileToDownload : filesToDownload ) {
+            downloadDependency( fileSet.getRepoUri(), workingDir, fileToDownload, matrixParams, dependencies );
         }
     }
 

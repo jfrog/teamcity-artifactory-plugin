@@ -19,22 +19,29 @@ public class BuildDependency
     private final String        buildNumberRequest;               // "LATEST"
     private       String        buildNumberResponse;              // "5"
     private final List<Pattern> patterns = Lists.newLinkedList(); // "libs-release-local:com/plugins/gradle/0.1.1/*.jar;status+=prod"
-    private final String        targetDirectory;                  //
 
 
     public static class Pattern {
 
         private final String        artifactoryPattern; // "libs-release-local:com/plugins/gradle/0.1.1/*.jar"
         private final String        matrixParameters;   // "status+=prod"
+        private final String        targetDirectory;    // Directory to download dependencies to
         private       PatternResult patternResult;      // Pattern result as received from Artifactory
 
-        public Pattern ( String artifactoryPattern, String matrixParameters ) {
+        public Pattern ( String artifactoryPattern, String matrixParameters, String targetDirectory ) {
+
+            if ( StringUtils.isBlank( artifactoryPattern )) { throw new IllegalArgumentException( "Artifactory pattern is blank" ); }
+            if ( matrixParameters == null ){ throw new NullPointerException( "Matrix parameters is null" ); } // Can be empty.
+            if ( targetDirectory  == null ){ throw new NullPointerException( "Target directory is null" );  } // Can be empty.
+
             this.artifactoryPattern = artifactoryPattern;
             this.matrixParameters   = matrixParameters;
+            this.targetDirectory    = targetDirectory;
         }
 
         public String        getArtifactoryPattern (){ return this.artifactoryPattern; }
         public String        getMatrixParameters   (){ return this.matrixParameters;   }
+        public String        getTargetDirectory    (){ return this.targetDirectory;    }
         public PatternResult getPatternResult      (){ return this.patternResult;      }
         public void          setPatternResult      ( PatternResult patternResult ) { this.patternResult = patternResult; }
     }
@@ -44,13 +51,10 @@ public class BuildDependency
 
         if ( StringUtils.isBlank( buildName ))          { throw new IllegalArgumentException( "Build name is blank" ); }
         if ( StringUtils.isBlank( buildNumberRequest )) { throw new IllegalArgumentException( "Build number is blank" ); }
-        if ( StringUtils.isBlank( pattern ))            { throw new IllegalArgumentException( "Pattern is blank" ); }
-        if ( targetDirectory == null )                  { throw new NullPointerException( "Target directory is null" ); } // Can be empty.
 
         this.buildName          = buildName;
         this.buildNumberRequest = buildNumberRequest;
-        addPattern( pattern );
-        this.targetDirectory    = targetDirectory;
+        addPattern( pattern, targetDirectory );
     }
 
 
@@ -59,10 +63,9 @@ public class BuildDependency
     public String        getBuildNumberResponse () { return this.buildNumberResponse; }
     public void          setBuildNumberResponse ( String buildNumberResponse ) { this.buildNumberResponse = buildNumberResponse; }
     public List<Pattern> getPatterns            () { return Collections.unmodifiableList( this.patterns ); }
-    public String        getTargetDirectory     () { return this.targetDirectory; }
 
 
-    public void addPattern ( String pattern )
+    public void addPattern ( String pattern, String targetDirectory )
     {
         if ( StringUtils.isBlank( pattern )) {
             throw new IllegalArgumentException( "Pattern can not be blank!" );
@@ -70,7 +73,8 @@ public class BuildDependency
 
         int     j = pattern.lastIndexOf( ';' );
         Pattern p = new Pattern(( j > 0 ) ? pattern.substring( 0,  j ) : pattern,
-                                ( j > 0 ) ? pattern.substring( j + 1 ) : "" );
+                                ( j > 0 ) ? pattern.substring( j + 1 ) : "",
+                                targetDirectory );
         this.patterns.add( p );
     }
 }

@@ -109,7 +109,7 @@ public class BuildDependenciesHelper
                 numbersMap.put( buildNumber, new BuildDependency( buildName, buildNumber, pattern, targetDirectory ));
             }
             else {
-                buildDependency.addPattern( pattern );
+                buildDependency.addPattern( pattern, targetDirectory );
             }
         }
 
@@ -184,4 +184,5 @@ public class BuildDependenciesHelper
                 String.format( "List sizes don't match: [%s] != [%s]", l1.size(), l2.size()));
         }
     }
+
 }
