@@ -18,6 +18,7 @@ package org.jfrog.teamcity.agent.listener;
 
 import static org.jfrog.teamcity.common.ConstantValues.*;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import jetbrains.buildServer.ExtensionHolder;
 import jetbrains.buildServer.agent.*;
@@ -28,6 +29,7 @@ import jetbrains.buildServer.util.ArchiveUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Dependency;
+import org.jfrog.build.api.builder.dependency.BuildDependencyBuilder;
 import org.jfrog.build.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.client.DeployDetailsArtifact;
 import org.jfrog.build.client.IncludeExcludePatterns;
@@ -107,8 +109,11 @@ public class AgentListenerBuildInfoHelper {
         }
     }
 
-    public void runnerFinished(BuildRunnerContext runner, BuildFinishedStatus status, List<Dependency> dependencies)
-            throws Exception {
+    public void runnerFinished( BuildRunnerContext    runner,
+                                BuildFinishedStatus   status,
+                                List<Dependency>      dependencies,
+                                List<BuildDependency> buildDependencies ) throws Exception {
+
         /**
          * This method handles the build info and artifact publication which is not applicable to gradle or ant
          * builds run with the extractor activated, so if that's the case, just skip
@@ -122,7 +127,8 @@ public class AgentListenerBuildInfoHelper {
         AgentRunningBuild build = runner.getBuild();
         BuildProgressLogger logger = build.getBuildLogger();
 
-        ExtractedBuildInfo extractedBuildInfo = extractBuildInfo(runner, dependencies);
+        ExtractedBuildInfo extractedBuildInfo = extractBuildInfo( runner, dependencies );
+        addBuildDependencies( extractedBuildInfo.getBuildInfo(), buildDependencies );
 
         String selectedServerUrl = runnerParams.get(RunnerParameterKeys.URL);
 
@@ -164,7 +170,27 @@ public class AgentListenerBuildInfoHelper {
         }
     }
 
-    private ExtractedBuildInfo extractBuildInfo(BuildRunnerContext runnerContext, List<Dependency> dependencies) {
+
+    private void addBuildDependencies ( Build buildInfo, List<BuildDependency> buildDependencies ) {
+
+        List<org.jfrog.build.api.dependency.BuildDependency> dependencies = Lists.newLinkedList();
+
+        for ( BuildDependency dependency : buildDependencies ) {
+            dependencies.add( new BuildDependencyBuilder().
+                              name( dependency.getBuildName()).
+                              number( dependency.getBuildNumberResponse()).
+                              uri( dependency.getBuildUri()).
+                              timestampDate( new Date( Long.valueOf( dependency.getBuildTimestamp()))).
+                              build());
+        }
+
+        buildInfo.setBuildDependencies( dependencies );
+    }
+
+
+    private ExtractedBuildInfo extractBuildInfo( BuildRunnerContext    runnerContext,
+                                                 List<Dependency>      dependencies ) {
+
         AgentRunningBuild build = runnerContext.getBuild();
         Map<File, String> publishableArtifacts = getPublishableArtifacts(runnerContext);
 
@@ -214,7 +240,7 @@ public class AgentListenerBuildInfoHelper {
      * Create gz of the build info and publish it to the server. The file will be saved under
      * .BuildServer/system/artifacts/$Project/$Build/$BuildNumber/.teamcity/artifactory-build-info.json.gz
      */
-    private void publishBuildInfoToTeamCityServer(AgentRunningBuild build, Build buildInfo) throws IOException {
+    private void publishBuildInfoToTeamCityServer(AgentRunningBuild build, Build buildInfo) {
         try {
             ArtifactsPublisher publisher = extensionHolder.getExtensions(ArtifactsPublisher.class).iterator().next();
             File buildInfoFile = new File(build.getAgentTempDirectory(), BUILD_INFO_FILE_NAME);

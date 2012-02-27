@@ -99,11 +99,13 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
         }
 
         try {
-            buildInfoHelper.runnerFinished(runner, buildStatus, publishedDependencies);
-            releaseHelper.runnerFinished(runner, buildStatus);
-        } catch (Exception e) {
+            buildInfoHelper.runnerFinished( runner, buildStatus, publishedDependencies, buildDependencies );
+            releaseHelper.runnerFinished  ( runner, buildStatus );
+        }
+        catch (Exception e) {
             logException(runner, e);
-        } finally {
+        }
+        finally {
             ReleaseParameters releaseParams = new ReleaseParameters(runner.getBuild());
             if (releaseParams.isReleaseBuild()) {
                 BuildInterruptReason buildInterruptReason =

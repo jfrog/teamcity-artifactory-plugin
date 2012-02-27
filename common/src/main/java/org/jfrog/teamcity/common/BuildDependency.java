@@ -17,8 +17,10 @@ public class BuildDependency
 {
     private final String        buildName;                        // "gradle-plugins :: Build :: Gradle"
     private final String        buildNumberRequest;               // "LATEST"
-    private       String        buildNumberResponse;              // "5"
     private final List<Pattern> patterns = Lists.newLinkedList(); // "libs-release-local:com/plugins/gradle/0.1.1/*.jar;status+=prod"
+    private       String        buildNumberResponse;              // "5"
+    private       String        buildTimestamp;                   //
+    private       String        buildUri;                         //
 
 
     public static class Pattern {
@@ -60,9 +62,13 @@ public class BuildDependency
 
     public String        getBuildName           () { return this.buildName; }
     public String        getBuildNumberRequest  () { return this.buildNumberRequest; }
+    public List<Pattern> getPatterns            () { return Collections.unmodifiableList( this.patterns ); }
     public String        getBuildNumberResponse () { return this.buildNumberResponse; }
     public void          setBuildNumberResponse ( String buildNumberResponse ) { this.buildNumberResponse = buildNumberResponse; }
-    public List<Pattern> getPatterns            () { return Collections.unmodifiableList( this.patterns ); }
+    public String        getBuildTimestamp      () { return this.buildTimestamp; }
+    public void          setBuildTimestamp      ( String buildTimestamp ){ this.buildTimestamp = buildTimestamp; }
+    public String        getBuildUri            () { return this.buildUri; }
+    public void          setBuildUri            ( String buildUri ) { this.buildUri = buildUri; }
 
 
     public void addPattern ( String pattern, String targetDirectory )
