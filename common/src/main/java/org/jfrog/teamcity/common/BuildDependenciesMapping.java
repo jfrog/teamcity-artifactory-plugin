@@ -2,13 +2,11 @@ package org.jfrog.teamcity.common;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.jfrog.build.api.builder.dependency.BuildOutputsRequestBuilder;
-import org.jfrog.build.api.dependency.BuildOutputs;
-import org.jfrog.build.api.dependency.BuildOutputsRequest;
+import org.jfrog.build.api.builder.dependency.BuildPatternArtifactsRequestBuilder;
+import org.jfrog.build.api.dependency.BuildPatternArtifacts;
+import org.jfrog.build.api.dependency.BuildPatternArtifactsRequest;
 import org.jfrog.build.api.dependency.PatternResult;
-import org.jfrog.build.client.JsonSerializer;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -65,17 +63,13 @@ public class BuildDependenciesMapping
 
 
     /**
-     * Retrieves a JSON-converted mapping.
+     * Retrieves dependencies mapping converted to list of {@link BuildPatternArtifactsRequest}.
      *
-     * @return JSON-converted mapping.
+     * @return dependencies mapping converted to list of {@link BuildPatternArtifactsRequest}.
      */
-    public String toJson () throws IOException
+    public List<BuildPatternArtifactsRequest> toBuildRequests ()
     {
-        if ( isEmpty()) {
-            return "";
-        }
-
-        List<BuildOutputsRequest> requests = Lists.newLinkedList();
+        List<BuildPatternArtifactsRequest> requests = Lists.newLinkedList();
 
         for ( Map.Entry<String, Map<String, List<BuildDependencyPattern>>> e1 : mapping.entrySet()) {
 
@@ -85,7 +79,7 @@ public class BuildDependenciesMapping
             for ( Map.Entry<String, List<BuildDependencyPattern>> e2 : buildNumbers.entrySet()) {
                 String                       buildNumber  = e2.getKey();
                 List<BuildDependencyPattern> patterns     = e2.getValue();
-                BuildOutputsRequestBuilder   builder      = new BuildOutputsRequestBuilder().buildName( buildName ).
+                BuildPatternArtifactsRequestBuilder builder      = new BuildPatternArtifactsRequestBuilder().buildName( buildName ).
                                                                                              buildNumber( buildNumber );
                 for ( BuildDependencyPattern pattern : patterns ) {
                     builder.pattern( pattern.getPattern());
@@ -95,19 +89,18 @@ public class BuildDependenciesMapping
             }
         }
 
-        String json = new JsonSerializer<List<BuildOutputsRequest>>().toJSON( requests );
-        return json;
+        return requests;
     }
 
 
     /**
      * Applies build outputs received from Artifactory.
      *
-     * @param outputs build outputs received from Artifactory.
+     * @param artifacts build outputs received from Artifactory.
      */
-    public void applyBuildOutputs( List<BuildOutputs> outputs ) {
+    public void applyBuildPatternArtifacts( List<BuildPatternArtifacts> artifacts ) {
 
-        for ( BuildOutputs build : outputs ) {
+        for ( BuildPatternArtifacts build : artifacts ) {
 
             final String name   = build.getBuildName();
             final String number = build.getBuildNumber();

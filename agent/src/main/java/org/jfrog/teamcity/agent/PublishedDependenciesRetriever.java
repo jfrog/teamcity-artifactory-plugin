@@ -16,15 +16,13 @@
 
 package org.jfrog.teamcity.agent;
 
-import static org.jfrog.teamcity.common.ConstantValues.*;
-import jetbrains.buildServer.agent.BuildProgressLogger;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.log.Loggers;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.builder.DependencyBuilder;
 import org.jfrog.teamcity.agent.api.PatternResultFileSet;
-import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.PublishedItemsHelper;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
@@ -40,31 +38,23 @@ import java.util.Set;
 /**
  * @author Noam Y. Tenne
  */
-public class PublishedDependenciesRetriever {
+public class PublishedDependenciesRetriever extends DependenciesRetriever {
 
-    private BuildRunnerContext runnerContext;
-    private Map<String, String> runnerParams;
-    private BuildProgressLogger logger;
-
-    public PublishedDependenciesRetriever(BuildRunnerContext runnerContext) {
-        this.runnerContext = runnerContext;
-        logger = runnerContext.getBuild().getBuildLogger();
-        runnerParams = runnerContext.getRunnerParameters();
+    public PublishedDependenciesRetriever(  @NotNull BuildRunnerContext runnerContext ) {
+        super( runnerContext );
     }
 
-    public void appendDependencies(List<Dependency> dependencies) throws IOException {
-        String selectedServerUrl = runnerParams.get(RunnerParameterKeys.URL);
+    public void appendDependencies( List<Dependency> dependencies ) throws IOException {
 
         //Don't run if no server was configured
-        if (StringUtils.isBlank(selectedServerUrl)) {
+        if ( ! isServerUrl()) {
             return;
         }
 
         //Don't run if no published dependency patterns were entered
         String selectedPublishedDependencies = runnerParams.get(RunnerParameterKeys.PUBLISHED_DEPENDENCIES);
-        String selectedBuildDependencies     = runnerParams.get(RunnerParameterKeys.BUILD_DEPENDENCIES);
-        if (StringUtils.isBlank(selectedPublishedDependencies) ||
-                selectedPublishedDependencies.equals(ConstantValues.DISABLED_MESSAGE)) {
+
+        if ( ! dependencyEnabled( selectedPublishedDependencies )) {
             return;
         }
 
@@ -75,18 +65,18 @@ public class PublishedDependenciesRetriever {
             return;
         }
 
-        logger.progressStarted("Beginning to resolve Build Info published dependencies from " + selectedServerUrl);
+        logger.progressStarted("Beginning to resolve Build Info published dependencies from " + serverUrl );
 
-        downloadDependencies(selectedServerUrl, patternPairs, dependencies);
+        downloadDependencies( patternPairs, dependencies );
 
         logger.progressMessage("Finished resolving Build Info published dependencies.");
         logger.progressFinished();
     }
 
-    private void downloadDependencies(String selectedServerUrl, Map<String, String> patternPairs,
-            List<Dependency> dependencies) throws IOException {
+    private void downloadDependencies( Map<String, String> patternPairs,
+                                       List<Dependency> dependencies) throws IOException {
 
-        PublishedDependencyClient client = getClient(selectedServerUrl, runnerParams);
+        ArtifactoryDependenciesClient client = getClient();
 
         try {
             for (Map.Entry<String, String> patternPair : patternPairs.entrySet()) {
@@ -97,7 +87,7 @@ public class PublishedDependenciesRetriever {
         }
     }
 
-    private void handleDependencyPatternPair(List<Dependency> dependencies, PublishedDependencyClient client,
+    private void handleDependencyPatternPair(List<Dependency> dependencies, ArtifactoryDependenciesClient client,
             Map.Entry<String, String> patternPair) throws IOException {
         String sourcePattern = patternPair.getKey();
         String pattern = extractPatternFromSource(sourcePattern);
@@ -125,7 +115,7 @@ public class PublishedDependenciesRetriever {
         }
     }
 
-    private void downloadDependency(List<Dependency> dependencies, PublishedDependencyClient client,
+    private void downloadDependency(List<Dependency> dependencies, ArtifactoryDependenciesClient client,
             String matrixParams, File workingDir, PatternResultFileSet fileSet, String fileToDownload)
             throws IOException {
         StringBuilder downloadUriBuilder = new StringBuilder(fileSet.getRepoUri()).append("/").
@@ -162,26 +152,6 @@ public class PublishedDependenciesRetriever {
         }
     }
 
-    private PublishedDependencyClient getClient(String selectedServerUrl, Map<String, String> runnerParams) {
-        PublishedDependencyClient infoClient =
-                new PublishedDependencyClient(selectedServerUrl,
-                        runnerParams.get(RunnerParameterKeys.DEPLOYER_USERNAME),
-                        runnerParams.get(RunnerParameterKeys.DEPLOYER_PASSWORD),
-                        logger);
-        infoClient.setConnectionTimeout(Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
-
-        if (runnerParams.containsKey(PROXY_HOST)) {
-            if (StringUtils.isNotBlank(runnerParams.get(PROXY_USERNAME))) {
-                infoClient.setProxyConfiguration(runnerParams.get(PROXY_HOST),
-                        Integer.parseInt(runnerParams.get(PROXY_PORT)), runnerParams.get(PROXY_USERNAME),
-                        runnerParams.get(PROXY_PASSWORD));
-            } else {
-                infoClient.setProxyConfiguration(runnerParams.get(PROXY_HOST),
-                        Integer.parseInt(runnerParams.get(PROXY_PORT)));
-            }
-        }
-        return infoClient;
-    }
 
     private String extractPatternFromSource(String sourcePattern) {
         int indexOfSemiColon = sourcePattern.indexOf(';');

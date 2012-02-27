@@ -16,19 +16,16 @@
 
 package org.jfrog.teamcity.agent;
 
-import static org.jfrog.teamcity.common.ConstantValues.*;
-import jetbrains.buildServer.agent.BuildProgressLogger;
 import jetbrains.buildServer.agent.BuildRunnerContext;
-import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.Dependency;
+import org.jfrog.build.api.dependency.BuildPatternArtifacts;
 import org.jfrog.teamcity.common.BuildDependenciesHelper;
 import org.jfrog.teamcity.common.BuildDependenciesMapping;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -36,40 +33,20 @@ import java.util.Map;
  *
  * @author Evgeny Goldin.
  */
-public class BuildDependenciesRetriever
+public class BuildDependenciesRetriever extends DependenciesRetriever
 {
 
-    private final BuildRunnerContext  runnerContext;
-    private final Map<String, String> runnerParams;
-    private final BuildProgressLogger logger;
-
-
     public BuildDependenciesRetriever ( @NotNull BuildRunnerContext runnerContext ) {
-        this.runnerContext = runnerContext;
-        this.logger        = runnerContext.getBuild().getBuildLogger();
-        this.runnerParams  = runnerContext.getRunnerParameters();
-    }
-
-
-    /**
-     * Determines if dependency parameter specified is enabled.
-     *
-     * @param s dependency parameter (published or build)
-     * @return true, if dependency parameter specified is enabled,
-     *         false otherwise
-     */
-    private boolean dependencyEnabled( String s ) {
-        return ! (( StringUtils.isBlank( s )) || ( DISABLED_MESSAGE.equals( s )));
+        super( runnerContext );
     }
 
 
     public void appendDependencies( List<Dependency> dependencies ) throws IOException {
-        String serverUrl = runnerParams.get( RunnerParameterKeys.URL );
 
         /**
          * Don't run if no server was configured
          */
-        if ( StringUtils.isBlank( serverUrl )) {
+        if ( ! isServerUrl()) {
             return;
         }
 
@@ -78,18 +55,24 @@ public class BuildDependenciesRetriever
         /**
          * Don't run if no build dependency patterns were specified.
          */
-        if ( dependencyEnabled( buildDependencies )) {
-
-            BuildDependenciesMapping mapping = BuildDependenciesHelper.getBuildDependenciesMapping( buildDependencies );
-
-            if ( ! mapping.isEmpty()) {
-                logger.progressStarted( "Beginning to resolve Build Info build dependencies from " + serverUrl );
-
-                String requstJson = mapping.toJson();
-
-                logger.progressMessage( "Finished resolving Build Info build dependencies." );
-                logger.progressFinished();
-            }
+        if ( ! dependencyEnabled( buildDependencies )) {
+            return;
         }
+
+        BuildDependenciesMapping mapping = BuildDependenciesHelper.getBuildDependenciesMapping( buildDependencies );
+
+        /**
+         * Don't run if dependencies mapping came out to be empty.
+         */
+        if ( mapping.isEmpty()) {
+            return;
+        }
+
+        logger.progressStarted( "Beginning to resolve Build Info build dependencies from " + serverUrl );
+
+        final List<BuildPatternArtifacts> outputs = getClient().retreiveBuildPatternArtifacts( mapping.toBuildRequests());
+
+        logger.progressMessage( "Finished resolving Build Info build dependencies." );
+        logger.progressFinished();
     }
 }

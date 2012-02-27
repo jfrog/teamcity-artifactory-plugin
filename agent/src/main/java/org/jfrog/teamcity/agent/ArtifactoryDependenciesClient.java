@@ -24,29 +24,32 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.codehaus.jackson.JsonParser;
+import org.jfrog.build.api.dependency.BuildPatternArtifacts;
+import org.jfrog.build.api.dependency.BuildPatternArtifactsRequest;
 import org.jfrog.build.client.ArtifactoryHttpClient;
 import org.jfrog.build.client.PreemptiveHttpClient;
+import org.jfrog.build.util.JsonSerializer;
 import org.jfrog.teamcity.agent.api.PatternResultFileSet;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.util.List;
 
 /**
  * @author Noam Y. Tenne
  */
-public class PublishedDependencyClient {
+public class ArtifactoryDependenciesClient
+{
 
     private String artifactoryUrl;
 
     private ArtifactoryHttpClient httpClient;
 
-    public PublishedDependencyClient(String artifactoryUrl, String username, String password,
-            BuildProgressLogger logger) {
+    public ArtifactoryDependenciesClient ( String artifactoryUrl, String username, String password,
+                                           BuildProgressLogger logger ) {
         this.artifactoryUrl = StringUtils.stripEnd(artifactoryUrl, "/");
         httpClient = new ArtifactoryHttpClient(this.artifactoryUrl, username, password,
                 new TeamcityAgenBuildInfoLog(logger));
@@ -70,35 +73,69 @@ public class PublishedDependencyClient {
         }
     }
 
+
+    /**
+     * Retrieves list of {@link BuildPatternArtifacts} for build dependencies specified.
+     *
+     * @param requests build dependencies to retrieve outputs for.
+     * @return build outputs for dependencies specified.
+     *
+     * @throws IOException
+     */
+    public List<BuildPatternArtifacts> retreiveBuildPatternArtifacts( List<BuildPatternArtifactsRequest> requests ) throws IOException
+    {
+        final String       json     = new JsonSerializer<List<BuildPatternArtifactsRequest>>().toJSON( requests );
+        final HttpPost     post     = new HttpPost( artifactoryUrl + "/api/outputs" );
+
+        StringEntity stringEntity = new StringEntity( json );
+        stringEntity.setContentType( "application/vnd.org.jfrog.artifactory+json" );
+        post.setEntity( stringEntity );
+
+        List outputs = readResponse( httpClient.getHttpClient().execute( post ),
+                                     List.class,
+                                     "Failed to retrieve build artifacts report" );
+        return null;
+    }
+
+
+
+
     public PatternResultFileSet searchArtifactsByPattern(String pattern) throws IOException {
         PreemptiveHttpClient client = httpClient.getHttpClient();
 
         String patternSearchUrl = artifactoryUrl + "/api/search/pattern?pattern=" + pattern;
-        HttpGet httpget = new HttpGet(patternSearchUrl);
-        HttpResponse response = client.execute(httpget);
-        if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            HttpEntity httpEntity = response.getEntity();
-            if (httpEntity != null) {
-                httpEntity.consumeContent();
-            }
-            throw new IOException("Failed to search artifact by the pattern '" + pattern + "': " +
-                    response.getStatusLine());
-        } else {
+        return readResponse( client.execute( new HttpGet( patternSearchUrl )),
+                             PatternResultFileSet.class,
+                             "Failed to search artifact by the pattern '" + pattern + "'" );
+    }
+
+
+    private <T> T readResponse( HttpResponse response, Class<T> valueType, String errorMessage ) throws IOException {
+
+        if ( response.getStatusLine().getStatusCode() == HttpStatus.SC_OK ) {
             HttpEntity entity = response.getEntity();
-            if (entity != null) {
-                InputStream content = entity.getContent();
-                try {
-                    JsonParser parser = httpClient.createJsonParser(content);
-                    return parser.readValueAs(PatternResultFileSet.class);
-                } finally {
-                    IOUtils.closeQuietly(content);
-                    entity.consumeContent();
-                }
+            if ( entity == null ) {
+                return null;
+            }
+
+            InputStream content = entity.getContent();
+            try {
+                JsonParser parser = httpClient.createJsonParser( content );
+                return parser.readValueAs( valueType );
+            }
+            finally {
+                IOUtils.closeQuietly( content );
             }
         }
-
-        return null;
+        else {
+            HttpEntity httpEntity = response.getEntity();
+            if (httpEntity != null) {
+                IOUtils.closeQuietly( httpEntity.getContent());
+            }
+            throw new IOException( errorMessage + ": " + response.getStatusLine());
+        }
     }
+
 
     public void downloadArtifact(String downloadUrl, File dest) throws IOException {
         HttpResponse response = executeGet(downloadUrl);
