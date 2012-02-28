@@ -154,7 +154,7 @@ public class BuildDependenciesHelper
             }
 
             dependency.setBuildNumberResponse( artifacts.getBuildNumber());
-            dependency.setBuildTimestamp( artifacts.getTimestamp());
+            dependency.setBuildStarted( artifacts.getStarted());
             dependency.setBuildUri( artifacts.getUri());
 
             List<BuildDependency.Pattern> dependencyPatterns = dependency.getPatterns();

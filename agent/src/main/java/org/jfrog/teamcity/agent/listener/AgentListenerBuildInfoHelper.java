@@ -180,7 +180,7 @@ public class AgentListenerBuildInfoHelper {
                               name( dependency.getBuildName()).
                               number( dependency.getBuildNumberResponse()).
                               uri( dependency.getBuildUri()).
-                              timestampDate( new Date( Long.valueOf( dependency.getBuildTimestamp()))).
+                              started( dependency.getBuildStarted()).
                               build());
         }
 
