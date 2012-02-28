@@ -22,6 +22,24 @@ public class BuildDependency
     private       String        buildStarted;                     //
     private       String        buildUrl;                         //
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BuildDependency that = (BuildDependency) o;
+
+        return !(buildName != null ? !buildName.equals(that.buildName) : that.buildName != null) && !(buildNumberResponse != null ? !buildNumberResponse.equals(that.buildNumberResponse) : that.buildNumberResponse != null) && !(buildStarted != null ? !buildStarted.equals(that.buildStarted) : that.buildStarted != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = buildName != null ? buildName.hashCode() : 0;
+        result = 31 * result + (buildNumberResponse != null ? buildNumberResponse.hashCode() : 0);
+        result = 31 * result + (buildStarted != null ? buildStarted.hashCode() : 0);
+        return result;
+    }
 
     public static class Pattern {
 
