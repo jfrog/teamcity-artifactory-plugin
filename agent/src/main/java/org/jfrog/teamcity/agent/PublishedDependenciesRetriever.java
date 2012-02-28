@@ -98,7 +98,7 @@ public class PublishedDependenciesRetriever extends DependenciesRetriever {
         logger.progressMessage("Found " + filesToDownload.size() + " dependencies.");
 
         for ( String fileToDownload : filesToDownload ) {
-            downloadDependency( fileSet.getRepoUri(), workingDir, fileToDownload, matrixParams, dependencies );
+            downloadArtifact( fileSet.getRepoUri(), workingDir, fileToDownload, matrixParams, dependencies );
         }
     }
 
@@ -134,7 +134,7 @@ public class PublishedDependenciesRetriever extends DependenciesRetriever {
                     mandatory = true;
                     key = key.substring(0, key.length() - 1);
                 }
-                matrixParamBuilder.append(";").append(URLEncoder.encode(key, "utf-8"));
+                matrixParamBuilder.append( URLEncoder.encode( key, "utf-8" ) );
                 if (mandatory) {
                     matrixParamBuilder.append("+");
                 }

@@ -108,45 +108,46 @@ public abstract class DependenciesRetriever
     }
 
 
-    protected final void downloadDependency ( String           repoUri,
-                                              File             workingDir,
-                                              String           fileToDownload,
-                                              String           matrixParams,
-                                              List<Dependency> dependencies )
+    protected final void downloadArtifact ( String           repoUri,
+                                            File             workingDir,
+                                            String           fileToDownload,
+                                            String           matrixParams,
+                                            List<Dependency> dependencies )
             throws IOException {
 
-        StringBuilder downloadUriBuilder = new StringBuilder( repoUri ).append("/").
-                append(fileToDownload);
-        String downloadUri = downloadUriBuilder.toString();
-        String downloadUriWithParams = downloadUriBuilder.append(matrixParams).toString();
+        final String uri           = repoUri + '/' + fileToDownload;
+        final String uriWithParams = ( StringUtils.isBlank( matrixParams ) ? uri : uri + ';' + matrixParams );
+        final File   dest          = new File( workingDir, fileToDownload );
 
-        File dest = new File(workingDir, fileToDownload);
-        logger.progressMessage("Downloading '" + downloadUriWithParams + "' ..." );
+        logger.progressMessage( "Downloading '" + uriWithParams + "' ..." );
 
         try {
-            client.downloadArtifact(downloadUriWithParams, dest);
+            client.downloadArtifact( uriWithParams, dest );
 
-            logger.progressMessage("Successfully downloaded '" + downloadUriWithParams + "' into '" +
-                    dest.getAbsolutePath() + "'");
+            if ( ! dest.isFile()) {
+                throw new IOException( String.format( "[%s] is not found!", dest.getCanonicalPath()));
+            }
 
-            logger.progressMessage("Retrieving checksums...");
-            String md5 = client.downloadChecksum(downloadUri, "md5");
-            String sha1 = client.downloadChecksum(downloadUri, "sha1");
+            logger.progressMessage( "Successfully downloaded '" + uriWithParams + "' into '" + dest.getCanonicalPath() + "'");
+            logger.progressMessage( "Retrieving checksums..." );
 
-            DependencyBuilder builder = new DependencyBuilder()
-                    .id(fileToDownload)
-                    .md5(md5)
-                    .sha1(sha1);
-            dependencies.add(builder.build());
-        } catch (FileNotFoundException fnfe) {
+            String md5  = client.downloadChecksum( uri, "md5"  );
+            String sha1 = client.downloadChecksum( uri, "sha1" );
+
+            DependencyBuilder builder = new DependencyBuilder().id(fileToDownload).
+                                                                md5(md5).
+                                                                sha1( sha1 );
+            dependencies.add( builder.build());
+        }
+        catch ( FileNotFoundException e ) {
             dest.delete();
-            String warningMessage = "Error occurred while resolving published dependency: " + fnfe.getMessage();
-            logger.warning(warningMessage);
-            Loggers.AGENT.warn(warningMessage);
-        } catch (IOException ioe) {
+            String warningMessage = "Error occurred while resolving published dependency: " + e.getMessage();
+            logger.warning( warningMessage );
+            Loggers.AGENT.warn( warningMessage );
+        }
+        catch ( IOException e ) {
             dest.delete();
-            throw ioe;
+            throw e;
         }
     }
-
 }
