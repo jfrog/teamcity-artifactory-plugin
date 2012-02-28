@@ -105,7 +105,7 @@ public class BuildDependenciesRetriever extends DependenciesRetriever
                     List<PatternArtifact> artifacts = pattern.getPatternResult().getPatternArtifacts();
 
                     logger.progressMessage( message +
-                        String.format( ", pattern [%s] - [%s] result%s found",
+                        String.format( ", pattern [%s] - [%s] result%s found.",
                                        pattern.getArtifactoryPattern(), artifacts.size(), ( artifacts.size() == 1 ? "" : "s" )));
 
                     for ( PatternArtifact artifact : artifacts ) {
