@@ -20,6 +20,7 @@ import static org.jfrog.teamcity.common.ConstantValues.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import jetbrains.buildServer.ExtensionHolder;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.agent.impl.artifacts.ArtifactsBuilder;
@@ -48,6 +49,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Noam Y. Tenne
@@ -176,19 +178,43 @@ public class AgentListenerBuildInfoHelper {
     private void addBuildDependencies ( Build buildInfo, List<BuildDependency> buildDependencies ) {
 
         List<org.jfrog.build.api.dependency.BuildDependency> dependencies = Lists.newLinkedList();
+        Map<String, Set<String>>                             buildsMap    = Maps.newHashMap();
 
         for ( BuildDependency dependency : buildDependencies ) {
-            if ( dependency.getBuildNumberResponse() != null ) {
-                /**
-                 * dependency.getBuildNumberResponse() is null for unresolved dependencies (wrong build name or build number)
-                 */
-                dependencies.add( new BuildDependencyBuilder().
-                                  name( dependency.getBuildName()).
-                                  number( dependency.getBuildNumberResponse()).
-                                  uri( dependency.getBuildUri()).
-                                  started( dependency.getBuildStarted()).
-                                  build());
+
+            final String      buildName    = dependency.getBuildName();
+            final String      buildNumber  = dependency.getBuildNumberResponse();
+            final String      buildUri     = dependency.getBuildUri();
+            final String      buildStarted = dependency.getBuildStarted();
+                  Set<String> buildNumbers = buildsMap.get( buildName );
+
+            /**
+             * Build number is null for unresolved dependencies (wrong build name or build number).
+             */
+            if ( buildNumber == null ) {
+                continue;
             }
+
+            /**
+             * This combination of build name and number was already added.
+             */
+            if (( buildNumbers != null ) && ( buildNumbers.contains( buildNumber ))) {
+                continue;
+            }
+
+            if ( buildNumbers == null ) {
+                buildsMap.put( buildName, Sets.<String>newHashSet());
+                buildNumbers = buildsMap.get( buildName );
+            }
+
+            dependencies.add( new BuildDependencyBuilder().
+                              name( buildName ).
+                              number( buildNumber ).
+                              uri( buildUri ).
+                              started( buildStarted ).
+                              build());
+
+            buildNumbers.add( buildNumber );
         }
 
         buildInfo.setBuildDependencies( dependencies );

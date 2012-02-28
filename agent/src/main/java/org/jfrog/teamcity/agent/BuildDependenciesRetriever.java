@@ -91,7 +91,7 @@ public class BuildDependenciesRetriever extends DependenciesRetriever
             final String message = String.format( "Dependency on build [%s], number [%s]",
                                                   dependency.getBuildName(), dependency.getBuildNumberRequest());
             /**
-             * dependency.getBuildNumberResponse() is null for unresolved dependencies (wrong build name or build number)
+             * dependency.getBuildNumberResponse() is null for unresolved dependencies (wrong build name or build number).
              */
             if ( dependency.getBuildNumberResponse() == null ) {
                 logger.progressMessage( message + " - no results found, check correctness of dependency build name and build number." );
