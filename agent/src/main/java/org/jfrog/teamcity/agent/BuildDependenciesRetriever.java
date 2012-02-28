@@ -90,23 +90,31 @@ public class BuildDependenciesRetriever extends DependenciesRetriever
 
         for ( BuildDependency dependency : buildDependencies ) {
 
-            for ( BuildDependency.Pattern pattern : dependency.getPatterns()) {
+            /**
+             * dependency.getBuildNumberResponse() is null for unresolved dependencies (wrong build name or build number)
+             */
+            if ( dependency.getBuildNumberResponse() == null ) {
+//                logger.progressMessage( "" );
+            }
+            else {
+                for ( BuildDependency.Pattern pattern : dependency.getPatterns()) {
 
-                for ( PatternArtifact artifact : pattern.getPatternResult().getPatternArtifacts()) {
+                    for ( PatternArtifact artifact : pattern.getPatternResult().getPatternArtifacts()) {
 
-                    final String uri = artifact.getUri(); // "libs-release-local/com/goldin/plugins/gradle/0.1.1/gradle-0.1.1.jar"
-                    final int    j   = uri.indexOf( '/' );
+                        final String uri = artifact.getUri(); // "libs-release-local/com/goldin/plugins/gradle/0.1.1/gradle-0.1.1.jar"
+                        final int    j   = uri.indexOf( '/' );
 
-                    assert ( j > 0 ): String.format( "Filed to locate '/' in [%s]", uri );
+                        assert ( j > 0 ): String.format( "Filed to locate '/' in [%s]", uri );
 
-                    final String repoUrl = artifact.getArtifactoryUrl() + '/' + uri.substring( 0, j );
-                    final String fileUrl = uri.substring( j + 1 );
+                        final String repoUrl = artifact.getArtifactoryUrl() + '/' + uri.substring( 0, j );
+                        final String fileUrl = uri.substring( j + 1 );
 
-                    downloadArtifact( repoUrl, // "http://10.0.0.23:8080/artifactory/libs-release-local"
-                                      targetDir( pattern.getTargetDirectory() ),
-                                      fileUrl, // "com/goldin/plugins/gradle/0.1.1/gradle-0.1.1.jar"
-                                      pattern.getMatrixParameters(),
-                                      Lists.<Dependency>newLinkedList() );
+                        downloadArtifact( repoUrl, // "http://10.0.0.23:8080/artifactory/libs-release-local"
+                                          targetDir( pattern.getTargetDirectory() ),
+                                          fileUrl, // "com/goldin/plugins/gradle/0.1.1/gradle-0.1.1.jar"
+                                          pattern.getMatrixParameters(),
+                                          Lists.<Dependency>newLinkedList() );
+                    }
                 }
             }
         }

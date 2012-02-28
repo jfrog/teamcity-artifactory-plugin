@@ -83,7 +83,8 @@ public class AgentListenerBuildInfoHelper {
         PublishedDependenciesRetriever dependenciesRetriever = new PublishedDependenciesRetriever(runner);
         try {
             dependenciesRetriever.appendDependencies(dependencies);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             String errorMessage = "Error occurred while resolving published dependencies: " + e.getMessage();
             BuildProgressLogger logger = runner.getBuild().getBuildLogger();
             Loggers.AGENT.error(errorMessage, e);
@@ -99,7 +100,8 @@ public class AgentListenerBuildInfoHelper {
 
         try {
             dependenciesRetriever.appendDependencies( buildDependencies );
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             String errorMessage = "Error occurred while resolving build dependencies: " + e.getMessage();
             BuildProgressLogger logger = runner.getBuild().getBuildLogger();
             Loggers.AGENT.error(errorMessage, e);
@@ -176,12 +178,17 @@ public class AgentListenerBuildInfoHelper {
         List<org.jfrog.build.api.dependency.BuildDependency> dependencies = Lists.newLinkedList();
 
         for ( BuildDependency dependency : buildDependencies ) {
-            dependencies.add( new BuildDependencyBuilder().
-                              name( dependency.getBuildName()).
-                              number( dependency.getBuildNumberResponse()).
-                              uri( dependency.getBuildUri()).
-                              started( dependency.getBuildStarted()).
-                              build());
+            if ( dependency.getBuildNumberResponse() != null ) {
+                /**
+                 * dependency.getBuildNumberResponse() is null for unresolved dependencies (wrong build name or build number)
+                 */
+                dependencies.add( new BuildDependencyBuilder().
+                                  name( dependency.getBuildName()).
+                                  number( dependency.getBuildNumberResponse()).
+                                  uri( dependency.getBuildUri()).
+                                  started( dependency.getBuildStarted()).
+                                  build());
+            }
         }
 
         buildInfo.setBuildDependencies( dependencies );

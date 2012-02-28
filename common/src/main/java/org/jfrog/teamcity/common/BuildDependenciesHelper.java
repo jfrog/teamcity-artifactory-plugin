@@ -148,10 +148,13 @@ public class BuildDependenciesHelper
             BuildDependency       dependency = buildDependencies.get( j );
             BuildPatternArtifacts artifacts  = buildArtifacts.get( j );
 
-            if ( ! dependency.getBuildName().equals( artifacts.getBuildName())) {
-                throw new IllegalArgumentException(
-                    String.format( "Build names don't match: [%s] != [%s]", dependency.getBuildName(), artifacts.getBuildName()));
+            if ( artifacts == null ) {
+                // Pattern didn't match any results: wrong build name or build number.
+                continue;
             }
+
+            assert dependency.getBuildName().equals( artifacts.getBuildName()):
+                   String.format( "Build names don't match: [%s] != [%s]", dependency.getBuildName(), artifacts.getBuildName());
 
             dependency.setBuildNumberResponse( artifacts.getBuildNumber());
             dependency.setBuildStarted( artifacts.getStarted());
