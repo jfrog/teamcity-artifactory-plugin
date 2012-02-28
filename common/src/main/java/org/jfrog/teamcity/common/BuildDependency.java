@@ -20,7 +20,7 @@ public class BuildDependency
     private final List<Pattern> patterns = Lists.newLinkedList(); // "libs-release-local:com/plugins/gradle/0.1.1/*.jar;status+=prod"
     private       String        buildNumberResponse;              // "5"
     private       String        buildStarted;                     //
-    private       String        buildUri;                         //
+    private       String        buildUrl;                         //
 
 
     public static class Pattern {
@@ -67,8 +67,8 @@ public class BuildDependency
     public void          setBuildNumberResponse ( String buildNumberResponse ) { this.buildNumberResponse = buildNumberResponse; }
     public String        getBuildStarted        () { return this.buildStarted; }
     public void          setBuildStarted        ( String buildStarted ){ this.buildStarted = buildStarted; }
-    public String        getBuildUri            () { return this.buildUri; }
-    public void          setBuildUri            ( String buildUri ) { this.buildUri = buildUri; }
+    public String        getBuildUrl            () { return this.buildUrl; }
+    public void          setBuildUrl            ( String buildUrl ) { this.buildUrl = buildUrl; }
 
 
     public void addPattern ( String pattern, String targetDirectory )

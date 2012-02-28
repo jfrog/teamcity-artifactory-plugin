@@ -184,7 +184,7 @@ public class AgentListenerBuildInfoHelper {
 
             final String      buildName    = dependency.getBuildName();
             final String      buildNumber  = dependency.getBuildNumberResponse();
-            final String      buildUri     = dependency.getBuildUri();
+            final String      buildUrl     = dependency.getBuildUrl();
             final String      buildStarted = dependency.getBuildStarted();
                   Set<String> buildNumbers = buildsMap.get( buildName );
 
@@ -210,7 +210,7 @@ public class AgentListenerBuildInfoHelper {
             dependencies.add( new BuildDependencyBuilder().
                               name( buildName ).
                               number( buildNumber ).
-                              uri( buildUri ).
+                              url( buildUrl ).
                               started( buildStarted ).
                               build());
 

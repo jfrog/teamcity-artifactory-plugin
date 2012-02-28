@@ -158,7 +158,7 @@ public class BuildDependenciesHelper
 
             dependency.setBuildNumberResponse( artifacts.getBuildNumber());
             dependency.setBuildStarted( artifacts.getStarted());
-            dependency.setBuildUri( artifacts.getUri());
+            dependency.setBuildUrl( artifacts.getUrl());
 
             List<BuildDependency.Pattern> dependencyPatterns = dependency.getPatterns();
             List<PatternResult>           patternResults     = artifacts.getPatternResults();
