@@ -90,16 +90,25 @@ public class BuildDependenciesRetriever extends DependenciesRetriever
 
         for ( BuildDependency dependency : buildDependencies ) {
 
+            final String message = String.format( "Dependency on build [%s], number [%s]",
+                                                  dependency.getBuildName(), dependency.getBuildNumberRequest());
             /**
              * dependency.getBuildNumberResponse() is null for unresolved dependencies (wrong build name or build number)
              */
             if ( dependency.getBuildNumberResponse() == null ) {
-//                logger.progressMessage( "" );
+                logger.progressMessage( message + " - no results found, check correctness of dependency build name and build number." );
             }
             else {
+
                 for ( BuildDependency.Pattern pattern : dependency.getPatterns()) {
 
-                    for ( PatternArtifact artifact : pattern.getPatternResult().getPatternArtifacts()) {
+                    List<PatternArtifact> artifacts = pattern.getPatternResult().getPatternArtifacts();
+
+                    logger.progressMessage( message +
+                        String.format( ", pattern [%s] - [%s] result%s found",
+                                       pattern.getArtifactoryPattern(), artifacts.size(), ( artifacts.size() == 1 ? "" : "s" )));
+
+                    for ( PatternArtifact artifact : artifacts ) {
 
                         final String uri = artifact.getUri(); // "libs-release-local/com/goldin/plugins/gradle/0.1.1/gradle-0.1.1.jar"
                         final int    j   = uri.indexOf( '/' );
