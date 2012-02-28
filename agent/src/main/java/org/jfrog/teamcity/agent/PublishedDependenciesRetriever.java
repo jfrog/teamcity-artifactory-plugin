@@ -98,7 +98,7 @@ public class PublishedDependenciesRetriever extends DependenciesRetriever {
         logger.progressMessage("Found " + filesToDownload.size() + " dependencies.");
 
         for ( String fileToDownload : filesToDownload ) {
-            downloadArtifact( fileSet.getRepoUri(), workingDir, fileToDownload, matrixParams, dependencies );
+            downloadArtifact( workingDir, fileSet.getRepoUri(), fileToDownload, matrixParams, dependencies );
         }
     }
 

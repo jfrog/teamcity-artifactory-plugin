@@ -108,16 +108,25 @@ public abstract class DependenciesRetriever
     }
 
 
-    protected final void downloadArtifact ( String           repoUri,
-                                            File             workingDir,
-                                            String           fileToDownload,
+    protected final void downloadArtifact ( File   workingDir,
+                                            String repoUri,
+                                            String filePath,
+                                            String matrixParams ) throws IOException {
+
+        downloadArtifact( workingDir, repoUri, filePath, matrixParams, null );
+    }
+
+
+    protected final void downloadArtifact ( File             workingDir,
+                                            String           repoUri,
+                                            String           filePath,
                                             String           matrixParams,
                                             List<Dependency> dependencies )
             throws IOException {
 
-        final String uri           = repoUri + '/' + fileToDownload;
+        final String uri           = repoUri + '/' + filePath;
         final String uriWithParams = ( StringUtils.isBlank( matrixParams ) ? uri : uri + ';' + matrixParams );
-        final File   dest          = new File( workingDir, fileToDownload );
+        final File   dest          = new File( workingDir, filePath );
 
         logger.progressMessage( "Downloading '" + uriWithParams + "' ..." );
 
@@ -129,15 +138,19 @@ public abstract class DependenciesRetriever
             }
 
             logger.progressMessage( "Successfully downloaded '" + uriWithParams + "' into '" + dest.getCanonicalPath() + "'");
-            logger.progressMessage( "Retrieving checksums..." );
 
-            String md5  = client.downloadChecksum( uri, "md5"  );
-            String sha1 = client.downloadChecksum( uri, "sha1" );
+            if ( dependencies != null ) {
 
-            DependencyBuilder builder = new DependencyBuilder().id(fileToDownload).
-                                                                md5(md5).
-                                                                sha1( sha1 );
-            dependencies.add( builder.build());
+                logger.progressMessage( "Retrieving checksums..." );
+
+                String md5  = client.downloadChecksum( uri, "md5"  );
+                String sha1 = client.downloadChecksum( uri, "sha1" );
+
+                DependencyBuilder builder = new DependencyBuilder().id( filePath ).
+                                                                    md5( md5 ).
+                                                                    sha1( sha1 );
+                dependencies.add( builder.build());
+            }
         }
         catch ( FileNotFoundException e ) {
             dest.delete();

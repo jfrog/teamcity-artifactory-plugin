@@ -16,10 +16,8 @@
 
 package org.jfrog.teamcity.agent;
 
-import com.google.common.collect.Lists;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildPatternArtifacts;
 import org.jfrog.build.api.dependency.BuildPatternArtifactsRequest;
 import org.jfrog.build.api.dependency.PatternArtifact;
@@ -115,14 +113,13 @@ public class BuildDependenciesRetriever extends DependenciesRetriever
 
                         assert ( j > 0 ): String.format( "Filed to locate '/' in [%s]", uri );
 
-                        final String repoUrl = artifact.getArtifactoryUrl() + '/' + uri.substring( 0, j );
-                        final String fileUrl = uri.substring( j + 1 );
+                        final String repoUrl  = artifact.getArtifactoryUrl() + '/' + uri.substring( 0, j );
+                        final String filePath = uri.substring( j + 1 );
 
-                        downloadArtifact( repoUrl, // "http://10.0.0.23:8080/artifactory/libs-release-local"
-                                          targetDir( pattern.getTargetDirectory() ),
-                                          fileUrl, // "com/goldin/plugins/gradle/0.1.1/gradle-0.1.1.jar"
-                                          pattern.getMatrixParameters(),
-                                          Lists.<Dependency>newLinkedList() );
+                        downloadArtifact( targetDir( pattern.getTargetDirectory()),
+                                          repoUrl,  // "http://10.0.0.23:8080/artifactory/libs-release-local"
+                                          filePath, // "com/goldin/plugins/gradle/0.1.1/gradle-0.1.1.jar"
+                                          pattern.getMatrixParameters());
                     }
                 }
             }
