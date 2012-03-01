@@ -1,7 +1,7 @@
 package org.jfrog.teamcity.agent.release.vcs.perforce;
 
-import com.perforce.p4java.core.IChangelist;
 import jetbrains.buildServer.agent.BuildRunnerContext;
+import org.jfrog.build.vcs.perforce.PerforceClient;
 import org.jfrog.teamcity.agent.release.vcs.AbstractScmManager;
 
 import java.io.File;
@@ -24,7 +24,7 @@ public class PerforceManager extends AbstractScmManager {
     }
 
     public void prepare() throws IOException {
-        PerforceClient.Builder builder = new PerforceClient.Builder();
+        PerforceClient.Builder builder = new org.jfrog.build.vcs.perforce.PerforceClient.Builder();
         String hostAddress = perforceProperties.get("port");
         if (!hostAddress.contains(":")) {
             hostAddress = "localhost:" + hostAddress;
@@ -38,16 +38,16 @@ public class PerforceManager extends AbstractScmManager {
         perforce = builder.build();
     }
 
-    public void commitWorkingCopy(IChangelist changeList, String commitMessage) throws IOException {
-        perforce.commitWorkingCopy(changeList, commitMessage);
+    public void commitWorkingCopy(int changeListId, String commitMessage) throws IOException {
+        perforce.commitWorkingCopy(changeListId, commitMessage);
     }
 
     public void createTag(String label, String commitMessage, String changeListId) throws IOException {
         perforce.createLabel(label, commitMessage, changeListId);
     }
 
-    public void revertWorkingCopy(IChangelist changeList) throws IOException {
-        perforce.revertWorkingCopy(changeList);
+    public void revertWorkingCopy(int changeListId) throws IOException {
+        perforce.revertWorkingCopy(changeListId);
     }
 
     public void deleteLabel(String tagUrl) throws IOException {
@@ -58,15 +58,25 @@ public class PerforceManager extends AbstractScmManager {
         perforce.editFile(changeListId, releaseVersion);
     }
 
-    public IChangelist createNewChangeList() throws IOException {
+    /**
+     * Creates a new changelist and returns its id number
+     *
+     * @return The id of the newly created changelist
+     * @throws IOException In case of errors communicating with perforce server
+     */
+    public int createNewChangeList() throws IOException {
         return perforce.createNewChangeList();
     }
 
-    public void deleteChangeList(IChangelist currentChangeList) throws IOException {
-        perforce.deleteChangeList(currentChangeList);
+    public void deleteChangeList(int changeListId) throws IOException {
+        perforce.deleteChangeList(changeListId);
     }
 
-    public IChangelist getDefaultChangeList() throws IOException {
-        return perforce.getDefaultChangeList();
+    public int getDefaultChangeListId() throws IOException {
+        return perforce.getDefaultChangeListId();
+    }
+
+    public void closeConnection() throws IOException {
+        perforce.closeConnection();
     }
 }
