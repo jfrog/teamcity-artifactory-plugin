@@ -73,7 +73,6 @@
                 }
                 BS.local.loadTargetRepos(selectedUrlId);
                 BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
-                BS.artifactory.checkCompatibleVersion(selectedUrlId);
                 BS.Util.show($('targetRepo.container'));
                 BS.Util.show($('overrideDefaultDeployerCredentials.container'));
 
@@ -95,6 +94,8 @@
                 BS.Util.show($('publishedArtifacts.container'));
                 BS.Util.show($('publishedDependencies.container'));
                 BS.Util.show($('buildDependencies.container'));
+                BS.artifactory.checkCompatibleVersion(selectedUrlId);
+
             }
             BS.MultilineProperties.updateVisible();
         }
@@ -166,5 +167,6 @@ display:inline-block;
 
     <jsp:include page="../common/genericItemsEdit.jsp">
         <jsp:param name="shouldDisplay" value="${foundExistingConfig}"/>
+        <jsp:param name="existingUrlId" value="${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}"/>
     </jsp:include>
 </l:settingsGroup>

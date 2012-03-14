@@ -22,6 +22,7 @@
 <jsp:useBean id="propertiesBean" scope="request" type="jetbrains.buildServer.controllers.BasePropertiesBean"/>
 
 <c:set var="shouldDisplay" value="${param.shouldDisplay}" scope="request"/>
+<c:set var="existingUrlId" value="${param.existingUrlId}" scope="request"/>
 
 <tr class="noBorder" id="publishedArtifacts.container"
     style="${shouldDisplay ? '' : 'display: none;'}">
@@ -91,4 +92,9 @@
     </span>
         <span id="error_org.jfrog.artifactory.selectedDeployableServer.buildDependencies" class="error"/>
     </td>
+
+    <script type="text/javascript">
+        BS.artifactory.checkArtifactoryHasAddons("${existingUrlId}");
+        BS.artifactory.checkCompatibleVersion("${existingUrlId}");
+    </script>
 </tr>

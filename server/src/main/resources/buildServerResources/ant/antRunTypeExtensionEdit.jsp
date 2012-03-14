@@ -93,7 +93,6 @@
                             false;
                 }
                 BS.local.loadTargetRepos(selectedUrlId);
-                BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
                 BS.artifactory.checkCompatibleVersion(selectedUrlId);
                 BS.Util.show($('targetRepo.container'));
                 BS.Util.show($('overrideDefaultDeployerCredentials.container'));
@@ -132,6 +131,7 @@
                     BS.Util.show($('publishedArtifacts.container'));
                     BS.Util.show($('publishedDependencies.container'));
                     BS.Util.show($('buildDependencies.container'));
+                    BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
                 }
             }
             BS.MultilineProperties.updateVisible();
@@ -238,8 +238,6 @@ display:inline-block;
                 <script type="text/javascript">
                     var existingUrlId = '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}';
                     BS.local.loadTargetRepos(existingUrlId);
-                    BS.artifactory.checkArtifactoryHasAddons(existingUrlId);
-                    BS.artifactory.checkCompatibleVersion(existingUrlId);
                 </script>
             </c:if>
             <span class="smallNote">
@@ -285,5 +283,6 @@ Use the Artifactory-Ivy integration to collect build info data and deploy artifa
 
     <jsp:include page="../common/genericItemsEdit.jsp">
         <jsp:param name="shouldDisplay" value="${(!foundActivateIvyIntegrationSelected) && foundExistingConfig}"/>
+        <jsp:param name="existingUrlId" value="${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}"/>
     </jsp:include>
 </l:settingsGroup>

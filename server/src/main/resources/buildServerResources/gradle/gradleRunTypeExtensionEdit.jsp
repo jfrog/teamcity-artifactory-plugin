@@ -127,7 +127,6 @@ BS.local = {
                 $('org.jfrog.artifactory.selectedDeployableServer.publishIvyDescriptors').checked = true;
             }
             BS.local.loadTargetRepos(selectedUrlId);
-            BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
             BS.artifactory.checkCompatibleVersion(selectedUrlId);
             BS.Util.show($('targetRepo.container'));
             if (BS.local.isActivateGradleIntegrationSelected()) {
@@ -177,6 +176,7 @@ BS.local = {
                 BS.Util.show($('publishedArtifacts.container'));
                 BS.Util.show($('publishedDependencies.container'));
                 BS.Util.show($('buildDependencies.container'));
+                BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
             }
 
             if (publishBuildInfo) {
@@ -506,6 +506,7 @@ The TeamCity plugin automatically applies the Artifactory plugin (and, consequen
 
     <jsp:include page="../common/genericItemsEdit.jsp">
         <jsp:param name="shouldDisplay" value="${!foundActivateGradleIntegrationSelected && foundExistingConfig}"/>
+        <jsp:param name="existingUrlId" value="${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}"/>
     </jsp:include>
 
     <jsp:include page="../common/releaseManagementEdit.jsp">
