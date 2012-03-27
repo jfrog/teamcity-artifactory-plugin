@@ -29,12 +29,13 @@ public class PerforceManager extends AbstractScmManager {
         if (!hostAddress.contains(":")) {
             hostAddress = "localhost:" + hostAddress;
         }
-        builder.hostAddress(hostAddress)
-                .client(perforceProperties.get("client"));
+        builder.hostAddress(hostAddress).client(perforceProperties.get("client"));
         if (perforceProperties.containsKey("user")) {
             builder.username(perforceProperties.get("user")).password(perforceProperties.get("secure:passwd"));
         }
-
+        if (perforceProperties.containsKey("charset")) {
+            builder.charset(perforceProperties.get("charset"));
+        }
         perforce = builder.build();
     }
 
