@@ -16,6 +16,7 @@
 
 package org.jfrog.teamcity.agent;
 
+import com.google.common.collect.Multimap;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import org.jfrog.build.api.BuildAgent;
 import org.jfrog.build.api.BuildType;
@@ -26,14 +27,13 @@ import org.jfrog.teamcity.agent.util.InfoCollectionException;
 
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Noam Y. Tenne
  */
 public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
 
-    public GenericBuildInfoExtractor(BuildRunnerContext runnerContext, Map<File, String> artifactsToPublish,
+    public GenericBuildInfoExtractor(BuildRunnerContext runnerContext, Multimap<File, String> artifactsToPublish,
             List<Dependency> publishedDependencies) {
         super(runnerContext, artifactsToPublish, publishedDependencies);
     }
