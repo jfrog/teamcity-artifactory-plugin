@@ -78,17 +78,17 @@
     </th>
     <td>
         <props:multilineProperty name="org.jfrog.artifactory.selectedDeployableServer.buildDependencies"
-                                 linkTitle="Edit downloaded artifacts" cols="49" rows="3" expanded="true"/>
+                                 linkTitle="Edit build dependencies" cols="49" rows="3" expanded="true"/>
     <span class="smallNote">
-    New line or comma separated paths to artifacts that will be downloaded from Artifactory.
-    Supports ant-style wildcards like <kbd>repo-key:dir/*/bob/*.zip</kbd> (** wilcards are not supported)
-    and target directories like <kbd>repo-key:*.zip=>winFiles, repo-key:unix/distro.tgz=>linuxFiles</kbd>,
-    where <kbd>winFiles</kbd> and <kbd>linuxFiles</kbd> are target directories. Target directories can either be
-    absolute or relative to the working directory.<br/>
-    Artifacts can be downloaded conditionally based on their property values in Artifactory. For example, to
-    download all zip files marked as production ready: <kbd>repo-key:dir/*/bob/*.zip;status+=prod</kbd>. For more
-    details see the plug-in's <a href="http://wiki.jfrog.org/confluence/display/RTF/TeamCity+Artifactory+Plug-in"
-                                 target="_blank">documentation</a>.
+    New line or comma separated references to other build artifacts that this build should use as dependencies.
+    Each reference is specified in the format of: <kbd>repo_key:path_pattern[;prop=val1,val2[;prop2+=val3]@build_name:build_number[=>arget_dir]</kbd>, where:
+    <kbd>repo_key</kbd> - a key of the Artifactory repository that contains the dependencies (may contain the * and the  ? wildcards).
+    <kbd>path_pattern</kbd> - an Ant-like pattern of the dependencies path within the Artifactory  (may contain the * and the  ? wildcards, including **).
+    Path can take optional conditional property values as specified in resolved artifacts.
+    <kbd>build_name</kbd> - The name of the build that was published to Artifactory, of which dependencies should be resolved.
+        <kbd>build_number</kbd> - A specific build run number. Can be <kbd>LATEST</kbd> to depend on the latest build run, or <kbd>LAST_RELEASE</kbd> to depend on the latest build with a "release" status.
+    <kbd>target_dir</kbd> - An optional target directory to where resolved dependencies will be downloaded. By default dependencies will be downloaded to a path under the build workspace.
+    For example: <kbd>repo-key:dir/**/bob/*.zip@myBuild#LATEST</kbd>
     </span>
         <span id="error_org.jfrog.artifactory.selectedDeployableServer.buildDependencies" class="error"/>
     </td>
