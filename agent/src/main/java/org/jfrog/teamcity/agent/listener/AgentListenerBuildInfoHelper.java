@@ -17,10 +17,16 @@
 package org.jfrog.teamcity.agent.listener;
 
 import com.google.common.base.Function;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import jetbrains.buildServer.ExtensionHolder;
-import jetbrains.buildServer.agent.*;
+import jetbrains.buildServer.agent.AgentRunningBuild;
+import jetbrains.buildServer.agent.ArtifactsPreprocessor;
+import jetbrains.buildServer.agent.ArtifactsPublisher;
+import jetbrains.buildServer.agent.BuildFinishedStatus;
+import jetbrains.buildServer.agent.BuildProgressLogger;
+import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.agent.impl.artifacts.ArtifactsBuilder;
 import jetbrains.buildServer.agent.impl.artifacts.ArtifactsCollection;
 import jetbrains.buildServer.log.Loggers;
@@ -35,7 +41,11 @@ import org.jfrog.build.client.IncludeExcludePatterns;
 import org.jfrog.build.client.PatternMatcher;
 import org.jfrog.build.extractor.BuildInfoExtractor;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
-import org.jfrog.teamcity.agent.*;
+import org.jfrog.teamcity.agent.BuildDependenciesRetriever;
+import org.jfrog.teamcity.agent.GenericBuildInfoExtractor;
+import org.jfrog.teamcity.agent.LoggingArtifactsBuilderAdapter;
+import org.jfrog.teamcity.agent.MavenBuildInfoExtractor;
+import org.jfrog.teamcity.agent.PublishedDependenciesRetriever;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
 import org.jfrog.teamcity.common.BuildDependency;
@@ -65,8 +75,8 @@ public class AgentListenerBuildInfoHelper {
     }
 
     public void beforeRunnerStart(BuildRunnerContext runner,
-                                  List<Dependency> publishedDependencies,
-                                  List<BuildDependency> buildDependencies) {
+            List<Dependency> publishedDependencies,
+            List<BuildDependency> buildDependencies) {
         Map<String, String> runnerParams = runner.getRunnerParameters();
         /**
          * This method handles the generic build info dependency publication which is not applicable to gradle or ant
@@ -112,9 +122,9 @@ public class AgentListenerBuildInfoHelper {
     }
 
     public void runnerFinished(BuildRunnerContext runner,
-                               BuildFinishedStatus status,
-                               List<Dependency> dependencies,
-                               List<BuildDependency> buildDependencies) throws Exception {
+            BuildFinishedStatus status,
+            List<Dependency> dependencies,
+            List<BuildDependency> buildDependencies) throws Exception {
 
         /**
          * This method handles the build info and artifact publication which is not applicable to gradle or ant
@@ -174,26 +184,28 @@ public class AgentListenerBuildInfoHelper {
 
 
     private void addBuildDependencies(Build buildInfo, List<BuildDependency> buildDependencies) {
-        buildInfo.setBuildDependencies(transform(newArrayList(newHashSet(buildDependencies)), new Function<BuildDependency, org.jfrog.build.api.dependency.BuildDependency>() {
-            public org.jfrog.build.api.dependency.BuildDependency apply(BuildDependency dependency) {
-                final String buildNumber = dependency.getBuildNumberResponse();
-                return buildNumber == null ? null //Build number is null for unresolved dependencies (wrong build name or build number).
-                        : new BuildDependencyBuilder().
-                        name(dependency.getBuildName()).
-                        number(buildNumber).
-                        url(dependency.getBuildUrl()).
-                        started(dependency.getBuildStarted()).
-                        build();
-            }
-        }));
+        buildInfo.setBuildDependencies(transform(newArrayList(newHashSet(buildDependencies)),
+                new Function<BuildDependency, org.jfrog.build.api.dependency.BuildDependency>() {
+                    public org.jfrog.build.api.dependency.BuildDependency apply(BuildDependency dependency) {
+                        final String buildNumber = dependency.getBuildNumberResponse();
+                        return buildNumber == null ? null
+                                //Build number is null for unresolved dependencies (wrong build name or build number).
+                                : new BuildDependencyBuilder().
+                                name(dependency.getBuildName()).
+                                number(buildNumber).
+                                url(dependency.getBuildUrl()).
+                                started(dependency.getBuildStarted()).
+                                build();
+                    }
+                }));
     }
 
 
     private ExtractedBuildInfo extractBuildInfo(BuildRunnerContext runnerContext,
-                                                List<Dependency> dependencies) {
+            List<Dependency> dependencies) {
 
         AgentRunningBuild build = runnerContext.getBuild();
-        Map<File, String> publishableArtifacts = getPublishableArtifacts(runnerContext);
+        Multimap<File, String> publishableArtifacts = getPublishableArtifacts(runnerContext);
 
         if (RunTypeUtils.isMavenRunType(runnerContext.getRunType())) {
             File mavenBuildInfoFile = new File(build.getBuildTempDirectory(), "maven-build-info.xml");
@@ -216,7 +228,7 @@ public class AgentListenerBuildInfoHelper {
     }
 
     private ArtifactoryBuildInfoClient getBuildInfoClient(String selectedServerUrl, Map<String, String> runnerParams,
-                                                          BuildProgressLogger logger) {
+            BuildProgressLogger logger) {
         ArtifactoryBuildInfoClient infoClient =
                 new ArtifactoryBuildInfoClient(selectedServerUrl,
                         runnerParams.get(RunnerParameterKeys.DEPLOYER_USERNAME),
@@ -264,10 +276,10 @@ public class AgentListenerBuildInfoHelper {
         }
     }
 
-    private Map<File, String> getPublishableArtifacts(BuildRunnerContext runnerContext) {
+    private Multimap<File, String> getPublishableArtifacts(BuildRunnerContext runnerContext) {
         BuildProgressLogger logger = runnerContext.getBuild().getBuildLogger();
 
-        Map<File, String> map = Maps.newHashMap();
+        Multimap<File, String> map = HashMultimap.create();
         String publishedArtifactPropVal = runnerContext.getRunnerParameters().get(
                 RunnerParameterKeys.PUBLISHED_ARTIFACTS);
         if (StringUtils.isNotBlank(publishedArtifactPropVal)) {
@@ -294,7 +306,9 @@ public class AgentListenerBuildInfoHelper {
                         }
                         logInfo(logger, infoBuilder.toString());
                     }
-                    map.putAll(pathMap);
+                    for (Map.Entry<File, String> entry : pathMap.entrySet()) {
+                        map.put(entry.getKey(), entry.getValue());
+                    }
                 }
             } catch (Exception e) {
                 throw new RuntimeException("Error occurred during artifacts publishing: " + e.getMessage(), e);

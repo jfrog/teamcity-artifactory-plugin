@@ -29,12 +29,15 @@ public class PerforceManager extends AbstractScmManager {
         if (!hostAddress.contains(":")) {
             hostAddress = "localhost:" + hostAddress;
         }
-        builder.hostAddress(hostAddress)
-                .client(perforceProperties.get("client"));
+        // TeamCity always creates new client and puts it into the environment variables
+        String client = runner.getBuild().getSharedBuildParameters().getEnvironmentVariables().get("P4CLIENT");
+        builder.hostAddress(hostAddress).client(client);
         if (perforceProperties.containsKey("user")) {
             builder.username(perforceProperties.get("user")).password(perforceProperties.get("secure:passwd"));
         }
-
+        if (perforceProperties.containsKey("charset")) {
+            builder.charset(perforceProperties.get("charset"));
+        }
         perforce = builder.build();
     }
 

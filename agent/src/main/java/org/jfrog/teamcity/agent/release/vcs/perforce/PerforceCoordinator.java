@@ -44,7 +44,7 @@ public class PerforceCoordinator extends AbstractVcsCoordinator {
             labelChangeListId = currentChangeListId + "";
             perforce.commitWorkingCopy(currentChangeListId, releaseParameters.getTagComment());
         } else {
-            perforce.deleteChangeList(currentChangeListId);
+            safeRevertWorkingCopy();
             currentChangeListId = perforce.getDefaultChangeListId();
         }
 
@@ -65,6 +65,9 @@ public class PerforceCoordinator extends AbstractVcsCoordinator {
         if (modified) {
             log("Submitting next development version changes");
             perforce.commitWorkingCopy(currentChangeListId, releaseParameters.getNextDevCommitComment());
+        } else {
+            safeRevertWorkingCopy();
+            currentChangeListId = perforce.getDefaultChangeListId();
         }
     }
 
@@ -80,6 +83,9 @@ public class PerforceCoordinator extends AbstractVcsCoordinator {
             if (tagCreated) {
                 safeDeleteLabel(releaseParameters.getTagUrl());
             }
+        } else {
+            log("Closing connection to perforce server");
+            perforce.closeConnection();
         }
     }
 
