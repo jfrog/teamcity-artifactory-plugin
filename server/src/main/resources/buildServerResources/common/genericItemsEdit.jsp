@@ -73,7 +73,7 @@
     style="${shouldDisplay ? '' : 'display: none;'}">
     <th>
         <label for="org.jfrog.artifactory.selectedDeployableServer.buildDependencies">
-            Custom resolved artifacts/build dependencies:
+            Custom build dependencies:
         </label>
     </th>
     <td>
