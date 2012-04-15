@@ -21,12 +21,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import jetbrains.buildServer.ExtensionHolder;
-import jetbrains.buildServer.agent.AgentRunningBuild;
-import jetbrains.buildServer.agent.ArtifactsPreprocessor;
-import jetbrains.buildServer.agent.ArtifactsPublisher;
-import jetbrains.buildServer.agent.BuildFinishedStatus;
-import jetbrains.buildServer.agent.BuildProgressLogger;
-import jetbrains.buildServer.agent.BuildRunnerContext;
+import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.agent.impl.artifacts.ArtifactsBuilder;
 import jetbrains.buildServer.agent.impl.artifacts.ArtifactsCollection;
 import jetbrains.buildServer.log.Loggers;
@@ -41,11 +36,7 @@ import org.jfrog.build.client.IncludeExcludePatterns;
 import org.jfrog.build.client.PatternMatcher;
 import org.jfrog.build.extractor.BuildInfoExtractor;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
-import org.jfrog.teamcity.agent.BuildDependenciesRetriever;
-import org.jfrog.teamcity.agent.GenericBuildInfoExtractor;
-import org.jfrog.teamcity.agent.LoggingArtifactsBuilderAdapter;
-import org.jfrog.teamcity.agent.MavenBuildInfoExtractor;
-import org.jfrog.teamcity.agent.PublishedDependenciesRetriever;
+import org.jfrog.teamcity.agent.*;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
 import org.jfrog.teamcity.common.BuildDependency;
@@ -75,8 +66,8 @@ public class AgentListenerBuildInfoHelper {
     }
 
     public void beforeRunnerStart(BuildRunnerContext runner,
-            List<Dependency> publishedDependencies,
-            List<BuildDependency> buildDependencies) {
+                                  List<Dependency> publishedDependencies,
+                                  List<BuildDependency> buildDependencies) {
         Map<String, String> runnerParams = runner.getRunnerParameters();
         /**
          * This method handles the generic build info dependency publication which is not applicable to gradle or ant
@@ -88,31 +79,19 @@ public class AgentListenerBuildInfoHelper {
 
         runner.addRunnerParameter(BUILD_STARTED, String.valueOf(new Date().getTime()));
 
-        retrievePublishedDependencies(runner, publishedDependencies);
-        retrieveBuildDependencies(runner, buildDependencies);
+//        retrievePublishedDependencies(runner, publishedDependencies);
+//        retrieveBuildDependencies(runner, buildDependencies);
+        retrievePublishedAndBuildDependencies(runner, publishedDependencies, buildDependencies);
     }
 
-    private void retrievePublishedDependencies(BuildRunnerContext runner, List<Dependency> dependencies) {
-        PublishedDependenciesRetriever dependenciesRetriever = new PublishedDependenciesRetriever(runner);
+    private void retrievePublishedAndBuildDependencies(BuildRunnerContext runner, List<Dependency> publishedDependencies, List<BuildDependency> buildDependencies) {
+        PublishedDependenciesRetriever publishedDependenciesRetriever = new PublishedDependenciesRetriever(runner);
+        BuildDependenciesRetriever buildDependenciesRetriever = new BuildDependenciesRetriever(runner);
         try {
-            dependenciesRetriever.appendDependencies(dependencies);
+            publishedDependenciesRetriever.appendDependencies(publishedDependencies);
+            buildDependenciesRetriever.appendDependencies(buildDependencies);
         } catch (Exception e) {
-            String errorMessage = "Error occurred while resolving published dependencies: " + e.getMessage();
-            BuildProgressLogger logger = runner.getBuild().getBuildLogger();
-            Loggers.AGENT.error(errorMessage, e);
-            logger.buildFailureDescription(errorMessage);
-            logger.exception(e);
-            throw new RuntimeException(errorMessage, e);
-        }
-    }
-
-    private void retrieveBuildDependencies(BuildRunnerContext runner, List<BuildDependency> buildDependencies) {
-        BuildDependenciesRetriever dependenciesRetriever = new BuildDependenciesRetriever(runner);
-
-        try {
-            dependenciesRetriever.appendDependencies(buildDependencies);
-        } catch (Exception e) {
-            String errorMessage = "Error occurred while resolving build dependencies: " + e.getMessage();
+            String errorMessage = "Error occurred while resolving published or build dependencies: " + e.getMessage();
             BuildProgressLogger logger = runner.getBuild().getBuildLogger();
             Loggers.AGENT.error(errorMessage, e);
             logger.buildFailureDescription(errorMessage);
@@ -122,9 +101,9 @@ public class AgentListenerBuildInfoHelper {
     }
 
     public void runnerFinished(BuildRunnerContext runner,
-            BuildFinishedStatus status,
-            List<Dependency> dependencies,
-            List<BuildDependency> buildDependencies) throws Exception {
+                               BuildFinishedStatus status,
+                               List<Dependency> dependencies,
+                               List<BuildDependency> buildDependencies) throws Exception {
 
         /**
          * This method handles the build info and artifact publication which is not applicable to gradle or ant
@@ -202,7 +181,7 @@ public class AgentListenerBuildInfoHelper {
 
 
     private ExtractedBuildInfo extractBuildInfo(BuildRunnerContext runnerContext,
-            List<Dependency> dependencies) {
+                                                List<Dependency> dependencies) {
 
         AgentRunningBuild build = runnerContext.getBuild();
         Multimap<File, String> publishableArtifacts = getPublishableArtifacts(runnerContext);
@@ -228,7 +207,7 @@ public class AgentListenerBuildInfoHelper {
     }
 
     private ArtifactoryBuildInfoClient getBuildInfoClient(String selectedServerUrl, Map<String, String> runnerParams,
-            BuildProgressLogger logger) {
+                                                          BuildProgressLogger logger) {
         ArtifactoryBuildInfoClient infoClient =
                 new ArtifactoryBuildInfoClient(selectedServerUrl,
                         runnerParams.get(RunnerParameterKeys.DEPLOYER_USERNAME),

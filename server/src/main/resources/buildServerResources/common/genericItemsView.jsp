@@ -25,10 +25,10 @@
         Custom published artifacts: <props:displayValue
             name="org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts" emptyValue="not specified"/>
     </div>
-    <div class="nestedParameter">
-        Custom resolved artifacts: <props:displayValue
-            name="org.jfrog.artifactory.selectedDeployableServer.publishedDependencies" emptyValue="not specified"/>
-    </div>
+    <%--<div class="nestedParameter">--%>
+        <%--Custom resolved artifacts: <props:displayValue--%>
+            <%--name="org.jfrog.artifactory.selectedDeployableServer.publishedDependencies" emptyValue="not specified"/>--%>
+    <%--</div>--%>
     <div class="nestedParameter">
         Custom resolved artifacts: <props:displayValue
             name="org.jfrog.artifactory.selectedDeployableServer.buildDependencies" emptyValue="not specified"/>

@@ -35,22 +35,21 @@ import java.util.Map;
  *
  * @author Evgeny Goldin
  */
-public class BuildDependenciesHelper
-{
+public class BuildDependenciesHelper {
 
-    public static List<BuildDependency> getBuildDependencies ( String buildItemsPropertyValue ) {
+    public static List<BuildDependency> getBuildDependencies(String buildItemsPropertyValue) {
 
-        if ( StringUtils.isBlank( buildItemsPropertyValue )) {
+        if (StringUtils.isBlank(buildItemsPropertyValue)) {
             return Collections.emptyList();
         }
 
         // Build name => build number => build dependency
-        Map<String, Map<String, BuildDependency>> buildsMap         = buildsMap( buildItemsPropertyValue );
-        List<BuildDependency>                     buildDependencies = Lists.newLinkedList();
+        Map<String, Map<String, BuildDependency>> buildsMap = buildsMap(buildItemsPropertyValue);
+        List<BuildDependency> buildDependencies = Lists.newLinkedList();
 
-        for ( Map<String, BuildDependency> m : buildsMap.values()) {
-            for ( BuildDependency bd : m.values()){
-                buildDependencies.add( bd );
+        for (Map<String, BuildDependency> m : buildsMap.values()) {
+            for (BuildDependency bd : m.values()) {
+                buildDependencies.add(bd);
             }
         }
 
@@ -58,58 +57,58 @@ public class BuildDependenciesHelper
     }
 
 
-    private static Map<String, Map<String, BuildDependency>> buildsMap ( String buildItemsPropertyValue )
-    {
+    private static Map<String, Map<String, BuildDependency>> buildsMap(String buildItemsPropertyValue) {
         Map<String, Map<String, BuildDependency>> buildsMap = Maps.newHashMap();
-        List<String> patternLines = PublishedItemsHelper.parsePatternsFromProperty( buildItemsPropertyValue );
+        List<String> patternLines = PublishedItemsHelper.parsePatternsFromProperty(buildItemsPropertyValue);
 
-        for ( String patternLine : patternLines ) {
+        for (String patternLine : patternLines) {
+            //since the patterns might now include patterns which aren't part of a build, we need to filter those
+            if (patternLine.contains("@")) {
+                /**
+                 * Every pattern line is:
+                 * "<Artifactory repo>:<pattern>@<build name>#<build number> => <targetDirectory>"
+                 * "libs-release-local:com/goldin/plugins/gradle/0.1.1/*.jar@gradle-plugins :: Build :: Gradle#LATEST => many-jars-build"
+                 */
+                String[] splitPattern = patternLine.split("=>");
 
-            /**
-             * Every pattern line is:
-             * "<Artifactory repo>:<pattern>@<build name>#<build number> => <targetDirectory>"
-             * "libs-release-local:com/goldin/plugins/gradle/0.1.1/*.jar@gradle-plugins :: Build :: Gradle#LATEST => many-jars-build"
-             */
-            String[] splitPattern = patternLine.split( "=>" );
+                if (splitPattern.length < 1) {
+                    continue;
+                }
 
-            if ( splitPattern.length < 1 ) {
-                continue;
-            }
+                String dependency = FilenameUtils.separatorsToUnix(splitPattern[0].trim());
+                int index1 = dependency.lastIndexOf('@');
+                int index2 = dependency.lastIndexOf('#');
+                boolean lineIsOk = (index1 > 0) && (index2 > index1) && (index2 < (dependency.length() - 1));
 
-            String dependency = FilenameUtils.separatorsToUnix( splitPattern[ 0 ].trim() );
-            int index1        = dependency.lastIndexOf( '@' );
-            int index2        = dependency.lastIndexOf( '#' );
-            boolean lineIsOk  = ( index1 > 0 ) && ( index2 > index1 ) && ( index2 < ( dependency.length() - 1 ));
+                if (!lineIsOk) {
+                    continue;
+                }
 
-            if ( ! lineIsOk ) {
-                continue;
-            }
+                String pattern = PublishedItemsHelper.removeDoubleDotsFromPattern(dependency.substring(0, index1));
+                String buildName = dependency.substring(index1 + 1, index2);
+                String buildNumber = dependency.substring(index2 + 1);
+                String targetDirectory = (splitPattern.length > 1) ?
+                        PublishedItemsHelper.removeDoubleDotsFromPattern(FilenameUtils.separatorsToUnix(splitPattern[1].trim())) :
+                        "";
 
-            String pattern         = PublishedItemsHelper.removeDoubleDotsFromPattern( dependency.substring( 0, index1 ) );
-            String buildName       = dependency.substring( index1 + 1, index2 );
-            String buildNumber     = dependency.substring( index2 + 1 );
-            String targetDirectory = ( splitPattern.length > 1 ) ?
-                                         PublishedItemsHelper.removeDoubleDotsFromPattern( FilenameUtils.separatorsToUnix( splitPattern[ 1 ].trim())) :
-                                         "";
+                if (StringUtils.isBlank(buildName) || StringUtils.isBlank(buildNumber) || StringUtils.isBlank(pattern)) {
+                    continue;
+                }
 
-            if ( StringUtils.isBlank( buildName ) || StringUtils.isBlank( buildNumber ) || StringUtils.isBlank( pattern )) {
-                continue;
-            }
+                Map<String, BuildDependency> numbersMap = buildsMap.get(buildName);
 
-            Map<String, BuildDependency> numbersMap = buildsMap.get( buildName );
+                if (numbersMap == null) {
+                    buildsMap.put(buildName, Maps.<String, BuildDependency>newHashMap());
+                    numbersMap = buildsMap.get(buildName);
+                }
 
-            if ( numbersMap == null ) {
-                buildsMap.put( buildName, Maps.<String, BuildDependency>newHashMap());
-                numbersMap = buildsMap.get( buildName );
-            }
+                BuildDependency buildDependency = numbersMap.get(buildNumber);
 
-            BuildDependency buildDependency = numbersMap.get( buildNumber );
-
-            if ( buildDependency == null ) {
-                numbersMap.put( buildNumber, new BuildDependency( buildName, buildNumber, pattern, targetDirectory ));
-            }
-            else {
-                buildDependency.addPattern( pattern, targetDirectory );
+                if (buildDependency == null) {
+                    numbersMap.put(buildNumber, new BuildDependency(buildName, buildNumber, pattern, targetDirectory));
+                } else {
+                    buildDependency.addPattern(pattern, targetDirectory);
+                }
             }
         }
 
@@ -117,58 +116,56 @@ public class BuildDependenciesHelper
     }
 
 
-    public static List<BuildPatternArtifactsRequest> toArtifactsRequests ( List<BuildDependency> buildDependencies )
-    {
+    public static List<BuildPatternArtifactsRequest> toArtifactsRequests(List<BuildDependency> buildDependencies) {
         List<BuildPatternArtifactsRequest> artifactsRequests = Lists.newLinkedList();
 
-        for ( BuildDependency dependency : buildDependencies )
-        {
+        for (BuildDependency dependency : buildDependencies) {
             BuildPatternArtifactsRequestBuilder builder = new BuildPatternArtifactsRequestBuilder().
-                                                          buildName( dependency.getBuildName() ).
-                                                          buildNumber( dependency.getBuildNumberRequest() );
+                    buildName(dependency.getBuildName()).
+                    buildNumber(dependency.getBuildNumberRequest());
 
-            for ( BuildDependency.Pattern p : dependency.getPatterns()) {
-                builder.pattern( p.getArtifactoryPattern());
+            for (BuildDependency.Pattern p : dependency.getPatterns()) {
+                builder.pattern(p.getArtifactoryPattern());
             }
 
-            artifactsRequests.add( builder.build());
+            artifactsRequests.add(builder.build());
         }
 
         return artifactsRequests;
     }
 
 
-    public static void applyBuildArtifacts ( List<BuildDependency>       buildDependencies,
-                                             List<BuildPatternArtifacts> buildArtifacts ){
+    public static void applyBuildArtifacts(List<BuildDependency> buildDependencies,
+                                           List<BuildPatternArtifacts> buildArtifacts) {
 
-        verifySameSize( buildDependencies, buildArtifacts );
+        verifySameSize(buildDependencies, buildArtifacts);
 
-        for ( int j = 0; j < buildDependencies.size(); j++ ) {
+        for (int j = 0; j < buildDependencies.size(); j++) {
 
-            BuildDependency       dependency = buildDependencies.get( j );
-            BuildPatternArtifacts artifacts  = buildArtifacts.get( j );
+            BuildDependency dependency = buildDependencies.get(j);
+            BuildPatternArtifacts artifacts = buildArtifacts.get(j);
 
-            if ( artifacts == null ) {
+            if (artifacts == null) {
                 // Pattern didn't match any results: wrong build name or build number.
                 continue;
             }
 
-            assert dependency.getBuildName().equals( artifacts.getBuildName()):
-                   String.format( "Build names don't match: [%s] != [%s]", dependency.getBuildName(), artifacts.getBuildName());
+            assert dependency.getBuildName().equals(artifacts.getBuildName()) :
+                    String.format("Build names don't match: [%s] != [%s]", dependency.getBuildName(), artifacts.getBuildName());
 
-            dependency.setBuildNumberResponse( artifacts.getBuildNumber());
-            dependency.setBuildStarted( artifacts.getStarted());
-            dependency.setBuildUrl( artifacts.getUrl());
+            dependency.setBuildNumberResponse(artifacts.getBuildNumber());
+            dependency.setBuildStarted(artifacts.getStarted());
+            dependency.setBuildUrl(artifacts.getUrl());
 
             List<BuildDependency.Pattern> dependencyPatterns = dependency.getPatterns();
-            List<PatternResult>           patternResults     = artifacts.getPatternResults();
+            List<PatternResult> patternResults = artifacts.getPatternResults();
 
-            verifySameSize( dependencyPatterns, patternResults );
+            verifySameSize(dependencyPatterns, patternResults);
 
-            for ( int k = 0; k < dependencyPatterns.size(); k++ ) {
-                BuildDependency.Pattern p      = dependencyPatterns.get( k );
-                PatternResult           result = patternResults.get( k );
-                p.setPatternResult( result );
+            for (int k = 0; k < dependencyPatterns.size(); k++) {
+                BuildDependency.Pattern p = dependencyPatterns.get(k);
+                PatternResult result = patternResults.get(k);
+                p.setPatternResult(result);
             }
         }
     }
@@ -179,14 +176,13 @@ public class BuildDependenciesHelper
      *
      * @param l1 first list to check
      * @param l2 second list to check
-     *
      * @throws IllegalArgumentException if lists are of different sizes.
      */
-    private static void verifySameSize ( List l1, List l2 ) {
+    private static void verifySameSize(List l1, List l2) {
 
-        if ( l1.size() != l2.size() ) {
+        if (l1.size() != l2.size()) {
             throw new IllegalArgumentException(
-                String.format( "List sizes don't match: [%s] != [%s]", l1.size(), l2.size()));
+                    String.format("List sizes don't match: [%s] != [%s]", l1.size(), l2.size()));
         }
     }
 

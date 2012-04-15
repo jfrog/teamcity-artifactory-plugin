@@ -77,28 +77,28 @@ public class BaseRunTypeConfigPropertiesProcessor implements PropertiesProcessor
             }
         }
 
-        String publishedDependencies = properties.get(RunnerParameterKeys.PUBLISHED_DEPENDENCIES);
-        if (StringUtils.isNotBlank(publishedDependencies) &&
-                !publishedDependencies.equals(DISABLED_MESSAGE)) {
-            validatePublishedDependencies(invalidProperties, publishedDependencies);
+        String publishedAndBuildDependencies = properties.get(RunnerParameterKeys.BUILD_DEPENDENCIES);
+        if (StringUtils.isNotBlank(publishedAndBuildDependencies) &&
+                !publishedAndBuildDependencies.equals(DISABLED_MESSAGE)) {
+            validatePublishedAndBuildDependencies(invalidProperties, publishedAndBuildDependencies);
         }
 
         return invalidProperties;
     }
 
-    private void validatePublishedDependencies(Collection<InvalidProperty> invalidProperties,
-            String publishedDependencies) {
-        Map<String, String> pairs = PublishedItemsHelper.getPublishedItemsPatternPairs(publishedDependencies);
+    private void validatePublishedAndBuildDependencies(Collection<InvalidProperty> invalidProperties,
+                                                       String publishedAndBuildDependencies) {
+        Map<String, String> pairs = PublishedItemsHelper.getPublishedItemsPatternPairs(publishedAndBuildDependencies);
         for (Map.Entry<String, String> patternEntry : pairs.entrySet()) {
 
             String sourcePattern = patternEntry.getKey().trim();
 
             if (!sourcePattern.contains(":")) {
-                invalidProperties.add(new InvalidProperty(RunnerParameterKeys.PUBLISHED_DEPENDENCIES,
+                invalidProperties.add(new InvalidProperty(RunnerParameterKeys.BUILD_DEPENDENCIES,
                         getInvalidPatternMessage(sourcePattern,
                                 "must be formatted like: [repo-key]:[pattern/to/search/for].")));
-            } else if (sourcePattern.contains("**")) {
-                invalidProperties.add(new InvalidProperty(RunnerParameterKeys.PUBLISHED_DEPENDENCIES,
+            } else if (!sourcePattern.contains("@") && sourcePattern.contains("**")) {
+                invalidProperties.add(new InvalidProperty(RunnerParameterKeys.BUILD_DEPENDENCIES,
                         getInvalidPatternMessage(sourcePattern, "cannot contain the '**' wildcard.")));
             }
         }

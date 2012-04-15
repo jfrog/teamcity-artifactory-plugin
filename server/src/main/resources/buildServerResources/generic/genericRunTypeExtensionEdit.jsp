@@ -47,8 +47,8 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.includePublishedArtifacts').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.disableAutoLicenseDiscovery').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
-                $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').disabled = true;
-                $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').value = '${disabledMessage}';
+//                $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').disabled = true;
+                <!--$('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').value = '${disabledMessage}';-->
                 $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').disabled = true;
                 $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '${disabledMessage}';
 
@@ -64,7 +64,7 @@
                 BS.Util.hide($('includePublishedArtifacts.container'));
                 BS.Util.hide($('disableAutoLicenseDiscovery.container'));
                 BS.Util.hide($('publishedArtifacts.container'));
-                BS.Util.hide($('publishedDependencies.container'));
+//                BS.Util.hide($('publishedDependencies.container'));
                 BS.Util.hide($('buildDependencies.container'));
             } else {
                 if (!foundExistingConfig) {
@@ -92,7 +92,7 @@
                 }
 
                 BS.Util.show($('publishedArtifacts.container'));
-                BS.Util.show($('publishedDependencies.container'));
+//                BS.Util.show($('publishedDependencies.container'));
                 BS.Util.show($('buildDependencies.container'));
                 BS.artifactory.checkCompatibleVersion(selectedUrlId);
 

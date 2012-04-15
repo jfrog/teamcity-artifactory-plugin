@@ -54,9 +54,9 @@ BS.artifactory = {
 
     checkArtifactoryHasAddons:function (selectedUrlId)
     {
-        var publishedDependencies = $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies');
+//        var publishedDependencies = $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies');
         var buildDependencies = $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies');
-        if (publishedDependencies && buildDependencies) {
+        if (buildDependencies) {
             BS.ajaxRequest(base_uri + '${controllerUrl}', {
                 parameters:'selectedUrlId=' + selectedUrlId + '&onServerChange=true&checkArtifactoryHasAddons=true',
                 onComplete:function (response, options)
@@ -64,7 +64,7 @@ BS.artifactory = {
 
                     var xmlDoc = response.responseXML;
                     if (xmlDoc) {
-                        BS.artifactory.applyDisabledMessage(publishedDependencies, xmlDoc);
+//                        BS.artifactory.applyDisabledMessage(publishedDependencies, xmlDoc);
                         BS.artifactory.applyDisabledMessage(buildDependencies, xmlDoc);
                         BS.MultilineProperties.updateVisible();
                     }
