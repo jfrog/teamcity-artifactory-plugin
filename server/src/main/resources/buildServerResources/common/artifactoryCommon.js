@@ -15,8 +15,7 @@
  */
 
 BS.artifactory = {
-    populateRepoSelect:function (response, options, repoSelector, existingValue, addEmpty)
-    {
+    populateRepoSelect:function (response, options, repoSelector, existingValue, addEmpty) {
 
         var xmlDoc = response.responseXML;
         repoSelector.innerHTML = '';
@@ -43,7 +42,7 @@ BS.artifactory = {
                 option.innerHTML = repoName;
                 option.value = repoName;
                 repoSelector.appendChild(option);
-                if (!foundDefault && (repoName.indexOf(existingValue) != -1)) {
+                if (!foundDefault && (repoName == existingValue)) {
                     repoSelector.selectedIndex = (addEmpty) ? (i + 1) : i;
                     foundDefault = true;
                 }
@@ -52,15 +51,13 @@ BS.artifactory = {
         }
     },
 
-    checkArtifactoryHasAddons:function (selectedUrlId)
-    {
+    checkArtifactoryHasAddons:function (selectedUrlId) {
         var publishedDependencies = $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies');
         var buildDependencies = $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies');
         if (publishedDependencies && buildDependencies) {
             BS.ajaxRequest(base_uri + '${controllerUrl}', {
                 parameters:'selectedUrlId=' + selectedUrlId + '&onServerChange=true&checkArtifactoryHasAddons=true',
-                onComplete:function (response, options)
-                {
+                onComplete:function (response, options) {
 
                     var xmlDoc = response.responseXML;
                     if (xmlDoc) {
@@ -73,8 +70,7 @@ BS.artifactory = {
         }
     },
 
-    applyDisabledMessage:function (textAreaField, xmlDoc)
-    {
+    applyDisabledMessage:function (textAreaField, xmlDoc) {
         var hasAddons = xmlDoc.getElementsByTagName('hasAddons')[0];
         var hasAddonsValue = hasAddons.textContent || hasAddons.text || '';
         if (hasAddonsValue == "true") {
@@ -89,12 +85,10 @@ BS.artifactory = {
         }
     },
 
-    checkCompatibleVersion:function (selectedUrlId)
-    {
+    checkCompatibleVersion:function (selectedUrlId) {
         BS.ajaxRequest(base_uri + '${controllerUrl}', {
             parameters:'selectedUrlId=' + selectedUrlId + '&onServerChange=true&checkCompatibleVersion=true',
-            onComplete:function (response, options)
-            {
+            onComplete:function (response, options) {
 
                 var xmlDoc = response.responseXML;
                 if (xmlDoc) {
@@ -126,8 +120,7 @@ BS.artifactory = {
         });
     },
 
-    toggleLicenseViolationRecipientsVisibility:function ()
-    {
+    toggleLicenseViolationRecipientsVisibility:function () {
         var shouldRunLicenseChecks = $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks').checked;
         if (shouldRunLicenseChecks) {
             BS.Util.show($('licenseViolationRecipients.container'));
@@ -148,13 +141,11 @@ BS.artifactory = {
         BS.MultilineProperties.updateVisible();
     },
 
-    isDeployArtifactsSelected:function ()
-    {
+    isDeployArtifactsSelected:function () {
         return $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked;
     },
 
-    toggleDeployArtifactsSelection:function ()
-    {
+    toggleDeployArtifactsSelection:function () {
         if (BS.artifactory.isDeployArtifactsSelected()) {
             BS.Util.show($('deployIncludePatterns.container'));
             BS.Util.show($('deployExcludePatterns.container'));
@@ -168,13 +159,11 @@ BS.artifactory = {
         BS.MultilineProperties.updateVisible();
     },
 
-    isOverrideDefaultDeployerCredentialsSelected:function ()
-    {
+    isOverrideDefaultDeployerCredentialsSelected:function () {
         return $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked;
     },
 
-    toggleOverrideDefaultDeployerSelection:function ()
-    {
+    toggleOverrideDefaultDeployerSelection:function () {
         if (BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()) {
             BS.Util.show($('deployerUsername.container'));
             BS.Util.show($('deployerPassword.container'));
@@ -188,8 +177,7 @@ BS.artifactory = {
         BS.MultilineProperties.updateVisible();
     },
 
-    toggleReleaseManagementFieldsVisibility:function (builderName)
-    {
+    toggleReleaseManagementFieldsVisibility:function (builderName) {
         var releaseManagementEnabled = $('org.jfrog.artifactory.selectedDeployableServer.enableReleaseManagement').checked;
         if (releaseManagementEnabled) {
             BS.Util.show($('vcsTagsBaseUrlOrName.container'));
