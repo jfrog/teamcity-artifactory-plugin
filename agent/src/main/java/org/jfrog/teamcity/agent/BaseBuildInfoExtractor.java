@@ -19,6 +19,7 @@ package org.jfrog.teamcity.agent;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import jetbrains.buildServer.agent.BuildProgressLogger;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.agent.BuildRunnerContextEx;
@@ -67,14 +68,14 @@ import static org.jfrog.teamcity.common.ConstantValues.*;
 public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P, ExtractedBuildInfo> {
 
     protected BuildRunnerContext runnerContext;
-    private Map<File, String> artifactsToPublish;
+    private Multimap<File, String> artifactsToPublish;
     private List<Dependency> publishedDependencies;
     protected Map<String, String> runnerParams;
     protected Map<String, String> matrixParams;
     private BuildProgressLogger logger;
     private Map<String, Map<String, String>> calculatedChecksumCache;
 
-    public BaseBuildInfoExtractor(BuildRunnerContext runnerContext, Map<File, String> artifactsToPublish,
+    public BaseBuildInfoExtractor(BuildRunnerContext runnerContext, Multimap<File, String> artifactsToPublish,
             List<Dependency> publishedDependencies) {
         this.runnerContext = runnerContext;
         this.artifactsToPublish = artifactsToPublish;
@@ -311,7 +312,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
             return publishableArtifacts;
         }
 
-        for (Map.Entry<File, String> artifactToPublish : artifactsToPublish.entrySet()) {
+        for (Map.Entry<File, String> artifactToPublish : artifactsToPublish.entries()) {
             File source = artifactToPublish.getKey();
             String targetPath = artifactToPublish.getValue() + "/" + source.getName();
 

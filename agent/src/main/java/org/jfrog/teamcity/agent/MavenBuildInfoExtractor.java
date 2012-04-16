@@ -17,6 +17,7 @@
 package org.jfrog.teamcity.agent;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.util.FileUtil;
 import org.apache.commons.io.FilenameUtils;
@@ -60,7 +61,7 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
     private boolean snapshotRepoConfigured;
     private boolean releaseManagementActivated;
 
-    public MavenBuildInfoExtractor(BuildRunnerContext runnerContext, Map<File, String> artifactsToPublish,
+    public MavenBuildInfoExtractor(BuildRunnerContext runnerContext, Multimap<File, String> artifactsToPublish,
             List<Dependency> publishedDependencies) {
         super(runnerContext, artifactsToPublish, publishedDependencies);
         targetRepo = runnerParams.get(RunnerParameterKeys.TARGET_REPO);
