@@ -56,7 +56,7 @@
         <props:textProperty name="org.jfrog.artifactory.selectedDeployableServer.vcsTagsBaseUrlOrName"
                             className="longField"/>
             <span class="smallNote">
-                For subversion this is the URL of the tags location, for Git and perforce this is the name of the tag/label.
+                For Subversion this is the URL of the tags location, for Git and Perforce this is the name of the tag/label.
             </span>
     </td>
 </tr>
