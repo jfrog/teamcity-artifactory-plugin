@@ -17,10 +17,11 @@
 package org.jfrog.teamcity.server.runner;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
 import org.apache.commons.lang.StringUtils;
-import org.jfrog.teamcity.common.PublishedItemsHelper;
+import org.jfrog.build.util.PublishedItemsHelper;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
 
@@ -87,9 +88,10 @@ public class BaseRunTypeConfigPropertiesProcessor implements PropertiesProcessor
     }
 
     private void validatePublishedAndBuildDependencies(Collection<InvalidProperty> invalidProperties,
-                                                       String publishedAndBuildDependencies) {
-        Map<String, String> pairs = PublishedItemsHelper.getPublishedItemsPatternPairs(publishedAndBuildDependencies);
-        for (Map.Entry<String, String> patternEntry : pairs.entrySet()) {
+            String publishedAndBuildDependencies) {
+        Multimap<String, String> pairs = PublishedItemsHelper.getPublishedItemsPatternPairs(
+                publishedAndBuildDependencies);
+        for (Map.Entry<String, String> patternEntry : pairs.entries()) {
 
             String sourcePattern = patternEntry.getKey().trim();
 

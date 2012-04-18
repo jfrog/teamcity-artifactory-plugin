@@ -21,8 +21,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.dependency.BuildPatternArtifacts;
 import org.jfrog.build.api.dependency.BuildPatternArtifactsRequest;
 import org.jfrog.build.api.dependency.PatternArtifact;
-import org.jfrog.teamcity.common.BuildDependenciesHelper;
-import org.jfrog.teamcity.common.BuildDependency;
+import org.jfrog.build.api.dependency.UserBuildDependency;
+import org.jfrog.build.util.BuildDependenciesHelper;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.io.IOException;
@@ -34,92 +34,95 @@ import java.util.List;
  *
  * @author Evgeny Goldin.
  */
-public class BuildDependenciesRetriever extends DependenciesRetriever
-{
+public class BuildDependenciesRetriever extends DependenciesRetriever {
 
-    public BuildDependenciesRetriever ( @NotNull BuildRunnerContext runnerContext ) {
-        super( runnerContext );
+    public BuildDependenciesRetriever(@NotNull BuildRunnerContext runnerContext) {
+        super(runnerContext);
     }
 
 
-    public void appendDependencies( List<BuildDependency> buildDependencies ) throws IOException {
+    public void appendDependencies(List<UserBuildDependency> userBuildDependencies) throws IOException {
 
         /**
          * Don't run if no server was configured
          */
-        if ( ! isServerUrl()) {
+        if (!isServerUrl()) {
             return;
         }
 
-        String buildDependenciesParam = runnerParams.get( RunnerParameterKeys.BUILD_DEPENDENCIES );
+        String buildDependenciesParam = runnerParams.get(RunnerParameterKeys.BUILD_DEPENDENCIES);
 
         /**
          * Don't run if no build dependency patterns were specified.
          */
-        if ( ! dependencyEnabled( buildDependenciesParam )) {
+        if (!dependencyEnabled(buildDependenciesParam)) {
             return;
         }
 
-        buildDependencies.addAll( BuildDependenciesHelper.getBuildDependencies( buildDependenciesParam ));
+        userBuildDependencies.addAll(BuildDependenciesHelper.getBuildDependencies(buildDependenciesParam));
 
         /**
          * Don't run if dependencies mapping came out to be empty.
          */
-        if ( buildDependencies.isEmpty()) {
+        if (userBuildDependencies.isEmpty()) {
             return;
         }
 
-        logger.progressStarted( "Beginning to resolve Build Info build dependencies from " + serverUrl );
+        logger.progressStarted("Beginning to resolve Build Info build dependencies from " + serverUrl);
 
-        List<BuildPatternArtifactsRequest> artifactsRequests = BuildDependenciesHelper.toArtifactsRequests( buildDependencies );
-        List<BuildPatternArtifacts>        artifacts         = client.retrievePatternArtifacts( artifactsRequests );
-        BuildDependenciesHelper.applyBuildArtifacts( buildDependencies, artifacts );
+        List<BuildPatternArtifactsRequest> artifactsRequests = BuildDependenciesHelper.toArtifactsRequests(
+                userBuildDependencies);
+        List<BuildPatternArtifacts> artifacts = client.retrievePatternArtifacts(artifactsRequests);
+        BuildDependenciesHelper.applyBuildArtifacts(userBuildDependencies, artifacts);
 
-        try     { downloadBuildDependencies( buildDependencies ); }
-        finally { client.shutdown(); }
+        try {
+            downloadBuildDependencies(userBuildDependencies);
+        } finally {
+            client.shutdown();
+        }
 
-        logger.progressMessage( "Finished resolving Build Info build dependencies." );
+        logger.progressMessage("Finished resolving Build Info build dependencies.");
         logger.progressFinished();
     }
 
 
-    private void downloadBuildDependencies ( List<BuildDependency> buildDependencies ) throws IOException
-    {
+    private void downloadBuildDependencies(List<UserBuildDependency> userBuildDependencies) throws IOException {
 
-        for ( BuildDependency dependency : buildDependencies ) {
+        for (UserBuildDependency dependencyUser : userBuildDependencies) {
 
-            final String message = String.format( "Dependency on build [%s], number [%s]",
-                                                  dependency.getBuildName(), dependency.getBuildNumberRequest());
+            final String message = String.format("Dependency on build [%s], number [%s]",
+                    dependencyUser.getBuildName(), dependencyUser.getBuildNumberRequest());
             /**
              * dependency.getBuildNumberResponse() is null for unresolved dependencies (wrong build name or build number).
              */
-            if ( dependency.getBuildNumberResponse() == null ) {
-                logger.progressMessage( message + " - no results found, check correctness of dependency build name and build number." );
-            }
-            else {
+            if (dependencyUser.getBuildNumberResponse() == null) {
+                logger.progressMessage(
+                        message + " - no results found, check correctness of dependency build name and build number.");
+            } else {
 
-                for ( BuildDependency.Pattern pattern : dependency.getPatterns()) {
+                for (UserBuildDependency.Pattern pattern : dependencyUser.getPatterns()) {
 
                     List<PatternArtifact> artifacts = pattern.getPatternResult().getPatternArtifacts();
 
-                    logger.progressMessage( message +
-                        String.format( ", pattern [%s] - [%s] result%s found.",
-                                       pattern.getArtifactoryPattern(), artifacts.size(), ( artifacts.size() == 1 ? "" : "s" )));
+                    logger.progressMessage(message +
+                            String.format(", pattern [%s] - [%s] result%s found.",
+                                    pattern.getArtifactoryPattern(), artifacts.size(),
+                                    (artifacts.size() == 1 ? "" : "s")));
 
-                    for ( PatternArtifact artifact : artifacts ) {
+                    for (PatternArtifact artifact : artifacts) {
 
                         final String uri = artifact.getUri(); // "libs-release-local/com/goldin/plugins/gradle/0.1.1/gradle-0.1.1.jar"
-                        final int    j   = uri.indexOf( '/' );
+                        final int j = uri.indexOf('/');
 
-                        assert ( j > 0 ): String.format( "Filed to locate '/' in [%s]", uri );
+                        assert (j > 0) : String.format("Filed to locate '/' in [%s]", uri);
 
-                        final String repoUrl  = artifact.getArtifactoryUrl() + '/' + uri.substring( 0, j );
-                        final String filePath = uri.substring( j + 1 );
+                        final String repoUrl = artifact.getArtifactoryUrl() + '/' + uri.substring(0, j);
+                        final String filePath = uri.substring(j + 1);
 
-                        downloadArtifact( targetDir( pattern.getTargetDirectory()),
-                                          repoUrl,  // "http://10.0.0.23:8080/artifactory/libs-release-local"
-                                          filePath, // "com/goldin/plugins/gradle/0.1.1/gradle-0.1.1.jar"
-                                          pattern.getMatrixParameters());
+                        downloadArtifact(targetDir(pattern.getTargetDirectory()),
+                                repoUrl,  // "http://10.0.0.23:8080/artifactory/libs-release-local"
+                                filePath, // "com/goldin/plugins/gradle/0.1.1/gradle-0.1.1.jar"
+                                pattern.getMatrixParameters());
                     }
                 }
             }

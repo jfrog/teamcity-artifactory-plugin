@@ -16,32 +16,40 @@
 
 package org.jfrog.teamcity.agent;
 
-import static org.jfrog.teamcity.common.ConstantValues.*;
 import com.google.common.collect.Lists;
 import jetbrains.buildServer.ExtensionHolder;
-import jetbrains.buildServer.agent.*;
+import jetbrains.buildServer.agent.AgentLifeCycleAdapter;
+import jetbrains.buildServer.agent.AgentLifeCycleListener;
+import jetbrains.buildServer.agent.AgentRunningBuildEx;
+import jetbrains.buildServer.agent.BuildAgent;
+import jetbrains.buildServer.agent.BuildFinishedStatus;
+import jetbrains.buildServer.agent.BuildInterruptReason;
+import jetbrains.buildServer.agent.BuildProgressLogger;
+import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.Dependency;
+import org.jfrog.build.api.dependency.UserBuildDependency;
 import org.jfrog.teamcity.agent.listener.AgentListenerBuildInfoHelper;
 import org.jfrog.teamcity.agent.listener.AgentListenerReleaseHelper;
 import org.jfrog.teamcity.agent.release.ReleaseParameters;
-import org.jfrog.teamcity.common.BuildDependency;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.jfrog.teamcity.common.ConstantValues.PROP_SKIP_LOG_MESSAGE;
+
 
 public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
 
-    private ExtensionHolder              extensionsLocator;
-    private List<Dependency>             publishedDependencies = Lists.newArrayList();
-    private List<BuildDependency>        buildDependencies     = Lists.newArrayList();
+    private ExtensionHolder extensionsLocator;
+    private List<Dependency> publishedDependencies = Lists.newArrayList();
+    private List<UserBuildDependency> userBuildDependencies = Lists.newArrayList();
     private AgentListenerBuildInfoHelper buildInfoHelper;
-    private AgentListenerReleaseHelper   releaseHelper;
+    private AgentListenerReleaseHelper releaseHelper;
 
     public ArtifactoryAgentListener(@NotNull EventDispatcher<AgentLifeCycleListener> dispatcher,
             @NotNull ExtensionHolder extensionsLocator) {
@@ -69,23 +77,21 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
         }
 
         publishedDependencies.clear();
-        buildDependencies.clear();
-        buildInfoHelper = new AgentListenerBuildInfoHelper( extensionsLocator );
+        userBuildDependencies.clear();
+        buildInfoHelper = new AgentListenerBuildInfoHelper(extensionsLocator);
 
         try {
-            buildInfoHelper.beforeRunnerStart( runner, publishedDependencies, buildDependencies );
-        }
-        catch ( RuntimeException e ) {
-            logException( runner, e );
+            buildInfoHelper.beforeRunnerStart(runner, publishedDependencies, userBuildDependencies);
+        } catch (RuntimeException e) {
+            logException(runner, e);
         }
 
         releaseHelper = new AgentListenerReleaseHelper();
 
         try {
             releaseHelper.beforeRunnerStart(runner);
-        }
-        catch ( Exception e ) {
-            logException( runner, e );
+        } catch (Exception e) {
+            logException(runner, e);
         }
     }
 
@@ -99,13 +105,11 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
         }
 
         try {
-            buildInfoHelper.runnerFinished( runner, buildStatus, publishedDependencies, buildDependencies );
-            releaseHelper.runnerFinished  ( runner, buildStatus );
-        }
-        catch (Exception e) {
+            buildInfoHelper.runnerFinished(runner, buildStatus, publishedDependencies, userBuildDependencies);
+            releaseHelper.runnerFinished(runner, buildStatus);
+        } catch (Exception e) {
             logException(runner, e);
-        }
-        finally {
+        } finally {
             ReleaseParameters releaseParams = new ReleaseParameters(runner.getBuild());
             if (releaseParams.isReleaseBuild()) {
                 BuildInterruptReason buildInterruptReason =
