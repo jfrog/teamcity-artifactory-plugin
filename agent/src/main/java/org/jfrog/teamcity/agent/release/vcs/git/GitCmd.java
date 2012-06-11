@@ -38,8 +38,8 @@ public class GitCmd {
         cmd.add(gitExe);
         cmd.addAll(Arrays.asList(args));
         try {
-            ProcessBuilder pb = new ProcessBuilder().redirectErrorStream(true)
-                    .directory(workingDirectory).command(cmd);
+            ProcessBuilder pb = new ProcessBuilder(cmd.toArray(new String[cmd.size()])).redirectErrorStream(true)
+                    .directory(workingDirectory);
             Process process = pb.start();
             StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream());
             StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream());
