@@ -36,7 +36,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <plugin.version>${project.version}</plugin.version>
-        <teamcity.version>6.5.5</teamcity.version>
+        <teamcity.version>7.0.3</teamcity.version>
         <build.info.version>2.0.11</build.info.version>
     </properties>
 
@@ -278,6 +278,12 @@
                 <groupId>org.easymock</groupId>
                 <artifactId>easymock</artifactId>
                 <version>3.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>1.3</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
