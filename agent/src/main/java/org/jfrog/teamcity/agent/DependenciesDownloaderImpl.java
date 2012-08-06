@@ -54,15 +54,15 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
         return helper.downloadDependencies(downloadableArtifacts);
     }
 
-    public String getTargetDir(String relativeDir) {
-        final File targetDirFile = new File(relativeDir);
+    public String getTargetDir(String targetDir, String relativeDir) {
+        final File targetDirFile = new File(targetDir, relativeDir);
         final File workingDir = targetDirFile.isAbsolute() ? targetDirFile :
-                new File(runnerContext.getWorkingDirectory(), relativeDir);
+                new File(runnerContext.getWorkingDirectory(), targetDirFile.getPath());
         return workingDir.getAbsolutePath();
     }
 
     public Map<String, String> saveDownloadedFile(InputStream is, String filePath) throws IOException {
-        File dest = new File(getTargetDir(filePath));
+        File dest = new File(filePath);
         if (dest.exists()) {
             dest.delete();
             dest.createNewFile();
