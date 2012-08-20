@@ -73,7 +73,7 @@
         <props:textProperty name="org.jfrog.artifactory.selectedDeployableServer.limitChecksToScopes"
                             className="longField"/>
             <span class="smallNote">
-                Space-seperated list of scopes.
+                Space-separated list of scopes.
             </span>
     </td>
 </tr>
