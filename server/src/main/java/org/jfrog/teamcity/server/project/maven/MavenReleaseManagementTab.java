@@ -24,7 +24,6 @@ import jetbrains.buildServer.serverSide.SBuildRunnerDescriptor;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SFinishedBuild;
-import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.Build;
@@ -49,12 +48,10 @@ import static org.jfrog.teamcity.common.ConstantValues.BUILD_INFO_FILE_NAME_PACK
  */
 public class MavenReleaseManagementTab extends BaseReleaseManagementTab {
 
-    public MavenReleaseManagementTab(final @NotNull WebControllerManager controllerManager,
-            final @NotNull PagePlaces pagePlaces, final @NotNull ProjectManager projectManager,
-            final @NotNull DeployableArtifactoryServers deployableServers, final @NotNull SBuildServer buildServer) {
-        super(controllerManager, pagePlaces, projectManager, "mavenReleaseManagementTab.jsp",
-                "/artifactory/mavenReleaseManagement.html", deployableServers,
-                new MavenReleaseManagementController(projectManager, buildServer));
+    public MavenReleaseManagementTab(@NotNull WebControllerManager manager, @NotNull ProjectManager projectManager,
+            @NotNull DeployableArtifactoryServers deployableServers, @NotNull SBuildServer buildServer) {
+        super(manager, projectManager, "mavenReleaseManagementTab.jsp", "/artifactory/mavenReleaseManagement.html",
+                new MavenReleaseManagementController(projectManager, buildServer), deployableServers);
     }
 
     @Override

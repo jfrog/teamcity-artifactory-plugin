@@ -5,12 +5,12 @@ import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildRunnerDescriptor;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SFinishedBuild;
+import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.vcs.VcsRootInstance;
-import jetbrains.buildServer.web.openapi.PagePlaces;
-import jetbrains.buildServer.web.openapi.PlaceId;
-import jetbrains.buildServer.web.openapi.SimpleCustomTab;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
+import jetbrains.buildServer.web.openapi.buildType.BuildTypeTab;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
 
@@ -23,23 +23,21 @@ import static org.jfrog.teamcity.common.ConstantValues.NAME;
 /**
  * @author Noam Y. Tenne
  */
-public abstract class BaseReleaseManagementTab extends SimpleCustomTab {
+public abstract class BaseReleaseManagementTab extends BuildTypeTab {
 
     private ProjectManager projectManager;
     private DeployableArtifactoryServers deployableServers;
 
-    public BaseReleaseManagementTab(final @NotNull WebControllerManager controllerManager,
-            final @NotNull PagePlaces pagePlaces, final @NotNull ProjectManager projectManager,
-            final @NotNull String includeUrl, final @NotNull String controllerUrl,
-            final @NotNull DeployableArtifactoryServers deployableServers,
-            final @NotNull BaseFormXmlController controller) {
-        super(pagePlaces, PlaceId.BUILD_CONF_TAB, NAME, includeUrl, "Artifactory Release Management");
+    public BaseReleaseManagementTab(@NotNull WebControllerManager manager, @NotNull ProjectManager projectManager,
+            @NotNull String includeUrl, @NotNull String controllerUrl, @NotNull BaseFormXmlController controller,
+            @NotNull DeployableArtifactoryServers deployableServers) {
+        super(NAME, "Artifactory Release Management", manager, projectManager, includeUrl);
 
         this.projectManager = projectManager;
         this.deployableServers = deployableServers;
         register();
 
-        controllerManager.registerController(controllerUrl, controller);
+        manager.registerController(controllerUrl, controller);
     }
 
     @Override
@@ -58,16 +56,9 @@ public abstract class BaseReleaseManagementTab extends SimpleCustomTab {
     }
 
     @Override
-    public void fillModel(@NotNull Map<String, Object> model, @NotNull HttpServletRequest request) {
-        super.fillModel(model, request);
+    public void fillModel(@NotNull Map<String, Object> model, @NotNull HttpServletRequest request,
+            @NotNull SBuildType buildType, @Nullable SUser user) {
         String buildTypeId = request.getParameter("buildTypeId");
-        SBuildType buildType = projectManager.findBuildTypeById(buildTypeId);
-        if (buildType == null) {
-            setIncludeUrl("releaseManagementErrorTab.jsp");
-            model.put("errorMessage", "Unable to find a build type with the ID '" + buildTypeId + "'.");
-            return;
-        }
-
         SBuildRunnerDescriptor buildRunner = getFirstReleaseManagementEnabledRunner(buildType);
         if (buildRunner == null) {
             setIncludeUrl("releaseManagementErrorTab.jsp");
