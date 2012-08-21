@@ -186,7 +186,7 @@
                     </label>
                 </td>
                 <td>
-                    <textarea name="comment" cols="30" rows="3"></textarea>
+                    <textarea name="comment" cols="20" rows="3" style="resize: vertical;"></textarea>
                 </td>
             </tr>
             <tr>
