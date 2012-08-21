@@ -17,12 +17,18 @@
 
 <jsp:useBean id="serverConfigPersistenceManager" type="org.jfrog.teamcity.server.global.ServerConfigPersistenceManager"
              scope="request"/>
+
+<style type="text/css">
+    .editObjectFormDialog label {
+        display: inline-block;
+        width: 14.5em;
+    }
+</style>
+
 <bs:linkCSS>
-    /css/forms.css
     /css/admin/vcsSettings.css
 </bs:linkCSS>
 <bs:linkScript>
-    /js/bs/encrypt.js
     /js/bs/testConnection.js
 </bs:linkScript>
 <c:url var="controllerUrl" value="/admin/artifactory/serverConfigTab.html"/>
@@ -247,18 +253,21 @@
                         <c:out value="${server.url}"/>
                     </td>
                     <td class="edit highlight">
-                        <a href="javascript://" onclick="${onclick}">edit</a>
+                        <a href="#" onclick="${onclick}; return false">edit</a>
                     </td>
                     <td class="edit">
-                        <a href="javascript://" onclick="ConfigTabDialog.deleteObject(${server.id})">delete</a>
+                        <a href="#" onclick="ConfigTabDialog.deleteObject(${server.id}); return false">delete</a>
                     </td>
                 </tr>
             </c:forEach>
         </l:tableWithHighlighting>
     </bs:refreshable>
 
-    <p class="addNew"><a href="javascript://" onclick="ConfigTabDialog.showAddDialog();">Create new Artifactory server
-        configuration</a></p>
+    <p>
+        <a class="btn" href="#" onclick="ConfigTabDialog.showAddDialog(); return false">
+            <span class="addNew">Create new Artifactory server configuration</span>
+        </a>
+    </p>
 
     <bs:modalDialog formId="editObjectForm" title="Edit Artifactory Server Configuration" action="${controllerUrl}"
                     saveCommand="ConfigTabDialog.save();" closeCommand="ConfigTabDialog.close();">
@@ -266,86 +275,100 @@
         <table border="0" style="width: 409px">
             <tr>
                 <td>
-                    <label style="width: 14.5em" for="url">Artifactory Server URL:
+                    <label for="url">Artifactory Server URL:
                         <span class="mandatoryAsterix" title="Mandatory field">*</span>
                         <bs:helpIcon
                                 iconTitle="Specify the root URL of your Artifactory installation, for example: http://repo.jfrog.org/artifactory"/>
                     </label>
+                </td>
+                <td>
                     <forms:textField name="url" value=""/>
                 </td>
             </tr>
             <tr>
-                <td>
+                <td colspan="2">
                     <span class="error" id="errorUrl" style="margin-left: 0;"></span>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <label style="width: 14.5em" for="defaultDeployerUsername">Default Deployer Username:
+                    <label for="defaultDeployerUsername">Default Deployer Username:
                         <bs:helpIcon
                                 iconTitle="User with permissions to deploy to the selected of Artifactory repository."/>
                     </label>
+                </td>
+                <td>
                     <forms:textField name="defaultDeployerUsername" value=""/>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <label style="width: 14.5em" for="defaultDeployerPassword">Default Deployer Password:
+                    <label for="defaultDeployerPassword">Default Deployer Password:
                         <bs:helpIcon
                                 iconTitle="Password of the user entered above."/>
                     </label>
+                </td>
+                <td>
                     <forms:passwordField name="defaultDeployerPassword"/>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <label style="width: 14.5em" for="useDifferentResolverCredentials">Use Different Resolver
+                    <label for="useDifferentResolverCredentials">Use Different Resolver
                         Credentials
                         <bs:helpIcon iconTitle="Check if you wish to use a different user name and password for
                         resolution. Otherwise, the deployer user name and password will be used."/>
                     </label>
+                </td>
+                <td>
                     <forms:checkbox name="useDifferentResolverCredentials" value=""
                                     onclick="ConfigTabDialog.toggleUseDefaultResolverCredentials()"/>
                 </td>
             </tr>
             <tr id="defaultResolverUsername.container">
                 <td>
-                    <label style="width: 14.5em" for="defaultResolverUsername">Default Resolver Username:
+                    <label for="defaultResolverUsername">Default Resolver Username:
                         <bs:helpIcon iconTitle="The default user name that will be used when sending download
                         requests to Artifactory by individual jobs. Leave empty if anonymous is enabled."/>
                     </label>
+                </td>
+                <td>
                     <forms:textField name="defaultResolverUsername" value=""/>
                 </td>
             </tr>
             <tr id="defaultResolverPassword.container">
                 <td>
-                    <label style="width: 14.5em" for="defaultResolverPassword">Default Resolver Password:
+                    <label for="defaultResolverPassword">Default Resolver Password:
                         <bs:helpIcon
                                 iconTitle="Password of the user entered above."/>
                     </label>
+                </td>
+                <td>
                     <forms:passwordField name="defaultResolverPassword"/>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <label style="width: 14.5em" for="timeout">Timeout:
+                    <label for="timeout">Timeout:
                         <span class="mandatoryAsterix" title="Mandatory field">*</span>
                         <bs:helpIcon
                                 iconTitle="Network timeout in seconds (for connection establishment and for unanswered requests)."/>
                     </label>
+                </td>
+                <td>
                     <forms:textField name="timeout" value=""/>
                 </td>
             </tr>
             <tr>
-                <td>
+                <td colspan="2">
                     <span class="error" id="errorTimeout" style="margin-left: 0;"></span>
                 </td>
             </tr>
         </table>
         <div class="saveButtonsBlock">
-            <a href="javascript://" onclick="ConfigTabDialog.close();" class="cancel">Cancel</a>
-            <input class="submitButton" type="submit" name="editObject" value="Save">
-            <input class="submitButton" id="testConnectionButton" type="button" value="Test connection"
+            <a href="#" onclick="ConfigTabDialog.close(); return false" class="btn cancel">Cancel</a>
+            <input class="btn btn_primary submitButton" type="submit" name="editObject" value="Save">
+            <input class="btn btn_primary submitButton" id="testConnectionButton" type="button" value="Test connection"
                    onclick="ConfigTabDialog.testConnection();">
             <input type="hidden" name="id" value="">
             <input type="hidden" name="editMode" value="">
@@ -353,7 +376,6 @@
                    value="<c:out value='${serverConfigPersistenceManager.hexEncodedPublicKey}'/>"/>
             <forms:saving id="saving_configTab"/>
         </div>
-        <br clear="all"/>
 
         <bs:dialog dialogId="testConnectionDialog" dialogClass="vcsRootTestConnectionDialog" title="Test Connection"
                    closeCommand="BS.TestConnectionDialog.close(); ConfigTabDialog.enable();"
