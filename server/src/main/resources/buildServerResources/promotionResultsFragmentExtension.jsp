@@ -22,6 +22,13 @@
   ~ limitations under the License.
   --%>
 
+<style type="text/css">
+    .editObjectFormDialog label {
+        display: inline-block;
+        width: 14.5em;
+    }
+</style>
+
 <bs:linkCSS>
     /css/forms.css
 </bs:linkCSS>
@@ -134,7 +141,7 @@
                 <img width="48px" height="48px" src="${logoUrl}"/>
             </td>
             <td>
-                <a href="javascript://" onclick="PromoteDialog.showDialog();">Artifactory Release Promotion</a>
+                <a href="#" onclick="PromoteDialog.showDialog(); return false">Artifactory Release Promotion</a>
             </td>
         </tr>
     </table>
@@ -146,10 +153,12 @@
         <table border="0" style="width: 401px">
             <tr>
                 <td>
-                    <label for="targetStatus" style="width: 14.5em;">Target status:
+                    <label for="targetStatus">Target status:
                         <span class="mandatoryAsterix" title="Mandatory field">*</span>
                         <bs:helpIcon iconTitle="The target status to mark the build in Artifactory."/>
                     </label>
+                </td>
+                <td>
                     <forms:select name="targetStatus">
                         <c:forEach var="status" items="<%=PromotionTargetStatusType.values()%>">
                             <props:option value="${status.statusId}">
@@ -161,44 +170,51 @@
             </tr>
             <tr>
                 <td>
-                    <label for="promotionRepository" style="width: 14.5em;">Target promotion repository:
+                    <label for="promotionRepository">Target promotion repository:
                         <bs:helpIcon
-                                iconTitle="Target repository to promote the release published artifacts to. If non selected, just change the build info status."/>
+                                iconTitle="Target repository to promote the release published artifacts to. If none selected, just change the build info status."/>
                     </label>
+                </td>
+                <td>
                     <forms:select id="promotionRepository" name="promotionRepository"/>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <label for="comment" style="width: 14.5em;">Comment:
+                    <label for="comment">Comment:
                         <bs:helpIcon iconTitle="Comment that will be added to the promotion action."/>
                     </label>
-                    <textarea name="comment" cols="30" rows="3"></textarea>
+                </td>
+                <td>
+                    <textarea name="comment" cols="20" rows="3" style="resize: vertical;"></textarea>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <label for="includeDependencies" style="width: 14.5em;">Include dependencies:
+                    <label for="includeDependencies">Include dependencies:
                         <bs:helpIcon iconTitle="Also copy/move dependencies when promoting."/>
                     </label>
+                </td>
+                <td>
                     <forms:checkbox name="includeDependencies"/>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <label for="useCopy" style="width: 14.5em;">Use Copy:
+                    <label for="useCopy">Use Copy:
                         <bs:helpIcon iconTitle="Use copy instead of move when promoting to the target repository."/>
                     </label>
+                </td>
+                <td>
                     <forms:checkbox name="useCopy"/>
                 </td>
             </tr>
         </table>
         <div class="saveButtonsBlock">
-            <a href="javascript://" onclick="PromoteDialog.close();" class="cancel">Close</a>
-            <input class="submitButton" type="submit" name="editObject" value="Promote">
+            <a href="#" onclick="PromoteDialog.close(); return false" class="btn cancel">Close</a>
+            <input class="btn btn_primary submitButton" type="submit" name="editObject" value="Promote">
             <forms:saving id="saving_promoteDialog"/>
         </div>
-        <br clear="all"/>
     </bs:modalDialog>
 
     <bs:dialog dialogId="promotionFeedbackDialog" dialogClass="vcsRootTestConnectionDialog" title="Please Note"

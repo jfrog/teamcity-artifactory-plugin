@@ -98,8 +98,8 @@
                         var redirectUrl = responseXML.firstChild.firstChild.textContent;
                         ReleaseFeedbackDialog.showFeedbackDialog(true,
                                 "Release build was successfully added to the queue.<br/>" +
-                                        "<a href='javascript://' onclick='ReleaseFeedbackDialog.close(); window.location.href = \"" +
-                                        redirectUrl + "\"'>Take me to the build Page!</a>");
+                                        "<a href='#' onclick='ReleaseFeedbackDialog.close(); window.location.href = \"" +
+                                        redirectUrl + "\"; return false'>Take me to the build Page!</a>");
                     }
                 }
             });
@@ -356,7 +356,7 @@
 </table>
 
 <div>
-    <input class="submitButton" type="submit" name="buildAndRelease" value="Build and Release to Artifactory"
+    <input class="btn submitButton" type="submit" name="buildAndRelease" value="Build and Release to Artifactory"
            style="float: left;">
     <forms:saving id="saving_releaseManagementForm"/>
 </div>

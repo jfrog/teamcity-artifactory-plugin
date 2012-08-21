@@ -22,7 +22,7 @@
 <table border="0">
     <tr>
         <td>
-            <img width="48px" hight="48px" src="${logoUrl}"/>
+            <img width="48px" height="48px" src="${logoUrl}"/>
         </td>
         <td>
             <a href="${artifactoryBuildUrl}" target="_blank">Artifactory Build Info</a>

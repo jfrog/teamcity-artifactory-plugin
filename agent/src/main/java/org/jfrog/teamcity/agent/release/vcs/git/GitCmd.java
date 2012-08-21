@@ -1,5 +1,6 @@
 package org.jfrog.teamcity.agent.release.vcs.git;
 
+import com.google.common.base.Charsets;
 import jetbrains.buildServer.CommandLineExecutor;
 import jetbrains.buildServer.StreamGobbler;
 import org.apache.commons.lang.SystemUtils;
@@ -37,8 +38,8 @@ public class GitCmd {
         cmd.add(gitExe);
         cmd.addAll(Arrays.asList(args));
         try {
-            ProcessBuilder pb = new ProcessBuilder().redirectErrorStream(true)
-                    .directory(workingDirectory).command(cmd);
+            ProcessBuilder pb = new ProcessBuilder(cmd.toArray(new String[cmd.size()])).redirectErrorStream(true)
+                    .directory(workingDirectory);
             Process process = pb.start();
             StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream());
             StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream());
@@ -52,8 +53,8 @@ public class GitCmd {
                 exitCode = CommandLineExecutor.waitForProcess(process, errorGobbler, outputGobbler, timeout);
             }
 
-            String out = outputGobbler.getReadString();
-            out += errorGobbler.getReadString();
+            String out = outputGobbler.getReadString(Charsets.UTF_8);
+            out += errorGobbler.getReadString(Charsets.UTF_8);
 
             if (exitCode != 0) {
                 throw new GitException(String.format(

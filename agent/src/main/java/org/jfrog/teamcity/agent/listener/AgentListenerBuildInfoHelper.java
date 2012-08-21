@@ -42,11 +42,10 @@ import org.jfrog.build.client.IncludeExcludePatterns;
 import org.jfrog.build.client.PatternMatcher;
 import org.jfrog.build.extractor.BuildInfoExtractor;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
-import org.jfrog.teamcity.agent.BuildDependenciesRetriever;
+import org.jfrog.teamcity.agent.DependenciesResolver;
 import org.jfrog.teamcity.agent.GenericBuildInfoExtractor;
 import org.jfrog.teamcity.agent.LoggingArtifactsBuilderAdapter;
 import org.jfrog.teamcity.agent.MavenBuildInfoExtractor;
-import org.jfrog.teamcity.agent.PublishedDependenciesRetriever;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
 import org.jfrog.teamcity.common.RunTypeUtils;
@@ -88,18 +87,15 @@ public class AgentListenerBuildInfoHelper {
 
         runner.addRunnerParameter(BUILD_STARTED, String.valueOf(new Date().getTime()));
 
-        //        retrievePublishedDependencies(runner, publishedDependencies);
-        //        retrieveBuildDependencies(runner, buildDependencies);
         retrievePublishedAndBuildDependencies(runner, publishedDependencies, userBuildDependencies);
     }
 
     private void retrievePublishedAndBuildDependencies(BuildRunnerContext runner,
             List<Dependency> publishedDependencies, List<UserBuildDependency> userBuildDependencies) {
-        PublishedDependenciesRetriever publishedDependenciesRetriever = new PublishedDependenciesRetriever(runner);
-        BuildDependenciesRetriever buildDependenciesRetriever = new BuildDependenciesRetriever(runner);
+        DependenciesResolver dependenciesResolver = new DependenciesResolver(runner);
         try {
-            publishedDependenciesRetriever.appendDependencies(publishedDependencies);
-            buildDependenciesRetriever.appendDependencies(userBuildDependencies);
+            publishedDependencies.addAll(dependenciesResolver.retrievePublishedDependencies());
+            userBuildDependencies.addAll(dependenciesResolver.retrieveBuildDependencies());
         } catch (Exception e) {
             String errorMessage = "Error occurred while resolving published or build dependencies: " + e.getMessage();
             BuildProgressLogger logger = runner.getBuild().getBuildLogger();

@@ -7,7 +7,6 @@ import jetbrains.buildServer.serverSide.SBuildRunnerDescriptor;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SFinishedBuild;
-import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -35,13 +34,10 @@ import java.util.zip.GZIPInputStream;
  */
 public class GradleReleaseManagementTab extends BaseReleaseManagementTab {
 
-    public GradleReleaseManagementTab(final @NotNull WebControllerManager controllerManager,
-            final @NotNull PagePlaces pagePlaces, final @NotNull ProjectManager projectManager,
-            final @NotNull DeployableArtifactoryServers deployableServers,
-            final @NotNull SBuildServer buildServer) {
-        super(controllerManager, pagePlaces, projectManager, "gradleReleaseManagementTab.jsp",
-                "/artifactory/gradleReleaseManagement.html", deployableServers,
-                new GradleReleaseManagementController(projectManager, buildServer));
+    public GradleReleaseManagementTab(@NotNull WebControllerManager manager, @NotNull ProjectManager projectManager,
+            @NotNull DeployableArtifactoryServers deployableServers, @NotNull SBuildServer buildServer) {
+        super(manager, projectManager, "gradleReleaseManagementTab.jsp", "/artifactory/gradleReleaseManagement.html",
+                new GradleReleaseManagementController(projectManager, buildServer), deployableServers);
     }
 
     @Override
