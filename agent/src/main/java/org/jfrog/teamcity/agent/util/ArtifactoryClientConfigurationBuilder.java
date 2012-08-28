@@ -159,8 +159,12 @@ public abstract class ArtifactoryClientConfigurationBuilder {
                 clientConf.publisher.setIvyArtifactPattern(artifactPattern);
             }
         }
-        clientConf.publisher.setPublishBuildInfo(
-                Boolean.valueOf(runParameters.get(RunnerParameterKeys.PUBLISH_BUILD_INFO)));
+
+
+        String publishBuildInfoValue = runParameters.get(RunnerParameterKeys.PUBLISH_BUILD_INFO);
+        boolean isPublishBuildInfo = StringUtils.isEmpty(publishBuildInfoValue) || Boolean.valueOf(
+                publishBuildInfoValue);
+        clientConf.publisher.setPublishBuildInfo(isPublishBuildInfo);
         clientConf.setIncludeEnvVars(Boolean.valueOf(runParameters.get(RunnerParameterKeys.INCLUDE_ENV_VARS)));
         clientConf.setEnvVarsIncludePatterns(runParameters.get(RunnerParameterKeys.ENV_VARS_INCLUDE_PATTERNS));
         clientConf.setEnvVarsExcludePatterns(runParameters.get(RunnerParameterKeys.ENV_VARS_EXCLUDE_PATTERNS));

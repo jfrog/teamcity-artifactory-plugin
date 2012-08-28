@@ -31,6 +31,7 @@ import jetbrains.buildServer.agent.impl.artifacts.ArtifactsBuilder;
 import jetbrains.buildServer.agent.impl.artifacts.ArtifactsCollection;
 import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.util.ArchiveUtil;
+import jetbrains.buildServer.util.StringUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Dependency;
@@ -161,7 +162,7 @@ public class AgentListenerBuildInfoHelper {
             }
 
             String publishBuildInfoValue = runnerParams.get(RunnerParameterKeys.PUBLISH_BUILD_INFO);
-            if (Boolean.parseBoolean(publishBuildInfoValue)) {
+            if (StringUtil.isEmpty(publishBuildInfoValue) || Boolean.parseBoolean(publishBuildInfoValue)) {
                 publishBuildInfoToTeamCityServer(build, extractedBuildInfo.getBuildInfo());
                 sendBuildInfo(build, extractedBuildInfo.getBuildInfo(), infoClient);
             }

@@ -128,7 +128,7 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
              */
             SBuildType buildType = build.getBuildType();
             if (buildType != null) {
-                if (shouldStoreBuildInRunHistory(runParameters, runType)) {
+                if (shouldStoreBuildInRunHistory(runParameters)) {
                     String runnerCustomStorageId = Long.toString(build.getBuildId()) + "#" + runnerContext.getId();
 
                     CustomDataStorage runHistory = buildType.getCustomDataStorage(CustomDataStorageKeys.RUN_HISTORY);
@@ -194,8 +194,9 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
         }
     }
 
-    private boolean shouldStoreBuildInRunHistory(Map<String, String> runParameters, String runType) {
-        return Boolean.valueOf(runParameters.get(RunnerParameterKeys.PUBLISH_BUILD_INFO));
+    private boolean shouldStoreBuildInRunHistory(Map<String, String> runParameters) {
+        String publishBuildInfoValue = runParameters.get(RunnerParameterKeys.PUBLISH_BUILD_INFO);
+        return StringUtils.isEmpty(publishBuildInfoValue) || Boolean.valueOf(publishBuildInfoValue);
     }
 
     private void modifyReleaseManagementParamsIfNeeded(SRunnerContext runnerContext) {
