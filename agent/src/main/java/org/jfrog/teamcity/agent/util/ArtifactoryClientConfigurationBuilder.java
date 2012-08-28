@@ -11,6 +11,7 @@ import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryClientConfiguration;
 import org.jfrog.build.client.ClientProperties;
+import org.jfrog.build.client.IncludeExcludePatterns;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
@@ -85,9 +86,6 @@ public abstract class ArtifactoryClientConfigurationBuilder {
         }
 
         addClientProperties(runnerParameters, clientConf);
-        clientConf.setIncludeEnvVars(true);
-        clientConf.info.fillCommonSysProps();
-
         addMatrixParamProperties(runnerContext, clientConf);
         addEnvVars(runnerContext, clientConf);
         return clientConf;
@@ -161,9 +159,11 @@ public abstract class ArtifactoryClientConfigurationBuilder {
                 clientConf.publisher.setIvyArtifactPattern(artifactPattern);
             }
         }
-        clientConf.publisher.setPublishBuildInfo(true);
-        clientConf.publisher.setPublishBuildInfo(Boolean.valueOf(
-                runParameters.get(RunnerParameterKeys.PUBLISH_BUILD_INFO)));
+        clientConf.publisher.setPublishBuildInfo(
+                Boolean.valueOf(runParameters.get(RunnerParameterKeys.PUBLISH_BUILD_INFO)));
+        clientConf.setIncludeEnvVars(Boolean.valueOf(runParameters.get(RunnerParameterKeys.INCLUDE_ENV_VARS)));
+        clientConf.setEnvVarsIncludePatterns(runParameters.get(RunnerParameterKeys.ENV_VARS_INCLUDE_PATTERNS));
+        clientConf.setEnvVarsExcludePatterns(runParameters.get(RunnerParameterKeys.ENV_VARS_EXCLUDE_PATTERNS));
         String proxyHost = runParameters.get(ConstantValues.PROXY_HOST);
         if (StringUtils.isNotBlank(proxyHost)) {
             clientConf.proxy.setHost(proxyHost);
@@ -233,6 +233,7 @@ public abstract class ArtifactoryClientConfigurationBuilder {
         allParamMap.putAll(runnerContext.getBuildParameters().getAllParameters());
         allParamMap.putAll(((BuildRunnerContextEx) runnerContext).getConfigParameters());
 
+        HashMap<String, String> allVars = Maps.newHashMapWithExpectedSize(allParamMap.size());
         for (Map.Entry<String, String> entryToAdd : allParamMap.entrySet()) {
             String key = entryToAdd.getKey();
             if (key.startsWith(Constants.ENV_PREFIX)) {
@@ -240,7 +241,12 @@ public abstract class ArtifactoryClientConfigurationBuilder {
             } else if (key.startsWith(Constants.SYSTEM_PREFIX)) {
                 key = StringUtils.removeStartIgnoreCase(key, Constants.SYSTEM_PREFIX);
             }
-            clientConf.info.addBuildVariable(key, entryToAdd.getValue());
+            allVars.put(key, entryToAdd.getValue());
         }
+
+        IncludeExcludePatterns patterns = new IncludeExcludePatterns(clientConf.getEnvVarsIncludePatterns(),
+                clientConf.getEnvVarsExcludePatterns());
+        clientConf.info.addBuildVariables(allVars, patterns);
+        clientConf.fillFromProperties(allVars, patterns);
     }
 }
