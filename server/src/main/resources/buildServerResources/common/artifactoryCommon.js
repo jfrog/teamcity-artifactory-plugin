@@ -141,8 +141,25 @@ BS.artifactory = {
         BS.MultilineProperties.updateVisible();
     },
 
+    toggleIncludeEnvVarsVisibility:function () {
+        var shouldIncludeEnvVars = $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked;
+        if (shouldIncludeEnvVars) {
+            BS.Util.show($('envVarsIncludePatterns.container'));
+            BS.Util.show($('envVarsExcludePatterns.container'));
+        }
+        else {
+            BS.Util.hide($('envVarsIncludePatterns.container'));
+            BS.Util.hide($('envVarsExcludePatterns.container'));
+        }
+        BS.MultilineProperties.updateVisible();
+    },
+
     isDeployArtifactsSelected:function () {
         return $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked;
+    },
+
+    isPublishBuildInfoSelected:function () {
+        return $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked;
     },
 
     toggleDeployArtifactsSelection:function () {

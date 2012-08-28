@@ -43,7 +43,7 @@
 <script type="text/javascript">
 <%@ include file="../common/artifactoryCommon.js" %>
 BS.local = {
-    onServerChange : function(foundExistingConfig) {
+    onServerChange:function (foundExistingConfig) {
         var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId');
         var publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo');
         var resolvingRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.resolvingRepo');
@@ -63,6 +63,9 @@ BS.local = {
             $('org.jfrog.artifactory.selectedDeployableServer.ivyPattern').value = '';
             $('org.jfrog.artifactory.selectedDeployableServer.artifactPattern').value = '';
             $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
+            $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked = false;
+            $('org.jfrog.artifactory.selectedDeployableServer.envVarsIncludePatterns').value = '';
+            $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
             $('org.jfrog.artifactory.selectedDeployableServer.publishMavenDescriptors').checked = true;
             $('org.jfrog.artifactory.selectedDeployableServer.publishIvyDescriptors').checked = true;
             $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks').checked = false;
@@ -71,8 +74,6 @@ BS.local = {
             $('org.jfrog.artifactory.selectedDeployableServer.includePublishedArtifacts').checked = false;
             $('org.jfrog.artifactory.selectedDeployableServer.disableAutoLicenseDiscovery').checked = false;
             $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
-//            $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').disabled = true;
-            //$('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').value = '${disabledMessage}';
             $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').disabled = true;
             $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '${disabledMessage}';
             $('org.jfrog.artifactory.selectedDeployableServer.enableReleaseManagement').checked = false;
@@ -100,12 +101,14 @@ BS.local = {
             BS.Util.hide($('ivyPattern.container'));
             BS.Util.hide($('artifactPattern.container'));
             BS.Util.hide($('publishBuildInfo.container'));
+            BS.Util.hide($('includeEnvVars.container'));
+            BS.Util.hide($('envVarsIncludePatterns.container'));
+            BS.Util.hide($('envVarsExcludePatterns.container'));
             BS.Util.hide($('publishMavenDescriptors.container'));
             BS.Util.hide($('publishIvyDescriptors.container'));
             BS.Util.hide($('runLicenseChecks.container'));
             BS.Util.hide($('licenseViolationRecipients.container'));
             BS.Util.hide($('publishedArtifacts.container'));
-//            BS.Util.hide($('publishedDependencies.container'));
             BS.Util.hide($('buildDependencies.container'));
             BS.Util.hide($('enableReleaseManagement.container'));
             BS.Util.hide($('vcsTagsBaseUrlOrName.container'));
@@ -122,6 +125,7 @@ BS.local = {
             if (!foundExistingConfig) {
                 $('org.jfrog.artifactory.selectedDeployableServer.activateGradleIntegration').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = true;
+                $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
                 $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.publishMavenDescriptors').checked = true;
                 $('org.jfrog.artifactory.selectedDeployableServer.publishIvyDescriptors').checked = true;
@@ -131,7 +135,6 @@ BS.local = {
             BS.Util.show($('targetRepo.container'));
             if (BS.local.isActivateGradleIntegrationSelected()) {
                 BS.Util.show($('resolvingRepo.container'));
-                BS.Util.show($('publishBuildInfo.container'));
                 if (BS.artifactory.isDeployArtifactsSelected()) {
                     BS.Util.show($('publishMavenDescriptors.container'));
                     BS.Util.show($('publishIvyDescriptors.container'));
@@ -152,15 +155,29 @@ BS.local = {
             }
 
             BS.Util.show($('activateGradleIntegration.container'));
-
             if (BS.local.isActivateGradleIntegrationSelected() && BS.artifactory.isDeployArtifactsSelected()) {
                 BS.Util.show($('useM2CompatiblePatterns.container'));
                 BS.Util.show($('ivyPattern.container'));
                 BS.Util.show($('artifactPattern.container'));
             }
 
-            var publishBuildInfo = $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked;
-            if (!BS.local.isActivateGradleIntegrationSelected() || publishBuildInfo) {
+            if (!BS.local.isActivateGradleIntegrationSelected()) {
+                BS.Util.show($('publishedArtifacts.container'));
+                BS.Util.show($('buildDependencies.container'));
+                BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
+            }
+
+            BS.Util.show($('publishBuildInfo.container'));
+            var publishBuildInfo = BS.artifactory.isPublishBuildInfoSelected();
+            if (publishBuildInfo) {
+                BS.Util.show($('includeEnvVars.container'));
+                var includeEnvVarsEnabled =
+                        $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked;
+                if (includeEnvVarsEnabled) {
+                    BS.Util.show($('envVarsIncludePatterns.container'));
+                    BS.Util.show($('envVarsExcludePatterns.container'));
+                }
+
                 BS.Util.show($('runLicenseChecks.container'));
                 var shouldRunLicenseChecks = $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks')
                         .checked;
@@ -172,35 +189,25 @@ BS.local = {
                 }
             }
 
-            if (!BS.local.isActivateGradleIntegrationSelected()) {
-                BS.Util.show($('publishedArtifacts.container'));
-//                BS.Util.show($('publishedDependencies.container'));
-                BS.Util.show($('buildDependencies.container'));
-                BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
-            }
-
-            if (publishBuildInfo) {
-                BS.Util.show($('enableReleaseManagement.container'));
-                var releaseManagementEnabled =
-                        $('org.jfrog.artifactory.selectedDeployableServer.enableReleaseManagement').checked;
-                if (releaseManagementEnabled) {
-                    BS.Util.show($('vcsTagsBaseUrlOrName.container'));
-                    BS.Util.show($('gitReleaseBranchNamePrefix.container'));
-                    BS.Util.show($('releaseProperties.container'));
-                    BS.Util.show($('nextIntegrationProperties.container'));
-                    BS.Util.show($('alternativeGradleTasks.container'));
-                    BS.Util.show($('alternativeGradleOptions.container'));
-                }
+            BS.Util.show($('enableReleaseManagement.container'));
+            var releaseManagementEnabled =
+                    $('org.jfrog.artifactory.selectedDeployableServer.enableReleaseManagement').checked;
+            if (releaseManagementEnabled) {
+                BS.Util.show($('vcsTagsBaseUrlOrName.container'));
+                BS.Util.show($('gitReleaseBranchNamePrefix.container'));
+                BS.Util.show($('releaseProperties.container'));
+                BS.Util.show($('nextIntegrationProperties.container'));
+                BS.Util.show($('alternativeGradleTasks.container'));
+                BS.Util.show($('alternativeGradleOptions.container'));
             }
         }
         BS.MultilineProperties.updateVisible();
-    }
-    ,
+    },
 
-    loadTargetRepos : function(selectedUrlId) {
+    loadTargetRepos:function (selectedUrlId) {
         BS.ajaxRequest(base_uri + '${controllerUrl}', {
-            parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadTargetRepos=true',
-            onComplete: function(response, options) {
+            parameters:'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadTargetRepos=true',
+            onComplete:function (response, options) {
 
                 var publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo');
                 BS.artifactory.populateRepoSelect(response, options, publishRepoSelect,
@@ -209,8 +216,8 @@ BS.local = {
             }
         });
         BS.ajaxRequest(base_uri + '${controllerUrl}', {
-            parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadResolvingRepos=true',
-            onComplete: function(response, options) {
+            parameters:'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadResolvingRepos=true',
+            onComplete:function (response, options) {
 
                 var resolvingRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.resolvingRepo');
                 BS.artifactory.populateRepoSelect(response, options, resolvingRepoSelect,
@@ -218,21 +225,16 @@ BS.local = {
                         true);
             }
         });
-    }
-    ,
+    },
 
-    isActivateGradleIntegrationSelected: function() {
+    isActivateGradleIntegrationSelected:function () {
         return $('org.jfrog.artifactory.selectedDeployableServer.activateGradleIntegration').checked;
-    }
-    ,
+    },
 
-    isPublishBuildInfoSelected: function() {
-        return $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked;
-    }
-    ,
-
-    toggleOnGradleSelection: function() {
+    toggleOnGradleSelection:function () {
         if (BS.local.isActivateGradleIntegrationSelected()) {
+            BS.Util.show('projectUsesArtifactoryGradlePlugin.container');
+            $('org.jfrog.artifactory.selectedDeployableServer.projectUsesArtifactoryGradlePlugin').checked = false;
             BS.Util.show('deployArtifacts.container');
             $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = true;
             BS.Util.show('useM2CompatiblePatterns.container');
@@ -241,18 +243,16 @@ BS.local = {
             BS.Util.show($('artifactPattern.container'));
             BS.Util.hide($('publishedArtifacts.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
-//            BS.Util.hide($('publishedDependencies.container'));
             BS.Util.hide($('buildDependencies.container'));
-//            $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').value = '';
             $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '';
             BS.Util.show($('resolvingRepo.container'));
-            BS.Util.show($('publishBuildInfo.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
             BS.Util.show($('publishMavenDescriptors.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.publishMavenDescriptors').checked = true;
             BS.Util.show($('publishIvyDescriptors.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.publishIvyDescriptors').checked = true;
         } else {
+            BS.Util.hide('projectUsesArtifactoryGradlePlugin.container');
+            $('org.jfrog.artifactory.selectedDeployableServer.projectUsesArtifactoryGradlePlugin').checked = false;
             BS.Util.hide('deployArtifacts.container');
             $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = false;
             BS.Util.hide('useM2CompatiblePatterns.container');
@@ -263,27 +263,29 @@ BS.local = {
             $('org.jfrog.artifactory.selectedDeployableServer.artifactPattern').value = '';
             BS.Util.show($('publishedArtifacts.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
-//            BS.Util.show($('publishedDependencies.container'));
             BS.Util.show($('buildDependencies.container'));
-//            $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').value = '';
             $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '';
             BS.Util.hide($('resolvingRepo.container'));
-            BS.Util.hide($('publishBuildInfo.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = false;
             BS.Util.hide($('publishMavenDescriptors.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.publishMavenDescriptors').checked = false;
             BS.Util.hide($('publishIvyDescriptors.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.publishIvyDescriptors').checked = false;
         }
         BS.local.toggleDeployArtifactsSelection();
-        BS.local.togglePublishBuildInfoSelection();
         BS.MultilineProperties.updateVisible();
     },
-    togglePublishBuildInfoSelection: function() {
-        if (BS.local.isPublishBuildInfoSelected()) {
+    togglePublishBuildInfoSelection:function () {
+        if (BS.artifactory.isPublishBuildInfoSelected()) {
+            BS.Util.show($('includeEnvVars.container'));
             BS.Util.show($('runLicenseChecks.container'));
             BS.Util.show($('enableReleaseManagement.container'));
         } else {
+            BS.Util.hide($('includeEnvVars.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked = false;
+            BS.Util.hide($('envVarsIncludePatterns.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.envVarsIncludePatterns').value = '';
+            BS.Util.hide($('envVarsExcludePatterns.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
             BS.Util.hide($('runLicenseChecks.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks').checked = false;
             BS.Util.hide($('licenseViolationRecipients.container'));
@@ -312,7 +314,7 @@ BS.local = {
         BS.MultilineProperties.updateVisible();
     },
 
-    toggleDeployArtifactsSelection: function() {
+    toggleDeployArtifactsSelection:function () {
         if (BS.artifactory.isDeployArtifactsSelected()) {
             BS.Util.show('useM2CompatiblePatterns.container');
             $('org.jfrog.artifactory.selectedDeployableServer.useM2CompatiblePatterns').checked = true;
@@ -452,22 +454,6 @@ The TeamCity plugin automatically applies the Artifactory plugin (and, consequen
         <jsp:param name="shouldDisplay" value="${foundActivateGradleIntegrationSelected && foundExistingConfig}"/>
     </jsp:include>
 
-    <tr class="noBorder" id="publishBuildInfo.container"
-        style="${foundActivateGradleIntegrationSelected && foundExistingConfig ? '' : 'display: none;'}">
-        <th>
-            <label for="org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo">
-                Publish build info:
-            </label>
-        </th>
-        <td>
-            <props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo"
-                                    onclick="BS.local.togglePublishBuildInfoSelection()"/>
-            <span class="smallNote">
-                Uncheck if you do not wish to deploy build information from the plugin.
-            </span>
-        </td>
-    </tr>
-
     <tr class="noBorder" id="publishMavenDescriptors.container"
         style="${foundActivateGradleIntegrationSelected && foundExistingConfig && foundDeployArtifactsSelected ? '' : 'display: none;'}">
         <th>
@@ -499,14 +485,35 @@ The TeamCity plugin automatically applies the Artifactory plugin (and, consequen
         </td>
     </tr>
 
+    <tr class="noBorder" id="publishBuildInfo.container"
+        style="${foundExistingConfig ? '' : 'display: none;'}">
+        <th>
+            <label for="org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo">
+                Publish build info:
+            </label>
+        </th>
+        <td>
+            <props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo"
+                                    onclick="BS.local.togglePublishBuildInfoSelection()"/>
+            <span class="smallNote">
+                Uncheck if you do not wish to deploy build information from the plugin.
+            </span>
+        </td>
+    </tr>
+
+    <jsp:include page="../common/envVarsEdit.jsp">
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
+    </jsp:include>
+
     <jsp:include page="../common/licensesEdit.jsp">
         <jsp:param name="shouldDisplay"
-                   value="${foundExistingConfig && (!foundActivateGradleIntegrationSelected || foundPublishBuildInfoSelected)}"/>
+                   value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
     </jsp:include>
 
     <jsp:include page="../common/genericItemsEdit.jsp">
         <jsp:param name="shouldDisplay" value="${!foundActivateGradleIntegrationSelected && foundExistingConfig}"/>
-        <jsp:param name="existingUrlId" value="${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}"/>
+        <jsp:param name="existingUrlId"
+                   value="${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}"/>
     </jsp:include>
 
     <jsp:include page="../common/releaseManagementEdit.jsp">

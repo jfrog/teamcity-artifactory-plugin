@@ -32,6 +32,7 @@ import org.jfrog.build.api.Agent;
 import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.BuildInfoFields;
+import org.jfrog.build.api.BuildInfoProperties;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.LicenseControl;
 import org.jfrog.build.api.Module;
@@ -42,8 +43,9 @@ import org.jfrog.build.api.util.FileChecksumCalculator;
 import org.jfrog.build.client.ClientProperties;
 import org.jfrog.build.client.DeployDetails;
 import org.jfrog.build.client.DeployDetailsArtifact;
+import org.jfrog.build.client.IncludeExcludePatterns;
+import org.jfrog.build.client.PatternMatcher;
 import org.jfrog.build.extractor.BuildInfoExtractor;
-import org.jfrog.build.extractor.BuildInfoExtractorSpec;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
 import org.jfrog.teamcity.agent.api.Gavc;
@@ -87,7 +89,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
         calculatedChecksumCache = Maps.newHashMap();
     }
 
-    public ExtractedBuildInfo extract(P context, BuildInfoExtractorSpec spec) {
+    public ExtractedBuildInfo extract(P context) {
         BuildInfoBuilder builder = getBuildInfoBuilder();
         if (builder == null) {
             return null;
@@ -159,7 +161,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
         licenseControl.setAutoDiscover(!Boolean.valueOf(runnerParams.get(
                 RunnerParameterKeys.DISABLE_AUTO_LICENSE_DISCOVERY)));
 
-        return new BuildInfoBuilder(runnerParams.get(BUILD_NAME)).
+        BuildInfoBuilder builder = new BuildInfoBuilder(runnerParams.get(BUILD_NAME)).
                 number(runnerContext.getBuild().getBuildNumber()).
                 startedDate(buildStarted).
                 durationMillis(buildDuration).
@@ -170,25 +172,27 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
                 vcsRevision(runnerParams.get(PROP_VCS_REVISION)).
                 parentName(runnerParams.get(PROP_PARENT_NAME)).
                 parentNumber(runnerParams.get(PROP_PARENT_NUMBER)).
-                licenseControl(licenseControl).
-                properties(gatherBuildInfoProperties());
+                licenseControl(licenseControl);
+
+        if (Boolean.valueOf(runnerParams.get(RunnerParameterKeys.INCLUDE_ENV_VARS))) {
+            addBuildInfoProperties(builder);
+        }
+        return builder;
     }
 
-    protected Properties gatherBuildInfoProperties() {
-        Properties props = new Properties();
-        props.setProperty("os.arch", System.getProperty("os.arch"));
-        props.setProperty("os.name", System.getProperty("os.name"));
-        props.setProperty("os.version", System.getProperty("os.version"));
-        props.setProperty("java.version", System.getProperty("java.version"));
-        props.setProperty("java.vm.info", System.getProperty("java.vm.info"));
-        props.setProperty("java.vm.name", System.getProperty("java.vm.name"));
-        props.setProperty("java.vm.specification.name", System.getProperty("java.vm.specification.name"));
-        props.setProperty("java.vm.vendor", System.getProperty("java.vm.vendor"));
+    private void addBuildInfoProperties(BuildInfoBuilder builder) {
+        IncludeExcludePatterns patterns = new IncludeExcludePatterns(
+                runnerParams.get(RunnerParameterKeys.ENV_VARS_INCLUDE_PATTERNS),
+                runnerParams.get(RunnerParameterKeys.ENV_VARS_EXCLUDE_PATTERNS));
 
+        addBuildVariables(builder, patterns);
+        addSystemProperties(builder, patterns);
+    }
+
+    private void addBuildVariables(BuildInfoBuilder builder, IncludeExcludePatterns patterns) {
         Map<String, String> allParamMap = Maps.newHashMap();
         allParamMap.putAll(runnerContext.getBuildParameters().getAllParameters());
         allParamMap.putAll(((BuildRunnerContextEx) runnerContext).getConfigParameters());
-
         for (Map.Entry<String, String> entryToAdd : allParamMap.entrySet()) {
             String key = entryToAdd.getKey();
             if (key.startsWith(Constants.ENV_PREFIX)) {
@@ -196,10 +200,23 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
             } else if (key.startsWith(Constants.SYSTEM_PREFIX)) {
                 key = StringUtils.removeStartIgnoreCase(key, Constants.SYSTEM_PREFIX);
             }
-            props.put(key, entryToAdd.getValue());
+            if (PatternMatcher.pathConflicts(key, patterns)) {
+                continue;
+            }
+            builder.addProperty(BuildInfoProperties.BUILD_INFO_ENVIRONMENT_PREFIX + key, entryToAdd.getValue());
         }
+    }
 
-        return props;
+    private void addSystemProperties(BuildInfoBuilder builder, IncludeExcludePatterns patterns) {
+        Properties systemProperties = System.getProperties();
+        Enumeration<?> enumeration = systemProperties.propertyNames();
+        while (enumeration.hasMoreElements()) {
+            String propertyKey = (String) enumeration.nextElement();
+            if (PatternMatcher.pathConflicts(propertyKey, patterns)) {
+                continue;
+            }
+            builder.addProperty(propertyKey, systemProperties.getProperty(propertyKey));
+        }
     }
 
     protected String getDeploymentPath(Gavc gavc, File file) {

@@ -160,8 +160,11 @@ public class AgentListenerBuildInfoHelper {
                 }
             }
 
-            publishBuildInfoToTeamCityServer(build, extractedBuildInfo.getBuildInfo());
-            sendBuildInfo(build, extractedBuildInfo.getBuildInfo(), infoClient);
+            String publishBuildInfoValue = runnerParams.get(RunnerParameterKeys.PUBLISH_BUILD_INFO);
+            if (Boolean.parseBoolean(publishBuildInfoValue)) {
+                publishBuildInfoToTeamCityServer(build, extractedBuildInfo.getBuildInfo());
+                sendBuildInfo(build, extractedBuildInfo.getBuildInfo(), infoClient);
+            }
         } finally {
             infoClient.shutdown();
         }
@@ -204,11 +207,11 @@ public class AgentListenerBuildInfoHelper {
 
             BuildInfoExtractor<File, ExtractedBuildInfo> buildInfoExtractor = new MavenBuildInfoExtractor(
                     runnerContext, publishableArtifacts, dependencies);
-            return buildInfoExtractor.extract(mavenBuildInfoFile, null);
+            return buildInfoExtractor.extract(mavenBuildInfoFile);
         } else {
             BuildInfoExtractor<Object, ExtractedBuildInfo> buildInfoExtractor = new GenericBuildInfoExtractor(
                     runnerContext, publishableArtifacts, dependencies);
-            return buildInfoExtractor.extract(null, null);
+            return buildInfoExtractor.extract(null);
         }
     }
 

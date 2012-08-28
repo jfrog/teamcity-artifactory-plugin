@@ -33,10 +33,12 @@ public class RunnerParameterKeys {
     public final static String DISABLE_AUTO_LICENSE_DISCOVERY = PREFIX + "disableAutoLicenseDiscovery";
     public final static String PROJECT_USES_ARTIFACTORY_GRADLE_PLUGIN = PREFIX + "projectUsesArtifactoryGradlePlugin";
     public final static String PUBLISH_BUILD_INFO = PREFIX + "publishBuildInfo";
+    public static final String INCLUDE_ENV_VARS = PREFIX + "includeEnvVars";
+    public static final String ENV_VARS_INCLUDE_PATTERNS = PREFIX + "envVarsIncludePatterns";
+    public static final String ENV_VARS_EXCLUDE_PATTERNS = PREFIX + "envVarsExcludePatterns";
     public final static String PUBLISH_MAVEN_DESCRIPTORS = PREFIX + "publishMavenDescriptors";
     public final static String PUBLISH_IVY_DESCRIPTORS = PREFIX + "publishIvyDescriptors";
     public final static String PUBLISHED_ARTIFACTS = PREFIX + "publishedArtifacts";
-//    public final static String PUBLISHED_DEPENDENCIES = PREFIX + "publishedDependencies";
     public final static String BUILD_DEPENDENCIES = PREFIX + "buildDependencies";
     public final static String ENABLE_RELEASE_MANAGEMENT = PREFIX + "enableReleaseManagement";
     public final static String VCS_TAG_BASE_URL_OR_NAME = PREFIX + "vcsTagsBaseUrlOrName";
