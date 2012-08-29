@@ -55,10 +55,6 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.includePublishedArtifacts').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.disableAutoLicenseDiscovery').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
-                //                $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').disabled = true;
-                <!--$('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').value = '
-
-            ${disabledMessage}';-->
                 $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').disabled = true;
                 $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '${disabledMessage}';
 
@@ -85,6 +81,7 @@
                     $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked =
                             false;
                     $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
+                    $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
                 }
                 BS.local.loadTargetRepos(selectedUrlId);
                 BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
@@ -108,10 +105,17 @@
                         BS.Util.show($('includePublishedArtifacts.container'));
                         BS.Util.show($('disableAutoLicenseDiscovery.container'));
                     }
+
+                    BS.Util.show($('includeEnvVars.container'));
+                    var includeEnvVarsEnabled =
+                            $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked;
+                    if (includeEnvVarsEnabled) {
+                        BS.Util.show($('envVarsIncludePatterns.container'));
+                        BS.Util.show($('envVarsExcludePatterns.container'));
+                    }
                 }
 
                 BS.Util.show($('publishedArtifacts.container'));
-                //                BS.Util.show($('publishedDependencies.container'));
                 BS.Util.show($('buildDependencies.container'));
                 BS.artifactory.checkCompatibleVersion(selectedUrlId);
 

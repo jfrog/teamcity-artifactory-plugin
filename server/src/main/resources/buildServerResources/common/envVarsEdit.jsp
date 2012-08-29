@@ -55,10 +55,8 @@
         <props:textProperty name="org.jfrog.artifactory.selectedDeployableServer.envVarsIncludePatterns"
                             className="longField"/>
             <span class="smallNote">
-                Comma or space-separated list of
-    <a href="http://ant.apache.org/manual/dirtasks.html#patterns" target="_blank">Ant-style patterns</a>
-    of environment variables that will be included in publishing. Include patterns are applied on the published build info before any
-    exclude patterns.
+                Comma or space-separated list of patterns of environment variables that will be included in publishing
+                (may contain the * and the ? wildcards). Include patterns are applied on the published build info before any exclude patterns.
             </span>
     </td>
 </tr>
@@ -74,10 +72,8 @@
         <props:textProperty name="org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns"
                             className="longField"/>
             <span class="smallNote">
-                Comma or space-separated list of
-    <a href="http://ant.apache.org/manual/dirtasks.html#patterns" target="_blank">Ant-style patterns</a>
-    of environment variables that will be excluded from publishing. Exclude patterns are applied on the published build info after any
-    include patterns.
+                Comma or space-separated list of patterns of environment variables that will be included in publishing
+                (may contain the * and the ? wildcards). Exclude patterns are applied on the published build info after any include patterns.
             </span>
     </td>
 </tr>
