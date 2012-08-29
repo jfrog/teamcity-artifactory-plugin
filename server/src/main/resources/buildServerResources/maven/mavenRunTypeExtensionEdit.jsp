@@ -103,6 +103,7 @@
                 if (!foundExistingConfig) {
                     $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = true;
                     $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
+                    $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
                     $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked =
                             false;
                 }
@@ -161,7 +162,6 @@
             if (BS.artifactory.isPublishBuildInfoSelected()) {
                 BS.Util.show($('includeEnvVars.container'));
                 BS.Util.show($('runLicenseChecks.container'));
-                BS.Util.show($('enableReleaseManagement.container'));
             } else {
                 BS.Util.hide($('includeEnvVars.container'));
                 $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked = false;
@@ -179,18 +179,6 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.includePublishedArtifacts').checked = false;
                 BS.Util.hide($('disableAutoLicenseDiscovery.container'));
                 $('org.jfrog.artifactory.selectedDeployableServer.disableAutoLicenseDiscovery').checked = false;
-                BS.Util.hide($('enableReleaseManagement.container'));
-                $('org.jfrog.artifactory.selectedDeployableServer.enableReleaseManagement').checked = false;
-                BS.Util.hide($('vcsTagsBaseUrlOrName.container'));
-                $('org.jfrog.artifactory.selectedDeployableServer.vcsTagsBaseUrlOrName').value = '';
-                BS.Util.hide($('gitReleaseBranchNamePrefix.container'));
-                $('org.jfrog.artifactory.selectedDeployableServer.gitReleaseBranchNamePrefix').value = '';
-                BS.Util.hide($('alternativeMavenGoals.container'));
-                $('org.jfrog.artifactory.selectedDeployableServer.alternativeMavenGoals').value = '';
-                BS.Util.hide($('alternativeMavenOptions.container'));
-                $('org.jfrog.artifactory.selectedDeployableServer.alternativeMavenOptions').value = '';
-                BS.Util.hide($('defaultModuleVersionConfiguration.container'));
-                $('org.jfrog.artifactory.selectedDeployableServer.defaultModuleVersionConfiguration').value = '';
             }
             BS.MultilineProperties.updateVisible();
         },

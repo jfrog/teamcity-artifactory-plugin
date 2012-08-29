@@ -98,6 +98,7 @@ BS.local = {
             if (!foundExistingConfig) {
                 $('org.jfrog.artifactory.selectedDeployableServer.activateIvyIntegration').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = true;
+                $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
                 $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
                 $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked =
                         false;

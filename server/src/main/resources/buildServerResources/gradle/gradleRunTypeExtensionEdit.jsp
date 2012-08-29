@@ -126,6 +126,7 @@ BS.local = {
                 $('org.jfrog.artifactory.selectedDeployableServer.activateGradleIntegration').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = true;
                 $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
+                $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
                 $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.publishMavenDescriptors').checked = true;
                 $('org.jfrog.artifactory.selectedDeployableServer.publishIvyDescriptors').checked = true;
@@ -278,7 +279,6 @@ BS.local = {
         if (BS.artifactory.isPublishBuildInfoSelected()) {
             BS.Util.show($('includeEnvVars.container'));
             BS.Util.show($('runLicenseChecks.container'));
-            BS.Util.show($('enableReleaseManagement.container'));
         } else {
             BS.Util.hide($('includeEnvVars.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked = false;
@@ -296,20 +296,6 @@ BS.local = {
             $('org.jfrog.artifactory.selectedDeployableServer.includePublishedArtifacts').checked = false;
             BS.Util.hide($('disableAutoLicenseDiscovery.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.disableAutoLicenseDiscovery').checked = false;
-            BS.Util.hide($('enableReleaseManagement.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.enableReleaseManagement').checked = false;
-            BS.Util.hide($('vcsTagsBaseUrlOrName.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.vcsTagsBaseUrlOrName').value = '';
-            BS.Util.hide($('gitReleaseBranchNamePrefix.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.gitReleaseBranchNamePrefix').value = '';
-            BS.Util.hide($('releaseProperties.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.releaseProperties').value = '';
-            BS.Util.hide($('nextIntegrationProperties.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.nextIntegrationProperties').value = '';
-            BS.Util.hide($('alternativeGradleTasks.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.alternativeGradleTasks').value = '';
-            BS.Util.hide($('alternativeGradleOptions.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.alternativeGradleOptions').value = '';
         }
         BS.MultilineProperties.updateVisible();
     },
