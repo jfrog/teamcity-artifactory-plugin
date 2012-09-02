@@ -55,8 +55,8 @@
         <props:textProperty name="org.jfrog.artifactory.selectedDeployableServer.envVarsIncludePatterns"
                             className="longField"/>
             <span class="smallNote">
-                Comma or space-separated list of patterns of environment variables that will be included in publishing
-                (may contain the * and the ? wildcards). Include patterns are applied on the published build info before any exclude patterns.
+                Comma or space-separated list of environment variables that will be included as part of the published build info.
+                Environment variables may contain the * and the ? wildcards. Include patterns are applied before any exclude patterns.
             </span>
     </td>
 </tr>
@@ -72,8 +72,8 @@
         <props:textProperty name="org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns"
                             className="longField"/>
             <span class="smallNote">
-                Comma or space-separated list of patterns of environment variables that will be included in publishing
-                (may contain the * and the ? wildcards). Exclude patterns are applied on the published build info after any include patterns.
+                Comma or space-separated list of environment variables that will be excluded as part of the published build info.
+                Environment variables may contain the * and the ? wildcards. Exclude patterns are applied after any include patterns.
             </span>
     </td>
 </tr>
