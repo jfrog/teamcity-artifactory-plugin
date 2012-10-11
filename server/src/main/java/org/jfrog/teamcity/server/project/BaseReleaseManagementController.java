@@ -5,13 +5,7 @@ import com.google.common.collect.Maps;
 import jetbrains.buildServer.BuildTypeDescriptor;
 import jetbrains.buildServer.controllers.ActionErrors;
 import jetbrains.buildServer.controllers.BaseFormXmlController;
-import jetbrains.buildServer.serverSide.BuildPromotionEx;
-import jetbrains.buildServer.serverSide.BuildTypeEx;
-import jetbrains.buildServer.serverSide.CustomDataStorage;
-import jetbrains.buildServer.serverSide.ProjectManager;
-import jetbrains.buildServer.serverSide.SBuildServer;
-import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.WebLinks;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.vcs.VcsRootInstance;
 import jetbrains.buildServer.web.util.SessionUser;
 import org.apache.commons.lang.StringUtils;
@@ -75,6 +69,11 @@ public abstract class BaseReleaseManagementController extends BaseFormXmlControl
 
         BuildTypeDescriptor.CheckoutType existingCheckType = buildType.getCheckoutType();
         if (!BuildTypeDescriptor.CheckoutType.ON_AGENT.equals(existingCheckType)) {
+            if (buildType.isTemplateBased()) {
+                errors.addError("runError", "For Release Management to work the checkout type must be 'On Agent'. Please change the checkout type in template or detach template for automatic change.");
+                errors.serialize(responseElement);
+                return;
+            }
             buildType.setCheckoutType(BuildTypeDescriptor.CheckoutType.ON_AGENT);
             CustomDataStorage checkChangeHistory =
                     buildType.getCustomDataStorage(CustomDataStorageKeys.CHECKOUT_CONFIGURATION_CHANGE_HISTORY);
@@ -91,7 +90,7 @@ public abstract class BaseReleaseManagementController extends BaseFormXmlControl
     }
 
     private void gatherReleaseManagementParameters(HttpServletRequest request, SBuildType buildType,
-            ActionErrors errors, Map<String, String> customParameters) {
+                                                   ActionErrors errors, Map<String, String> customParameters) {
         List<VcsRootInstance> roots = buildType.getVcsRootInstances();
         boolean gitVcs = false;
         boolean svnVcs = false;
@@ -132,10 +131,10 @@ public abstract class BaseReleaseManagementController extends BaseFormXmlControl
     }
 
     protected abstract void handleVersioning(HttpServletRequest request, Map<String, String> customParameters,
-            ActionErrors errors);
+                                             ActionErrors errors);
 
     private void handleReleaseBranch(HttpServletRequest request, Map<String, String> customParameters,
-            ActionErrors errors) {
+                                     ActionErrors errors) {
         boolean createReleaseBranch =
                 Boolean.valueOf(request.getParameter(ReleaseManagementParameterKeys.CREATE_RELEASE_BRANCH));
         if (createReleaseBranch) {
@@ -150,7 +149,7 @@ public abstract class BaseReleaseManagementController extends BaseFormXmlControl
     }
 
     private void handleVcsSettings(HttpServletRequest request, Map<String, String> customParameters,
-            ActionErrors errors) {
+                                   ActionErrors errors) {
         boolean createVcsTag = Boolean.valueOf(request.getParameter(ReleaseManagementParameterKeys.CREATE_VCS_TAG));
         if (createVcsTag) {
             customParameters.put(ReleaseManagementParameterKeys.CREATE_VCS_TAG, Boolean.TRUE.toString());
@@ -166,7 +165,7 @@ public abstract class BaseReleaseManagementController extends BaseFormXmlControl
     }
 
     private void handleStagingSettings(HttpServletRequest request, Map<String, String> customParameters,
-            ActionErrors errors) {
+                                       ActionErrors errors) {
         String stagingRepositoryKey = request.getParameter(ReleaseManagementParameterKeys.STAGING_REPOSITORY);
         if (StringUtils.isNotBlank(stagingRepositoryKey)) {
             customParameters.put(ReleaseManagementParameterKeys.STAGING_REPOSITORY, stagingRepositoryKey);
@@ -179,7 +178,7 @@ public abstract class BaseReleaseManagementController extends BaseFormXmlControl
     }
 
     protected void handlePerModuleVersion(HttpServletRequest request, Map<String, String> customParameters,
-            ActionErrors errors) {
+                                          ActionErrors errors) {
         customParameters.put(ReleaseManagementParameterKeys.USE_PER_MODULE_VERSION, Boolean.TRUE.toString());
 
         Map<String, String[]> parameterMap = request.getParameterMap();
