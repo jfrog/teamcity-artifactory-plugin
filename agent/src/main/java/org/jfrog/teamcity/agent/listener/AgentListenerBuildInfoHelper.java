@@ -151,8 +151,6 @@ public class AgentListenerBuildInfoHelper {
                         continue;
                     }
                     try {
-                        logger.progressMessage("Deploying artifact: " +
-                                deploymentPath);
                         infoClient.deployArtifact(deployableArtifact.getDeployDetails());
                     } catch (IOException e) {
                         throw new RuntimeException("Error deploying artifact: " + deployableArtifact.getFile() +
