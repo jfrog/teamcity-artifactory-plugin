@@ -87,6 +87,25 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
         return null;
     }
 
+    public boolean isFileExistsLocally(String filePath, String md5, String sha1) throws IOException {
+        File dest = new File(filePath);
+        if (!dest.exists()) {
+            return false;
+        }
+
+        try {
+            Map<String, String> checksumsMap = FileChecksumCalculator.calculateChecksums(dest, "md5", "sha1");
+            return checksumsMap != null &&
+                    StringUtils.isNotBlank(md5) && StringUtils.equals(md5, checksumsMap.get("md5")) &&
+                    StringUtils.isNotBlank(sha1) && StringUtils.equals(sha1, checksumsMap.get("sha1"));
+
+        } catch (NoSuchAlgorithmException e) {
+            log.warn("Could not find checksum algorithm: " + e.getLocalizedMessage());
+        }
+
+        return false;
+    }
+
     /**
      * Retrieves Artifactory HTTP client.
      *
