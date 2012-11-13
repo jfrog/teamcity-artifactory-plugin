@@ -99,7 +99,7 @@ public class BaseRunTypeConfigPropertiesProcessor implements PropertiesProcessor
                 invalidProperties.add(new InvalidProperty(RunnerParameterKeys.BUILD_DEPENDENCIES,
                         getInvalidPatternMessage(sourcePattern,
                                 "must be formatted like: [repo-key]:[pattern/to/search/for].")));
-            } else if (!sourcePattern.contains("@") && sourcePattern.contains("**")) {
+            } else if (!sourcePattern.contains("@") && sourcePattern.contains("**") && !sourcePattern.contains(";")) {
                 invalidProperties.add(new InvalidProperty(RunnerParameterKeys.BUILD_DEPENDENCIES,
                         getInvalidPatternMessage(sourcePattern, "cannot contain the '**' wildcard.")));
             }
