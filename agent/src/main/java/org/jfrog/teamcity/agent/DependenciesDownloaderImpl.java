@@ -93,6 +93,11 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
             return false;
         }
 
+        // If it's a folder return true since we don't care about it, not going to download a folder anyway
+        if (dest.isDirectory()) {
+            return true;
+        }
+
         try {
             Map<String, String> checksumsMap = FileChecksumCalculator.calculateChecksums(dest, "md5", "sha1");
             return checksumsMap != null &&
