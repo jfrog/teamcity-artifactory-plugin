@@ -16,7 +16,6 @@
 
 package org.jfrog.teamcity.agent.listener;
 
-import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
@@ -35,8 +34,7 @@ import jetbrains.buildServer.util.StringUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Dependency;
-import org.jfrog.build.api.builder.dependency.BuildDependencyBuilder;
-import org.jfrog.build.api.dependency.UserBuildDependency;
+import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.client.DeployDetailsArtifact;
 import org.jfrog.build.client.IncludeExcludePatterns;
@@ -58,9 +56,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.transform;
-import static com.google.common.collect.Sets.newHashSet;
 import static org.jfrog.teamcity.common.ConstantValues.*;
 
 /**
@@ -76,7 +71,7 @@ public class AgentListenerBuildInfoHelper {
 
     public void beforeRunnerStart(BuildRunnerContext runner,
             List<Dependency> publishedDependencies,
-            List<UserBuildDependency> userBuildDependencies) {
+            List<BuildDependency> buildDependencies) {
         Map<String, String> runnerParams = runner.getRunnerParameters();
         /**
          * This method handles the generic build info dependency publication which is not applicable to gradle or ant
@@ -88,15 +83,15 @@ public class AgentListenerBuildInfoHelper {
 
         runner.addRunnerParameter(BUILD_STARTED, String.valueOf(new Date().getTime()));
 
-        retrievePublishedAndBuildDependencies(runner, publishedDependencies, userBuildDependencies);
+        retrievePublishedAndBuildDependencies(runner, publishedDependencies, buildDependencies);
     }
 
     private void retrievePublishedAndBuildDependencies(BuildRunnerContext runner,
-            List<Dependency> publishedDependencies, List<UserBuildDependency> userBuildDependencies) {
+            List<Dependency> publishedDependencies, List<BuildDependency> buildDependencies) {
         DependenciesResolver dependenciesResolver = new DependenciesResolver(runner);
         try {
             publishedDependencies.addAll(dependenciesResolver.retrievePublishedDependencies());
-            userBuildDependencies.addAll(dependenciesResolver.retrieveBuildDependencies());
+            buildDependencies.addAll(dependenciesResolver.retrieveBuildDependencies());
         } catch (Exception e) {
             String errorMessage = "Error occurred while resolving published or build dependencies: " + e.getMessage();
             BuildProgressLogger logger = runner.getBuild().getBuildLogger();
@@ -110,7 +105,7 @@ public class AgentListenerBuildInfoHelper {
     public void runnerFinished(BuildRunnerContext runner,
             BuildFinishedStatus status,
             List<Dependency> dependencies,
-            List<UserBuildDependency> userBuildDependencies) throws Exception {
+            List<BuildDependency> buildDependencies) throws Exception {
 
         /**
          * This method handles the build info and artifact publication which is not applicable to gradle or ant
@@ -126,7 +121,7 @@ public class AgentListenerBuildInfoHelper {
         BuildProgressLogger logger = build.getBuildLogger();
 
         ExtractedBuildInfo extractedBuildInfo = extractBuildInfo(runner, dependencies);
-        addBuildDependencies(extractedBuildInfo.getBuildInfo(), userBuildDependencies);
+        extractedBuildInfo.getBuildInfo().setBuildDependencies(buildDependencies);
 
         String selectedServerUrl = runnerParams.get(RunnerParameterKeys.URL);
 
@@ -168,25 +163,6 @@ public class AgentListenerBuildInfoHelper {
             infoClient.shutdown();
         }
     }
-
-
-    private void addBuildDependencies(Build buildInfo, List<UserBuildDependency> userBuildDependencies) {
-        buildInfo.setBuildDependencies(transform(newArrayList(newHashSet(userBuildDependencies)),
-                new Function<UserBuildDependency, org.jfrog.build.api.dependency.BuildDependency>() {
-                    public org.jfrog.build.api.dependency.BuildDependency apply(UserBuildDependency dependencyUser) {
-                        final String buildNumber = dependencyUser.getBuildNumberResponse();
-                        return buildNumber == null ? null
-                                //Build number is null for unresolved dependencies (wrong build name or build number).
-                                : new BuildDependencyBuilder().
-                                name(dependencyUser.getBuildName()).
-                                number(buildNumber).
-                                url(dependencyUser.getBuildUrl()).
-                                started(dependencyUser.getBuildStarted()).
-                                build();
-                    }
-                }));
-    }
-
 
     private ExtractedBuildInfo extractBuildInfo(BuildRunnerContext runnerContext,
             List<Dependency> dependencies) {
