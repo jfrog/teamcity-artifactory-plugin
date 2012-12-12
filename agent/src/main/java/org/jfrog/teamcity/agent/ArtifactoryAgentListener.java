@@ -31,7 +31,7 @@ import jetbrains.buildServer.util.EventDispatcher;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.Dependency;
-import org.jfrog.build.api.dependency.UserBuildDependency;
+import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.teamcity.agent.listener.AgentListenerBuildInfoHelper;
 import org.jfrog.teamcity.agent.listener.AgentListenerReleaseHelper;
 import org.jfrog.teamcity.agent.release.ReleaseParameters;
@@ -47,7 +47,7 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
 
     private ExtensionHolder extensionsLocator;
     private List<Dependency> publishedDependencies = Lists.newArrayList();
-    private List<UserBuildDependency> userBuildDependencies = Lists.newArrayList();
+    private List<BuildDependency> userBuildDependencies = Lists.newArrayList();
     private AgentListenerBuildInfoHelper buildInfoHelper;
     private AgentListenerReleaseHelper releaseHelper;
 

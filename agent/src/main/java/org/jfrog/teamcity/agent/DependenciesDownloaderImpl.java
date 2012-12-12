@@ -1,6 +1,9 @@
 package org.jfrog.teamcity.agent;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import jetbrains.buildServer.agent.BuildRunnerContext;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -109,6 +112,41 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
         }
 
         return false;
+    }
+
+    public void removeUnusedArtifactsFromLocal(final Set<String> resolvedFiles) {
+        log.info("Collecting locally unresolved files for deletion...");
+        for (String resolvedFile : resolvedFiles) {
+            File resolvedFileParent = new File(resolvedFile).getParentFile();
+            if (!resolvedFileParent.exists()) {
+                continue;
+            }
+
+            File[] fileSiblings = resolvedFileParent.listFiles();
+            if (fileSiblings == null) {
+                continue;
+            }
+
+            for (File sibling : fileSiblings) {
+                String siblingPath = sibling.getAbsolutePath();
+                if (!isResolvedOrParentOfResolvedFile(resolvedFiles, siblingPath)) {
+                    try {
+                        FileUtils.forceDelete(sibling);
+                        log.info("Deleted unresolved file '" + siblingPath + "'");
+                    } catch (IOException e) {
+                        log.debug("Unable to delete '" + siblingPath + "' error message: " + e.getMessage());
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isResolvedOrParentOfResolvedFile(Set<String> resolvedFiles, final String path) {
+        return Iterables.any(resolvedFiles, new Predicate<String>() {
+            public boolean apply(String filePath) {
+                return StringUtils.equals(filePath, path) || StringUtils.startsWith(filePath, path);
+            }
+        });
     }
 
     /**

@@ -5,7 +5,7 @@ import jetbrains.buildServer.agent.BuildRunnerContext;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.Dependency;
-import org.jfrog.build.api.dependency.UserBuildDependency;
+import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.util.BuildDependenciesHelper;
 import org.jfrog.build.util.DependenciesDownloader;
@@ -50,7 +50,7 @@ public class DependenciesResolver {
         return helper.retrievePublishedDependencies(selectedPublishedDependencies);
     }
 
-    public List<UserBuildDependency> retrieveBuildDependencies() throws IOException, InterruptedException {
+    public List<BuildDependency> retrieveBuildDependencies() throws IOException, InterruptedException {
         if (!verifyParameters()) {
             Lists.newArrayList();
         }
