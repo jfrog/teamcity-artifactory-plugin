@@ -57,7 +57,7 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
         return helper.downloadDependencies(downloadableArtifacts);
     }
 
-    public String getTargetDir(String targetDir, String relativeDir) {
+    public String getTargetDir(String targetDir, String relativeDir) throws IOException {
         final File targetDirFile = new File(targetDir, relativeDir);
         final File workingDir = targetDirFile.isAbsolute() ? targetDirFile :
                 new File(runnerContext.getWorkingDirectory(), targetDirFile.getPath());
@@ -114,7 +114,7 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
         return false;
     }
 
-    public void removeUnusedArtifactsFromLocal(final Set<String> resolvedFiles) {
+    public void removeUnusedArtifactsFromLocal(final Set<String> resolvedFiles) throws IOException {
         log.info("Collecting locally unresolved files for deletion...");
         for (String resolvedFile : resolvedFiles) {
             File resolvedFileParent = new File(resolvedFile).getParentFile();
@@ -130,12 +130,8 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
             for (File sibling : fileSiblings) {
                 String siblingPath = sibling.getAbsolutePath();
                 if (!isResolvedOrParentOfResolvedFile(resolvedFiles, siblingPath)) {
-                    try {
-                        FileUtils.forceDelete(sibling);
-                        log.info("Deleted unresolved file '" + siblingPath + "'");
-                    } catch (IOException e) {
-                        log.debug("Unable to delete '" + siblingPath + "' error message: " + e.getMessage());
-                    }
+                    FileUtils.forceDelete(sibling);
+                    log.info("Deleted unresolved file '" + siblingPath + "'");
                 }
             }
         }
