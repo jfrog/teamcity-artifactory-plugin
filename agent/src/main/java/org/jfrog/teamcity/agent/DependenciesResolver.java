@@ -86,7 +86,7 @@ public class DependenciesResolver {
      *         false otherwise
      */
     private boolean dependencyEnabled(String s) {
-        return !((StringUtils.isBlank(s)) || (DISABLED_MESSAGE.equals(s)));
+        return !((StringUtils.isNotBlank(s)) || (DISABLED_MESSAGE.equals(s)));
     }
 
     private DependenciesDownloader createDependenciesDownloader() {

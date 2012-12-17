@@ -114,9 +114,10 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
         return false;
     }
 
-    public void removeUnusedArtifactsFromLocal(final Set<String> resolvedFiles) throws IOException {
+    public void removeUnusedArtifactsFromLocal(Set<String> allResolvesFiles, Set<String> forDeletionFiles)
+            throws IOException {
         log.info("Collecting locally unresolved files for deletion...");
-        for (String resolvedFile : resolvedFiles) {
+        for (String resolvedFile : forDeletionFiles) {
             File resolvedFileParent = new File(resolvedFile).getParentFile();
             if (!resolvedFileParent.exists()) {
                 continue;
@@ -129,7 +130,7 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
 
             for (File sibling : fileSiblings) {
                 String siblingPath = sibling.getAbsolutePath();
-                if (!isResolvedOrParentOfResolvedFile(resolvedFiles, siblingPath)) {
+                if (!isResolvedOrParentOfResolvedFile(allResolvesFiles, siblingPath)) {
                     FileUtils.forceDelete(sibling);
                     log.info("Deleted unresolved file '" + siblingPath + "'");
                 }
