@@ -116,7 +116,6 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
 
     public void removeUnusedArtifactsFromLocal(Set<String> allResolvesFiles, Set<String> forDeletionFiles)
             throws IOException {
-        log.info("Collecting locally unresolved files for deletion...");
         for (String resolvedFile : forDeletionFiles) {
             File resolvedFileParent = new File(resolvedFile).getParentFile();
             if (!resolvedFileParent.exists()) {
