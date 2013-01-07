@@ -39,8 +39,9 @@ public abstract class CredentialsHelper {
             credentialsToReturn = serverConfigBean.getDefaultDeployerCredentials();
         }
 
-        if (credentialsToReturn == null) {
-            credentialsToReturn = new CredentialsBean(null, null);
+        if (credentialsToReturn == null ||
+                (credentialsToReturn.getUsername() == null && credentialsToReturn.getPassword() == null)) {
+            credentialsToReturn = new CredentialsBean("", "");
         }
         return credentialsToReturn;
     }
