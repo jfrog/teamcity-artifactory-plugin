@@ -1,28 +1,24 @@
 apply plugin: 'idea'
 
-
-final buildInfoVersion = '2.0.x-SNAPSHOT'
-
-
 buildscript {
-    repositories {
-        mavenLocal()
-        mavenRepo url: 'http://evgenyg.artifactoryonline.com/evgenyg/repo/'
-    }
-    dependencies {
-        classpath 'com.github.goldin.plugins:teamcity:0.1.4-SNAPSHOT'
-    }
+    repositories { mavenLocal(); maven { url 'http://evgenyg.artifactoryonline.com/evgenyg/repo/' }}
+    dependencies { classpath 'com.github.goldin.plugins.gradle:teamcity:0.2-SNAPSHOT' }
 }
 
+// http://repo.jfrog.org/artifactory/repo/org/jfrog/buildinfo/build-info-api/2.0.x-SNAPSHOT/
+final buildInfoVersion = '2.0.x-SNAPSHOT'
 
+// http://evgenyg.artifactoryonline.com/evgenyg/teamcity/teamcity/server-api/
+ext.teamCityVersion = 8.0
 apply from: 'https://raw.github.com/evgeny-goldin/gradle-plugins/master/teamcity/teamcity.gradle'
+apply from: 'https://raw.github.com/evgeny-goldin/scripts/master/src/main/gradle/wrapper.gradle'
 
 
 defaultTasks 'clean', 'assembleTeamcityPlugin', 'build', 'install'
 
 
 idea.project {
-    jdkName = '1.6'
+    jdkName = '1.7'
     ipr.withXml { provider -> provider.node.component.find { it.@name == 'VcsDirectoryMappings' }.mapping.@vcs = 'Git' }
 }
 
@@ -37,12 +33,7 @@ subprojects {
     targetCompatibility = 1.5
     group               = 'org.jfrog.teamcity'
 
-
-    repositories {
-        mavenCentral()
-        mavenRepo url: 'http://repo.jfrog.org/artifactory/repo/'
-    }
-
+    repositories { mavenCentral(); maven{ url 'http://repo.jfrog.org/artifactory/repo/' }}
 
     idea.module {
         downloadSources = true
@@ -139,6 +130,3 @@ assembleTeamcityPluginConfig {
     agent       project( ':agent'  )
     artifacts   project( ':server' )
 }
-
-
-task wrapper( type: Wrapper ) { gradleVersion = '1.1' }
