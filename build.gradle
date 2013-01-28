@@ -1,8 +1,8 @@
 apply plugin: 'idea'
 
 buildscript {
-    repositories { mavenLocal(); maven { url 'http://evgenyg.artifactoryonline.com/evgenyg/repo/' }}
-    dependencies { classpath 'com.github.goldin.plugins.gradle:teamcity:0.2-SNAPSHOT' }
+    repositories { mavenCentral() }
+    dependencies { classpath 'com.github.goldin.plugins.gradle:teamcity:0.2' }
 }
 
 // http://repo.jfrog.org/artifactory/repo/org/jfrog/buildinfo/build-info-api/2.0.x-SNAPSHOT/
