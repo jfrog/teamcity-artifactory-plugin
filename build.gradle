@@ -9,7 +9,7 @@ buildscript {
 final buildInfoVersion = '2.0.x-SNAPSHOT'
 
 // http://evgenyg.artifactoryonline.com/evgenyg/teamcity/teamcity/server-api/
-ext.teamCityVersion = 8.0
+ext.teamCityVersion = '8.0'
 apply from: 'https://raw.github.com/evgeny-goldin/gradle-plugins/master/teamcity/teamcity.gradle'
 apply from: 'https://raw.github.com/evgeny-goldin/scripts/master/src/main/gradle/wrapper.gradle'
 
