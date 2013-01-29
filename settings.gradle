@@ -1,0 +1,2 @@
+rootProject.name = 'teamcity-artifactory-plugin'
+include 'common', 'agent', 'server'
