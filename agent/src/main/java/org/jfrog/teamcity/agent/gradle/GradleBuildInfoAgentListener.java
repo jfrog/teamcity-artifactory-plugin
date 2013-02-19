@@ -70,8 +70,8 @@ public class GradleBuildInfoAgentListener extends AgentLifeCycleAdapter {
                 }
             } else {
                 if (Boolean.valueOf(runnerParameters.get(RunnerParameterKeys.ENABLE_RELEASE_MANAGEMENT))) {
-                    File checkoutDirectory = build.getCheckoutDirectory();
-                    File gradleProperties = new File(checkoutDirectory, ConstantValues.GRADLE_PROPERTIES_FILE_NAME);
+                    File workingDirectory = runner.getWorkingDirectory();
+                    File gradleProperties = new File(workingDirectory, ConstantValues.GRADLE_PROPERTIES_FILE_NAME);
                     if (!gradleProperties.exists()) {
                         String errorMessage = "Unable to find the gradle release management properties file at '" +
                                 gradleProperties.getAbsolutePath() + "'.";

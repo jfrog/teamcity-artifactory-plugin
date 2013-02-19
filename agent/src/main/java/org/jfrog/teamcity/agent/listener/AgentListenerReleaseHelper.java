@@ -137,8 +137,8 @@ public class AgentListenerReleaseHelper {
     private boolean changeProperties(BuildRunnerContext runner, BuildProgressLogger logger,
             ReleaseParameters releaseParams, boolean releaseVersion) throws IOException, InterruptedException {
         logger.progressStarted("[RELEASE] Changing versions in the gradle properties file");
-        File checkoutDir = runner.getBuild().getCheckoutDirectory();
-        File gradlePropertiesFile = new File(checkoutDir, ConstantValues.GRADLE_PROPERTIES_FILE_NAME);
+        File workingDir = runner.getWorkingDirectory();
+        File gradlePropertiesFile = new File(workingDir, ConstantValues.GRADLE_PROPERTIES_FILE_NAME);
 
         Properties properties = new Properties();
         FileInputStream propertiesInputStream = null;
