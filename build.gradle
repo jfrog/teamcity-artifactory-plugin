@@ -2,7 +2,7 @@ apply plugin: 'idea'
 
 buildscript {
     repositories { mavenCentral() }
-    dependencies { classpath 'com.github.goldin.plugins.gradle:teamcity:0.2' }
+    dependencies { classpath 'com.github.goldin.plugins.gradle:teamcity:0.2.1' }
 }
 
 // http://repo.jfrog.org/artifactory/repo/org/jfrog/buildinfo/build-info-api/2.0.x-SNAPSHOT/
