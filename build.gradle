@@ -1,7 +1,10 @@
 apply plugin: 'idea'
 
 buildscript {
-    repositories { mavenCentral() }
+    repositories { 
+        maven { url 'http://jcenter.bintray.com' }
+        maven { url 'http://dl.bintray.com/content/evgenyg/BuildTools' }
+    }
     dependencies { classpath 'com.github.goldin.plugins.gradle:teamcity:0.2.1' }
 }
 
@@ -33,7 +36,10 @@ subprojects {
     targetCompatibility = 1.5
     group               = 'org.jfrog.teamcity'
 
-    repositories { mavenCentral(); maven{ url 'http://repo.jfrog.org/artifactory/repo/' }}
+    repositories { 
+        maven { url 'http://jcenter.bintray.com' } 
+        maven { url 'http://repo.jfrog.org/artifactory/repo/' }
+    }
 
     idea.module {
         downloadSources = true
