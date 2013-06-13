@@ -56,6 +56,12 @@
             <snapshots><enabled>false</enabled></snapshots>
             <releases><enabled>true</enabled></releases>
         </repository>
+        <repository>
+            <id>repo.jfrog.org</id>
+            <url>http://repo.jfrog.org/artifactory/libs-snapshots-local/</url>
+            <snapshots><enabled>true</enabled></snapshots>
+            <releases><enabled>false</enabled></releases>
+        </repository>
     </repositories>
 
     <developers>
