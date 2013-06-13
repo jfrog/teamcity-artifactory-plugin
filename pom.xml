@@ -40,6 +40,15 @@
         <build.info.version>2.0.x-SNAPSHOT</build.info.version>
     </properties>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <id>evgenyg.artifactoryonline.com</id>
+            <url>http://evgenyg.artifactoryonline.com/evgenyg/repo</url>
+            <snapshots><enabled>true</enabled></snapshots>
+            <releases><enabled>true</enabled></releases>
+        </pluginRepository>
+    </pluginRepositories>
+
     <developers>
         <developer>
             <id>noamt</id>
