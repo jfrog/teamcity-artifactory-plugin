@@ -49,6 +49,15 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <repositories>
+        <repository>
+            <id>jcenter.bintray.com</id>
+            <url>http://jcenter.bintray.com/</url>
+            <snapshots><enabled>false</enabled></snapshots>
+            <releases><enabled>true</enabled></releases>
+        </repository>
+    </repositories>
+
     <developers>
         <developer>
             <id>noamt</id>
