@@ -378,6 +378,21 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>com.github.goldin</groupId>
+                <artifactId>artifactory-maven-plugin</artifactId>
+                <version>0.3-SNAPSHOT</version>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <id>create-build-info</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>create-build-info</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
