@@ -415,8 +415,8 @@
                         <configuration>
                             <properties>buildInfoSample.properties</properties>
                             <propertiesMap>
-                                <buildInfo.build.name>myBuild</buildInfo.build.name>
-                                <buildInfo.build.number>133</buildInfo.build.number>
+                                <buildInfo.build.name>teamcity-artifactory-plugin</buildInfo.build.name>
+                                <buildInfo.build.number>222</buildInfo.build.number>
                             </propertiesMap>
                         </configuration>
                     </execution>
