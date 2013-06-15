@@ -408,11 +408,17 @@
                 <inherited>false</inherited>
                 <executions>
                     <execution>
-                        <id>create-build-info</id>
-                        <phase>initialize</phase>
+                        <id>build-info</id>
                         <goals>
-                            <goal>create-build-info</goal>
+                            <goal>build-info</goal>
                         </goals>
+                        <configuration>
+                            <properties>buildInfoSample.properties</properties>
+                            <propertiesMap>
+                                <buildInfo.build.name>myBuild</buildInfo.build.name>
+                                <buildInfo.build.number>133</buildInfo.build.number>
+                            </propertiesMap>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
