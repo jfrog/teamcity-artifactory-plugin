@@ -1,3 +1,2 @@
 language: java
-script:   "mvn -U -B -e clean deploy"
-
+script: ./run_build.sh
