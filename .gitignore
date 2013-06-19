@@ -7,6 +7,8 @@
 *.iws
 target
 
+buildInfo.properties
+
 # DO NOT add "build" - it is used as package name at agent/src/test/java/org/jfrog/build
 agent/build
 common/build
