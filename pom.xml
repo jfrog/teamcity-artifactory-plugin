@@ -413,7 +413,7 @@
                             <goal>extract-build-info</goal>
                         </goals>
                         <configuration>
-                            <writeMergedProperties>true</writeMergedProperties>
+                            <writeProperties>true</writeProperties>
                             <artifactoryPublishContextUrl>http://evgenyg.artifactoryonline.com/evgenyg</artifactoryPublishContextUrl>
                             <artifactoryPublishUsername>temp-deployer</artifactoryPublishUsername>
                             <artifactoryPublishPassword>{DESede}xtnt3nnvIKDvPdrT+lZJmUuA3LJ4WBNW</artifactoryPublishPassword>
