@@ -413,11 +413,10 @@
                             <goal>extract-build-info</goal>
                         </goals>
                         <configuration>
+                            <!-- ~~~~~~~~~~~~~~~~~~ -->
+                            <!-- Regular Properties -->
+                            <!-- ~~~~~~~~~~~~~~~~~~ -->
                             <writeProperties>true</writeProperties>
-                            <properties>
-                                artifactory.deploy.1 = 2
-                                artifactory.deploy.2 = 3
-                            </properties>    
                             <artifactoryPublishContextUrl>http://evgenyg.artifactoryonline.com/evgenyg</artifactoryPublishContextUrl>
                             <artifactoryPublishUsername>temp-deployer</artifactoryPublishUsername>
                             <artifactoryPublishPassword>{DESede}YiN0PzdSPYltV2J3u3O0fq3y2CbrEWxa</artifactoryPublishPassword>
@@ -425,13 +424,42 @@
                             <artifactoryPublishRepoKey>temp</artifactoryPublishRepoKey>
                             <artifactoryPublishSnapshotRepoKey>temp</artifactoryPublishSnapshotRepoKey>
                             <buildInfoConfigIncludeEnvVars>true</buildInfoConfigIncludeEnvVars>
+                            <!-- ~~~~~~~~~~~~~~~~~ -->
+                            <!-- Deploy Properties -->
+                            <!-- ~~~~~~~~~~~~~~~~~ -->
+                            <properties>
+                                artifactory.deploy.1 = 2
+                                artifactory.deploy.2 = 3
+                            </properties>    
                             <deployProperties>
                                 1      = 11
                                 3      = 4
                                 gradle = awesome
                                 teamcity.version   = ${teamcity.version}
                                 build.info.version = ${build.info.version}
-                            </deployProperties>    
+                            </deployProperties>   
+                            <!-- ~~~~~~~~~~~~~~~~~ -->
+                            <!-- Property Handlers -->
+                            <!-- ~~~~~~~~~~~~~~~~~ -->
+                            <resolver>
+                                <username>uuu</username>
+                                <password>ppp</password>
+                            </resolver>
+                            <publisher>
+                                <excludePatterns>*.pom</excludePatterns>
+                            </publisher>
+                            <buildInfo>
+                                <buildNumber>333</buildNumber>
+                            </buildInfo>
+                            <licenses>
+                                <includePublishedArtifacts>true</includePublishedArtifacts>
+                            </licenses>    
+                            <issues>
+                                <issueTrackerName>YouTrack</issueTrackerName>
+                            </issues>
+                            <blackDuck>
+                                <appName>MyBestApp</appName>
+                            </blackDuck>
                         </configuration>
                     </execution>
                 </executions>
