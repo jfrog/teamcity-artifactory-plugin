@@ -441,6 +441,10 @@
                             <!-- ~~~~~~~~~~~~~~~~~ -->
                             <!-- Property Handlers -->
                             <!-- ~~~~~~~~~~~~~~~~~ -->
+                            <artifactory>
+                                <timeout>60</timeout>
+                                <envVarsExcludePatterns>*LANG</envVarsExcludePatterns>
+                            </artifactory>
                             <resolver>
                                 <username>uuu</username>
                                 <password>ppp</password>
