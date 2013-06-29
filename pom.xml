@@ -441,6 +441,7 @@
                                 <envVarsExcludePatterns>.*PWD</envVarsExcludePatterns>
                             </artifactory>
                             <resolver>
+                                <contextUrl>http://evgenyg.artifactoryonline.com/evgenyg</contextUrl>
                                 <repoKey>repo</repoKey>
                             </resolver>
                             <publisher>
