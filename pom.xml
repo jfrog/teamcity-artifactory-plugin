@@ -441,23 +441,19 @@
                                 <envVarsExcludePatterns>.*PWD</envVarsExcludePatterns>
                             </artifactory>
                             <resolver>
-                                <username>uuu</username>
-                                <password>ppp</password>
+                                <repoKey>repo</repoKey>
                             </resolver>
                             <publisher>
                                 <contextUrl>http://evgenyg.artifactoryonline.com/evgenyg</contextUrl>
                                 <username>temp-deployer</username>
                                 <password>{DESede}YiN0PzdSPYltV2J3u3O0fq3y2CbrEWxa</password>
                                 <excludePatterns>*.pom</excludePatterns>
-                                <resolutionRepoKey>repo</resolutionRepoKey>
                                 <repoKey>temp</repoKey>
                                 <snapshotRepoKey>temp</snapshotRepoKey>
                             </publisher>
                             <buildInfo>
-                                <agentName>DRONE</agentName>
-                                <agentVersion>{DRONE_VERSION}</agentVersion>
-                                <buildNumber>{DRONE_BUILD_NUMBER}</buildNumber>
-                                <buildUrl>{DRONE_BUILD_URL}</buildUrl>
+                                <buildNumber>{DRONE_BUILD_NUMBER|TRAVIS_BUILD_NUMBER|BUILD_NUMBER}</buildNumber>
+                                <buildUrl>{DRONE_BUILD_URL|BUILD_URL}</buildUrl>
                             </buildInfo>
                             <licenses>
                                 <includePublishedArtifacts>true</includePublishedArtifacts>
