@@ -33,8 +33,8 @@
        value="${(not empty propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo'])
        && (propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo'] == true) ? true : false}"/>
 
-<jsp:include page="../common/buildInfoEnabledView.jsp">
-    <jsp:param name="buildInfoEnabled" value="${foundExistingConfig}"/>
+<jsp:include page="../common/artifactoryEnabledView.jsp">
+    <jsp:param name="artifactoryEnabled" value="${foundExistingConfig}"/>
 </jsp:include>
 
 <c:if test="${foundExistingConfig}">
@@ -69,11 +69,6 @@
     </jsp:include>
 
     <c:if test="${foundActivateGradleIntegrationSelected}">
-        <div class="nestedParameter">
-            Publish Build Info: <props:displayValue
-                name="org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo" emptyValue="false"/>
-        </div>
-
         <c:if test="${foundDeployArtifactsSelected}">
             <div class="nestedParameter">
                 Publish Maven descriptors: <props:displayValue
@@ -87,9 +82,17 @@
         </c:if>
     </c:if>
 
+    <div class="nestedParameter">
+        Publish Build Info: <props:displayValue
+            name="org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo" emptyValue="false"/>
+    </div>
+
+    <jsp:include page="../common/envVarsView.jsp">
+        <jsp:param name="shouldDisplay" value="${foundPublishBuildInfoSelected}"/>
+    </jsp:include>
+
     <jsp:include page="../common/licensesView.jsp">
-        <jsp:param name="shouldDisplay"
-                   value="${!foundActivateGradleIntegrationSelected || foundPublishBuildInfoSelected}"/>
+        <jsp:param name="shouldDisplay" value="${foundPublishBuildInfoSelected}"/>
     </jsp:include>
 
     <jsp:include page="../common/genericItemsView.jsp">

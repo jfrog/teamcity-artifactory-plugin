@@ -28,95 +28,109 @@
 <c:set var="foundExistingConfig"
        value="${not empty propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId'] ? true : false}"/>
 
+<c:set var="foundPublishBuildInfoSelected"
+       value="${(not empty propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo'])
+       && (propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo'] == true) ? true : false}"/>
+
 <c:set var="foundActivateIvyIntegrationSelected"
        value="${(not empty propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.activateIvyIntegration'])
        && (propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.activateIvyIntegration'] == true) ? true : false}"/>
 
 <script type="text/javascript">
-    <%@ include file="../common/artifactoryCommon.js" %>
-    BS.local = {
-        onServerChange : function(foundExistingConfig) {
-            var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId');
-            var publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo');
+<%@ include file="../common/artifactoryCommon.js" %>
+BS.local = {
+    onServerChange:function (foundExistingConfig) {
+        var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId');
+        var publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo');
 
-            var selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
-            if (!selectedUrlId) {
-                publishRepoSelect.innerHTML = '';
-                $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked = false;
-                $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value = '';
-                $('secure:org.jfrog.artifactory.selectedDeployableServer.deployerPassword').value = '';
+        var selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
+        if (!selectedUrlId) {
+            publishRepoSelect.innerHTML = '';
+            $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked = false;
+            $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value = '';
+            $('secure:org.jfrog.artifactory.selectedDeployableServer.deployerPassword').value = '';
+            $('org.jfrog.artifactory.selectedDeployableServer.activateIvyIntegration').checked = false;
+            $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = false;
+            $('org.jfrog.artifactory.selectedDeployableServer.deployIncludePatterns').value = '';
+            $('org.jfrog.artifactory.selectedDeployableServer.deployExcludePatterns').value = '';
+            $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
+            $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked = false;
+            $('org.jfrog.artifactory.selectedDeployableServer.envVarsIncludePatterns').value = '';
+            $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
+            $('org.jfrog.artifactory.selectedDeployableServer.useM2CompatiblePatterns').checked = true;
+            $('org.jfrog.artifactory.selectedDeployableServer.ivyPattern').value = '';
+            $('org.jfrog.artifactory.selectedDeployableServer.artifactPattern').value = '';
+            $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks').checked = false;
+            $('org.jfrog.artifactory.selectedDeployableServer.licenseViolationRecipients').value = '';
+            $('org.jfrog.artifactory.selectedDeployableServer.limitChecksToScopes').value = '';
+            $('org.jfrog.artifactory.selectedDeployableServer.includePublishedArtifacts').checked = false;
+            $('org.jfrog.artifactory.selectedDeployableServer.disableAutoLicenseDiscovery').checked = false;
+            $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
+            $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').disabled = true;
+            $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '${disabledMessage}';
+
+            BS.Util.hide($('targetRepo.container'));
+            BS.Util.hide($('version.warning.container'));
+            BS.Util.hide($('offline.warning.container'));
+            BS.Util.hide($('overrideDefaultDeployerCredentials.container'));
+            BS.Util.hide($('deployerUsername.container'));
+            BS.Util.hide($('deployerPassword.container'));
+            BS.Util.hide($('deployArtifacts.container'));
+            BS.Util.hide($('deployIncludePatterns.container'));
+            BS.Util.hide($('deployExcludePatterns.container'));
+            BS.Util.hide($('publishBuildInfo.container'));
+            BS.Util.hide($('includeEnvVars.container'));
+            BS.Util.hide($('envVarsIncludePatterns.container'));
+            BS.Util.hide($('envVarsExcludePatterns.container'));
+            BS.Util.hide($('useM2CompatiblePatterns.container'));
+            BS.Util.hide($('ivyPattern.container'));
+            BS.Util.hide($('artifactPattern.container'));
+            BS.Util.hide($('activateIvyIntegration.container'));
+            BS.Util.hide($('runLicenseChecks.container'));
+            BS.Util.hide($('licenseViolationRecipients.container'));
+            BS.Util.hide($('limitChecksToScopes.container'));
+            BS.Util.hide($('includePublishedArtifacts.container'));
+            BS.Util.hide($('disableAutoLicenseDiscovery.container'));
+            BS.Util.hide($('publishedArtifacts.container'));
+            BS.Util.hide($('buildDependencies.container'));
+        } else {
+
+            if (!foundExistingConfig) {
                 $('org.jfrog.artifactory.selectedDeployableServer.activateIvyIntegration').checked = false;
-                $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = false;
-                $('org.jfrog.artifactory.selectedDeployableServer.deployIncludePatterns').value = '';
-                $('org.jfrog.artifactory.selectedDeployableServer.deployExcludePatterns').value = '';
-                $('org.jfrog.artifactory.selectedDeployableServer.useM2CompatiblePatterns').checked = true;
-                $('org.jfrog.artifactory.selectedDeployableServer.ivyPattern').value = '';
-                $('org.jfrog.artifactory.selectedDeployableServer.artifactPattern').value = '';
-                $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks').checked = false;
-                $('org.jfrog.artifactory.selectedDeployableServer.licenseViolationRecipients').value = '';
-                $('org.jfrog.artifactory.selectedDeployableServer.limitChecksToScopes').value = '';
-                $('org.jfrog.artifactory.selectedDeployableServer.includePublishedArtifacts').checked = false;
-                $('org.jfrog.artifactory.selectedDeployableServer.disableAutoLicenseDiscovery').checked = false;
-                $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
-//                $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').disabled = true;
-           //     $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').value = '${disabledMessage}';
-                $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').disabled = true;
-                $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '${disabledMessage}';
+                $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = true;
+                $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
+                $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
+                $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked =
+                        false;
+            }
+            BS.local.loadTargetRepos(selectedUrlId);
+            BS.artifactory.checkCompatibleVersion(selectedUrlId);
+            BS.Util.show($('targetRepo.container'));
+            BS.Util.show($('overrideDefaultDeployerCredentials.container'));
 
-                BS.Util.hide($('targetRepo.container'));
-                BS.Util.hide($('version.warning.container'));
-                BS.Util.hide($('offline.warning.container'));
-                BS.Util.hide($('overrideDefaultDeployerCredentials.container'));
-                BS.Util.hide($('deployerUsername.container'));
-                BS.Util.hide($('deployerPassword.container'));
-                BS.Util.hide($('deployArtifacts.container'));
-                BS.Util.hide($('deployIncludePatterns.container'));
-                BS.Util.hide($('deployExcludePatterns.container'));
-                BS.Util.hide($('useM2CompatiblePatterns.container'));
-                BS.Util.hide($('ivyPattern.container'));
-                BS.Util.hide($('artifactPattern.container'));
-                BS.Util.hide($('activateIvyIntegration.container'));
-                BS.Util.hide($('runLicenseChecks.container'));
-                BS.Util.hide($('licenseViolationRecipients.container'));
-                BS.Util.hide($('limitChecksToScopes.container'));
-                BS.Util.hide($('includePublishedArtifacts.container'));
-                BS.Util.hide($('disableAutoLicenseDiscovery.container'));
-                BS.Util.hide($('publishedArtifacts.container'));
-//                BS.Util.hide($('publishedDependencies.container'));
-                BS.Util.hide($('buildDependencies.container'));
-            } else {
+            if (BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()) {
+                BS.Util.show($('deployerUsername.container'));
+                BS.Util.show($('deployerPassword.container'));
+            }
 
-                if (!foundExistingConfig) {
-                    $('org.jfrog.artifactory.selectedDeployableServer.activateIvyIntegration').checked = false;
-                    $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = true;
-                    $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked =
-                            false;
+            if (BS.local.isActivateIvyIntegrationSelected()) {
+                BS.Util.show($('deployArtifacts.container'));
+                if (BS.artifactory.isDeployArtifactsSelected()) {
+                    BS.Util.show($('deployIncludePatterns.container'));
+                    BS.Util.show($('deployExcludePatterns.container'));
                 }
-                BS.local.loadTargetRepos(selectedUrlId);
-                BS.artifactory.checkCompatibleVersion(selectedUrlId);
-                BS.Util.show($('targetRepo.container'));
-                BS.Util.show($('overrideDefaultDeployerCredentials.container'));
+            }
 
-                if (BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()) {
-                    BS.Util.show($('deployerUsername.container'));
-                    BS.Util.show($('deployerPassword.container'));
-                }
+            BS.Util.show($('activateIvyIntegration.container'));
+            if (BS.local.isActivateIvyIntegrationSelected() && BS.artifactory.isDeployArtifactsSelected()) {
+                BS.Util.show($('useM2CompatiblePatterns.container'));
+                BS.Util.show($('ivyPattern.container'));
+                BS.Util.show($('artifactPattern.container'));
+            }
 
-                if (BS.local.isActivateIvyIntegrationSelected()) {
-                    BS.Util.show($('deployArtifacts.container'));
-                    if (BS.artifactory.isDeployArtifactsSelected()) {
-                        BS.Util.show($('deployIncludePatterns.container'));
-                        BS.Util.show($('deployExcludePatterns.container'));
-                    }
-                }
-                BS.Util.show($('activateIvyIntegration.container'));
-
-                if (BS.local.isActivateIvyIntegrationSelected() && BS.artifactory.isDeployArtifactsSelected()) {
-                    BS.Util.show($('useM2CompatiblePatterns.container'));
-                    BS.Util.show($('ivyPattern.container'));
-                    BS.Util.show($('artifactPattern.container'));
-                }
-
+            BS.Util.show($('publishBuildInfo.container'));
+            var publishBuildInfo = BS.artifactory.isPublishBuildInfoSelected();
+            if (publishBuildInfo) {
                 BS.Util.show($('runLicenseChecks.container'));
                 var shouldRunLicenseChecks = $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks')
                         .checked;
@@ -127,85 +141,113 @@
                     BS.Util.show($('disableAutoLicenseDiscovery.container'));
                 }
 
-                if (!BS.local.isActivateIvyIntegrationSelected()) {
-                    BS.Util.show($('publishedArtifacts.container'));
-//                    BS.Util.show($('publishedDependencies.container'));
-                    BS.Util.show($('buildDependencies.container'));
-                    BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
+                BS.Util.show($('includeEnvVars.container'));
+                var includeEnvVarsEnabled =
+                        $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked;
+                if (includeEnvVarsEnabled) {
+                    BS.Util.show($('envVarsIncludePatterns.container'));
+                    BS.Util.show($('envVarsExcludePatterns.container'));
                 }
             }
-            BS.MultilineProperties.updateVisible();
-        }
-        ,
 
-        loadTargetRepos : function(selectedUrlId) {
-            BS.ajaxRequest(base_uri + '${controllerUrl}', {
-                parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadTargetRepos=true',
-                onComplete: function(response, options) {
-
-                    var publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo');
-                    BS.artifactory.populateRepoSelect(response, options, publishRepoSelect,
-                            '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.targetRepo']}',
-                            false);
-                }
-            });
-        }
-        ,
-
-        isActivateIvyIntegrationSelected: function() {
-            return $('org.jfrog.artifactory.selectedDeployableServer.activateIvyIntegration').checked;
-        }
-        ,
-
-        toggleOnIvySelection: function() {
-            if (BS.local.isActivateIvyIntegrationSelected()) {
-                BS.Util.show('deployArtifacts.container');
-                $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = true;
-                BS.Util.show('useM2CompatiblePatterns.container');
-                $('org.jfrog.artifactory.selectedDeployableServer.useM2CompatiblePatterns').checked = true;
-                BS.Util.show($('ivyPattern.container'));
-                BS.Util.show($('artifactPattern.container'));
-                BS.Util.hide($('publishedArtifacts.container'));
-                $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
-//                BS.Util.hide($('publishedDependencies.container'));
-                BS.Util.hide($('buildDependencies.container'));
-//                $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies').value = '';
-                $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '';
-            } else {
-                BS.Util.hide('deployArtifacts.container');
-                $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = false;
-                BS.Util.hide('useM2CompatiblePatterns.container');
-                $('org.jfrog.artifactory.selectedDeployableServer.useM2CompatiblePatterns').checked = false;
-                BS.Util.hide($('ivyPattern.container'));
-                $('org.jfrog.artifactory.selectedDeployableServer.ivyPattern').value = '';
-                BS.Util.hide($('artifactPattern.container'));
-                $('org.jfrog.artifactory.selectedDeployableServer.artifactPattern').value = '';
+            if (!BS.local.isActivateIvyIntegrationSelected()) {
                 BS.Util.show($('publishedArtifacts.container'));
-//                BS.Util.show($('publishedDependencies.container'));
                 BS.Util.show($('buildDependencies.container'));
+                BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
             }
-            BS.local.toggleDeployArtifactsSelection();
-            BS.MultilineProperties.updateVisible();
-        },
-        toggleDeployArtifactsSelection: function() {
-            if (BS.artifactory.isDeployArtifactsSelected()) {
-                BS.Util.show('useM2CompatiblePatterns.container');
-                $('org.jfrog.artifactory.selectedDeployableServer.useM2CompatiblePatterns').checked = true;
-                BS.Util.show($('ivyPattern.container'));
-                BS.Util.show($('artifactPattern.container'));
-            } else {
-                BS.Util.hide('useM2CompatiblePatterns.container');
-                $('org.jfrog.artifactory.selectedDeployableServer.useM2CompatiblePatterns').checked = false;
-                BS.Util.hide($('ivyPattern.container'));
-                $('org.jfrog.artifactory.selectedDeployableServer.ivyPattern').value = '';
-                BS.Util.hide($('artifactPattern.container'));
-                $('org.jfrog.artifactory.selectedDeployableServer.artifactPattern').value = '';
-            }
-
-            BS.artifactory.toggleDeployArtifactsSelection();
-            BS.MultilineProperties.updateVisible();
         }
+        BS.MultilineProperties.updateVisible();
+    },
+
+    loadTargetRepos:function (selectedUrlId) {
+        BS.ajaxRequest(base_uri + '${controllerUrl}', {
+            parameters:'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadTargetRepos=true',
+            onComplete:function (response, options) {
+
+                var publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo');
+                BS.artifactory.populateRepoSelect(response, options, publishRepoSelect,
+                        '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.targetRepo']}',
+                        false);
+            }
+        });
+    },
+
+    isActivateIvyIntegrationSelected:function () {
+        return $('org.jfrog.artifactory.selectedDeployableServer.activateIvyIntegration').checked;
+    },
+
+    toggleOnIvySelection:function () {
+        if (BS.local.isActivateIvyIntegrationSelected()) {
+            BS.Util.show('deployArtifacts.container');
+            $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = true;
+            BS.Util.show('useM2CompatiblePatterns.container');
+            $('org.jfrog.artifactory.selectedDeployableServer.useM2CompatiblePatterns').checked = true;
+            BS.Util.show($('ivyPattern.container'));
+            BS.Util.show($('artifactPattern.container'));
+            BS.Util.hide($('publishedArtifacts.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
+            BS.Util.hide($('buildDependencies.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '';
+        } else {
+            BS.Util.hide('deployArtifacts.container');
+            $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = false;
+            BS.Util.hide('useM2CompatiblePatterns.container');
+            $('org.jfrog.artifactory.selectedDeployableServer.useM2CompatiblePatterns').checked = false;
+            BS.Util.hide($('ivyPattern.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.ivyPattern').value = '';
+            BS.Util.hide($('artifactPattern.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.artifactPattern').value = '';
+            BS.Util.show($('publishedArtifacts.container'));
+            BS.Util.show($('buildDependencies.container'));
+        }
+        BS.local.toggleDeployArtifactsSelection();
+        BS.MultilineProperties.updateVisible();
+    },
+
+    toggleDeployArtifactsSelection:function () {
+        if (BS.artifactory.isDeployArtifactsSelected()) {
+            BS.Util.show('useM2CompatiblePatterns.container');
+            $('org.jfrog.artifactory.selectedDeployableServer.useM2CompatiblePatterns').checked = true;
+            BS.Util.show($('ivyPattern.container'));
+            BS.Util.show($('artifactPattern.container'));
+        } else {
+            BS.Util.hide('useM2CompatiblePatterns.container');
+            $('org.jfrog.artifactory.selectedDeployableServer.useM2CompatiblePatterns').checked = false;
+            BS.Util.hide($('ivyPattern.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.ivyPattern').value = '';
+            BS.Util.hide($('artifactPattern.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.artifactPattern').value = '';
+        }
+
+        BS.artifactory.toggleDeployArtifactsSelection();
+        BS.MultilineProperties.updateVisible();
+    },
+
+    togglePublishBuildInfoSelection:function () {
+        if (BS.artifactory.isPublishBuildInfoSelected()) {
+            BS.Util.show($('includeEnvVars.container'));
+            BS.Util.show($('runLicenseChecks.container'));
+        } else {
+            BS.Util.hide($('includeEnvVars.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked = false;
+            BS.Util.hide($('envVarsIncludePatterns.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.envVarsIncludePatterns').value = '';
+            BS.Util.hide($('envVarsExcludePatterns.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
+            BS.Util.hide($('runLicenseChecks.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks').checked = false;
+            BS.Util.hide($('licenseViolationRecipients.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.licenseViolationRecipients').value = '';
+            BS.Util.hide($('limitChecksToScopes.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.limitChecksToScopes').value = '';
+            BS.Util.hide($('includePublishedArtifacts.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.includePublishedArtifacts').checked = false;
+            BS.Util.hide($('disableAutoLicenseDiscovery.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.disableAutoLicenseDiscovery').checked = false;
+        }
+        BS.MultilineProperties.updateVisible();
     }
+}
 </script>
 
 <!--[if IE 7]>
@@ -277,12 +319,33 @@ Use the Artifactory-Ivy integration to collect build info data and deploy artifa
         <jsp:param name="shouldDisplay" value="${foundActivateIvyIntegrationSelected && foundExistingConfig}"/>
     </jsp:include>
 
+    <tr class="noBorder" id="publishBuildInfo.container"
+        style="${foundExistingConfig ? '' : 'display: none;'}">
+        <th>
+            <label for="org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo">
+                Publish build info:
+            </label>
+        </th>
+        <td>
+            <props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo"
+                                    onclick="BS.local.togglePublishBuildInfoSelection()"/>
+            <span class="smallNote">
+                Uncheck if you do not wish to deploy build information from the plugin.
+            </span>
+        </td>
+    </tr>
+
+    <jsp:include page="../common/envVarsEdit.jsp">
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
+    </jsp:include>
+
     <jsp:include page="../common/licensesEdit.jsp">
-        <jsp:param name="shouldDisplay" value="${foundExistingConfig}"/>
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
     </jsp:include>
 
     <jsp:include page="../common/genericItemsEdit.jsp">
         <jsp:param name="shouldDisplay" value="${(!foundActivateIvyIntegrationSelected) && foundExistingConfig}"/>
-        <jsp:param name="existingUrlId" value="${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}"/>
+        <jsp:param name="existingUrlId"
+                   value="${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}"/>
     </jsp:include>
 </l:settingsGroup>

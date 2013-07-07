@@ -16,12 +16,12 @@
   ~ limitations under the License.
   --%>
 
-<c:set var="buildInfoEnabled" value="${param.buildInfoEnabled}" scope="request"/>
+<c:set var="artifactoryEnabled" value="${param.artifactoryEnabled}" scope="request"/>
 
 <div class="parameter">
     Deploy artifacts to Artifactory:
     <c:choose>
-        <c:when test="${buildInfoEnabled}">
+        <c:when test="${artifactoryEnabled}">
             <strong>
                 enabled
             </strong>

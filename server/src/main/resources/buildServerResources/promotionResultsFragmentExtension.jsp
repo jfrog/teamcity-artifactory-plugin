@@ -41,7 +41,7 @@
 <script type="text/javascript">
     BS.local = {
         loadTargetRepos : function() {
-            BS.ajaxRequest(base_uri + '${controllerUrl}', {
+            BS.ajaxRequest('${controllerUrl}', {
                 parameters: 'buildId=${buildId}&loadTargetRepos=true',
                 onComplete: function(response, options) {
                     var repoSelect = $('promotionRepository');
@@ -108,7 +108,7 @@
                 }
             });
 
-            BS.FormSaver.save(this, base_uri + '${controllerUrl}', errorListener, false);
+            BS.FormSaver.save(this, '${controllerUrl}', errorListener, false);
             return false;
         }
     }));

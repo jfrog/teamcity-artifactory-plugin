@@ -128,7 +128,7 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
              */
             SBuildType buildType = build.getBuildType();
             if (buildType != null) {
-                if (shouldStoreBuildInRunHistory(runParameters, runType)) {
+                if (shouldStoreBuildInRunHistory(runParameters)) {
                     String runnerCustomStorageId = Long.toString(build.getBuildId()) + "#" + runnerContext.getId();
 
                     CustomDataStorage runHistory = buildType.getCustomDataStorage(CustomDataStorageKeys.RUN_HISTORY);
@@ -194,14 +194,9 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
         }
     }
 
-    private boolean shouldStoreBuildInRunHistory(Map<String, String> runParameters, String runType) {
-        /**
-         * The only time we care for the value of the publish build info checkbox, is when the gradle extractor is
-         * activated, otherwise we will always store the run in the history (controls the display of the Artifactory
-         * icon in the results page)
-         */
-        return !RunTypeUtils.isGradleWithExtractorActivated(runType, runParameters) ||
-                Boolean.valueOf(runParameters.get(RunnerParameterKeys.PUBLISH_BUILD_INFO));
+    private boolean shouldStoreBuildInRunHistory(Map<String, String> runParameters) {
+        String publishBuildInfoValue = runParameters.get(RunnerParameterKeys.PUBLISH_BUILD_INFO);
+        return StringUtils.isEmpty(publishBuildInfoValue) || Boolean.valueOf(publishBuildInfoValue);
     }
 
     private void modifyReleaseManagementParamsIfNeeded(SRunnerContext runnerContext) {

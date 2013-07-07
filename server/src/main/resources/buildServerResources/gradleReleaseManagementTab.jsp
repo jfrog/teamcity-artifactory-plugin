@@ -104,7 +104,7 @@
                 }
             });
 
-            BS.FormSaver.save(this, base_uri + '${controllerUrl}', errorListener, false);
+            BS.FormSaver.save(this, '${controllerUrl}', errorListener, false);
             return false;
         }
     });

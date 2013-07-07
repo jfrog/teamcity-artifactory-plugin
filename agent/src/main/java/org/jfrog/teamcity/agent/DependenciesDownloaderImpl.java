@@ -1,6 +1,9 @@
 package org.jfrog.teamcity.agent;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import jetbrains.buildServer.agent.BuildRunnerContext;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +57,7 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
         return helper.downloadDependencies(downloadableArtifacts);
     }
 
-    public String getTargetDir(String targetDir, String relativeDir) {
+    public String getTargetDir(String targetDir, String relativeDir) throws IOException {
         final File targetDirFile = new File(targetDir, relativeDir);
         final File workingDir = targetDirFile.isAbsolute() ? targetDirFile :
                 new File(runnerContext.getWorkingDirectory(), targetDirFile.getPath());
@@ -85,6 +88,61 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
         }
 
         return null;
+    }
+
+    public boolean isFileExistsLocally(String filePath, String md5, String sha1) throws IOException {
+        File dest = new File(filePath);
+        if (!dest.exists()) {
+            return false;
+        }
+
+        // If it's a folder return true since we don't care about it, not going to download a folder anyway
+        if (dest.isDirectory()) {
+            return true;
+        }
+
+        try {
+            Map<String, String> checksumsMap = FileChecksumCalculator.calculateChecksums(dest, "md5", "sha1");
+            return checksumsMap != null &&
+                    StringUtils.isNotBlank(md5) && StringUtils.equals(md5, checksumsMap.get("md5")) &&
+                    StringUtils.isNotBlank(sha1) && StringUtils.equals(sha1, checksumsMap.get("sha1"));
+
+        } catch (NoSuchAlgorithmException e) {
+            log.warn("Could not find checksum algorithm: " + e.getLocalizedMessage());
+        }
+
+        return false;
+    }
+
+    public void removeUnusedArtifactsFromLocal(Set<String> allResolvesFiles, Set<String> forDeletionFiles)
+            throws IOException {
+        for (String resolvedFile : forDeletionFiles) {
+            File resolvedFileParent = new File(resolvedFile).getParentFile();
+            if (!resolvedFileParent.exists()) {
+                continue;
+            }
+
+            File[] fileSiblings = resolvedFileParent.listFiles();
+            if (fileSiblings == null) {
+                continue;
+            }
+
+            for (File sibling : fileSiblings) {
+                String siblingPath = sibling.getAbsolutePath();
+                if (!isResolvedOrParentOfResolvedFile(allResolvesFiles, siblingPath)) {
+                    FileUtils.forceDelete(sibling);
+                    log.info("Deleted unresolved file '" + siblingPath + "'");
+                }
+            }
+        }
+    }
+
+    private boolean isResolvedOrParentOfResolvedFile(Set<String> resolvedFiles, final String path) {
+        return Iterables.any(resolvedFiles, new Predicate<String>() {
+            public boolean apply(String filePath) {
+                return StringUtils.equals(filePath, path) || StringUtils.startsWith(filePath, path);
+            }
+        });
     }
 
     /**
