@@ -435,7 +435,6 @@
                             <!-- Property Handlers -->
                             <!-- ~~~~~~~~~~~~~~~~~ -->
                             <artifactory>
-                                <activateRecorder>true</activateRecorder>
                                 <timeout>60</timeout>
                                 <includeEnvVars>true</includeEnvVars>
                                 <envVarsExcludePatterns>.*PWD</envVarsExcludePatterns>
