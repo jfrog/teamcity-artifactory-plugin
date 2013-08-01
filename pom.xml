@@ -439,10 +439,6 @@
                                 <includeEnvVars>true</includeEnvVars>
                                 <envVarsExcludePatterns>.*PWD</envVarsExcludePatterns>
                             </artifactory>
-                            <resolver>
-                                <contextUrl>{ARTIFACTORY_CONTEXT_URL|http://evgenyg.artifactoryonline.com/evgenyg}</contextUrl>
-                                <repoKey>repo</repoKey>
-                            </resolver>
                             <publisher>
                                 <contextUrl>{ARTIFACTORY_CONTEXT_URL|http://evgenyg.artifactoryonline.com/evgenyg}</contextUrl>
                                 <username>temp-deployer</username>
