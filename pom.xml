@@ -403,40 +403,27 @@
         <plugins>
             <plugin>
                 <groupId>org.jfrog.buildinfo</groupId>
-                <artifactId>build-info-extractor-maven3-plugin</artifactId>
+                <artifactId>artifactory-maven-plugin</artifactId>
                 <version>2.2.x-SNAPSHOT</version>
                 <inherited>false</inherited>
                 <executions>
                     <execution>
                         <id>build-info</id>
                         <goals>
-                            <goal>extract-build-info</goal>
+                            <goal>publish</goal>
                         </goals>
                         <configuration>
-                            <!-- ~~~~~~~~~~~~~~~~~ -->
-                            <!-- Deploy Properties -->
-                            <!-- ~~~~~~~~~~~~~~~~~ -->
-                            <properties>
-                                artifactory.deploy.1 = 2
-                                artifactory.deploy.2 = 3
-                            </properties>    
                             <deployProperties>
-                                1                  = 11
-                                3                  = 4
-                                gradle             = awesome
-                                teamcity.version   = ${teamcity.version}
-                                build.info.version = ${build.info.version}
+                                <gradle>awesome</gradle>
+                                <teamcity.version>${teamcity.version}</teamcity.version>
+                                <build.info.version>${build.info.version}</build.info.version>
                             </deployProperties>
-                            <!-- ~~~~~~~~~~~~~~~~~ -->
-                            <!-- Property Handlers -->
-                            <!-- ~~~~~~~~~~~~~~~~~ -->
                             <artifactory>
-                                <timeout>60</timeout>
                                 <includeEnvVars>true</includeEnvVars>
-                                <envVarsExcludePatterns>.*PWD</envVarsExcludePatterns>
+                                <propertiesFile>publish.properties</propertiesFile>
                             </artifactory>
                             <publisher>
-                                <contextUrl>{ARTIFACTORY_CONTEXT_URL|http://evgenyg.artifactoryonline.com/evgenyg}</contextUrl>
+                                <contextUrl>{ARTIFACTORY_CONTEXT_URL|"http://evgenyg.artifactoryonline.com/evgenyg"}</contextUrl>
                                 <username>temp-deployer</username>
                                 <password>{DESede}YiN0PzdSPYltV2J3u3O0fq3y2CbrEWxa</password>
                                 <excludePatterns>*.pom</excludePatterns>
@@ -444,18 +431,9 @@
                                 <snapshotRepoKey>temp</snapshotRepoKey>
                             </publisher>
                             <buildInfo>
-                                <buildNumber>{DRONE_BUILD_NUMBER|TRAVIS_BUILD_NUMBER|CI_BUILD_NUMBER|BUILD_NUMBER|333}</buildNumber>
-                                <buildUrl>{DRONE_BUILD_URL|CI_BUILD_URL|BUILD_URL|myDefaultUrl}</buildUrl>
+                                <buildNumber>{DRONE_BUILD_NUMBER|TRAVIS_BUILD_NUMBER|CI_BUILD_NUMBER|BUILD_NUMBER|"333"}</buildNumber>
+                                <buildUrl>{DRONE_BUILD_URL|CI_BUILD_URL|BUILD_URL|"DefaultBuildUrl"}</buildUrl>
                             </buildInfo>
-                            <licenses>
-                                <includePublishedArtifacts>true</includePublishedArtifacts>
-                            </licenses>    
-                            <issues>
-                                <issueTrackerName>YouTrack</issueTrackerName>
-                            </issues>
-                            <blackDuck>
-                                <appName>MyBestApp</appName>
-                            </blackDuck>
                         </configuration>
                     </execution>
                 </executions>
