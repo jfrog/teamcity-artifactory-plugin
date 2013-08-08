@@ -420,6 +420,7 @@
                             </deployProperties>
                             <artifactory>
                                 <includeEnvVars>true</includeEnvVars>
+                                <timeoutSec>60</timeoutSec>
                                 <propertiesFile>publish.properties</propertiesFile>
                             </artifactory>
                             <publisher>
@@ -434,6 +435,9 @@
                                 <buildNumber>{DRONE_BUILD_NUMBER|TRAVIS_BUILD_NUMBER|CI_BUILD_NUMBER|BUILD_NUMBER|"333"}</buildNumber>
                                 <buildUrl>{DRONE_BUILD_URL|CI_BUILD_URL|BUILD_URL|"DefaultBuildUrl"}</buildUrl>
                             </buildInfo>
+                            <blackDuck>
+                                <appName>MyBestApp</appName>
+                            </blackDuck>
                         </configuration>
                     </execution>
                 </executions>
