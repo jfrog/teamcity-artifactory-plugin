@@ -426,7 +426,7 @@
                             <publisher>
                                 <contextUrl>{ARTIFACTORY_CONTEXT_URL|"http://evgenyg.artifactoryonline.com/evgenyg"}</contextUrl>
                                 <username>temp-deployer</username>
-                                <password>{DESede}YiN0PzdSPYltV2J3u3O0fq3y2CbrEWxa</password>
+                                <password>{"DESede"}YiN0PzdSPYltV2J3u3O0fq3y2CbrEWxa</password>
                                 <excludePatterns>*.pom</excludePatterns>
                                 <repoKey>temp</repoKey>
                                 <snapshotRepoKey>temp</snapshotRepoKey>
