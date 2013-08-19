@@ -228,7 +228,10 @@ BS.local = {
             }
         });
         BS.ajaxRequest(base_uri + '${controllerUrl}', {
-            parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadResolvingRepos=true',
+            parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadResolvingRepos=true'
+                    + '&overrideDeployerCredentials=' + BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()
+                    + '&username=' + $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value
+                    + '&password=' + encyptedPass,
             onComplete: function (response, options) {
 
                 var resolvingRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.resolvingRepo');
