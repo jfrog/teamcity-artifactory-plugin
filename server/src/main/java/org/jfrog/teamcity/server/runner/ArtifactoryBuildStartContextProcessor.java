@@ -111,12 +111,7 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
             runnerContext.addRunnerParameter(RunnerParameterKeys.TIMEOUT, Integer.toString(serverConfig.getTimeout()));
 
             //TODO: [by yl] See how we can get a nicer build name...
-            String fullBuildName = build.getFullName();
-            String runnerContextName = runnerContext.getName();
-            if (StringUtils.isNotBlank(runnerContextName)) {
-                fullBuildName += " :: " + runnerContextName;
-            }
-            runnerContext.addRunnerParameter(BUILD_NAME, fullBuildName);
+            runnerContext.addRunnerParameter(BUILD_NAME, build.getFullName());
 
             runnerContext.addRunnerParameter(BUILD_NUMBER, build.getBuildNumber());
 
@@ -142,16 +137,12 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
             if (buildType != null) {
                 if (shouldStoreBuildInRunHistory(runParameters)) {
                     String runnerCustomStorageId = Long.toString(build.getBuildId()) + "#" + runnerContext.getId();
-
-                    CustomDataStorage runHistory = buildType.getCustomDataStorage(CustomDataStorageKeys.RUN_HISTORY);
-
                     StringBuilder artifactoryUrlBuilder = new StringBuilder().append(serverConfigUrl);
                     if (!serverConfigUrl.endsWith("/")) {
                         artifactoryUrlBuilder.append("/");
                     }
-                    String artifactoryUrl = artifactoryUrlBuilder.append("webapp/builds/").append(fullBuildName).
-                            append("/").append(build.getBuildNumber()).toString();
-
+                    String artifactoryUrl = artifactoryUrlBuilder.append("webapp/builds/").toString();
+                    CustomDataStorage runHistory = buildType.getCustomDataStorage(CustomDataStorageKeys.RUN_HISTORY);
                     runHistory.putValue(runnerCustomStorageId, artifactoryUrl);
                 }
             }
