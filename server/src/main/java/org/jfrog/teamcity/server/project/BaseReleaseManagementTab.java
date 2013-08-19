@@ -9,6 +9,7 @@ import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.vcs.VcsRootInstance;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import jetbrains.buildServer.web.openapi.buildType.BuildTypeTab;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
@@ -29,8 +30,8 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
     private DeployableArtifactoryServers deployableServers;
 
     public BaseReleaseManagementTab(@NotNull WebControllerManager manager, @NotNull ProjectManager projectManager,
-            @NotNull String includeUrl, @NotNull String controllerUrl, @NotNull BaseFormXmlController controller,
-            @NotNull DeployableArtifactoryServers deployableServers) {
+                                    @NotNull String includeUrl, @NotNull String controllerUrl, @NotNull BaseFormXmlController controller,
+                                    @NotNull DeployableArtifactoryServers deployableServers) {
         super(NAME, "Artifactory Release Management", manager, projectManager, includeUrl);
 
         this.projectManager = projectManager;
@@ -57,7 +58,7 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
 
     @Override
     public void fillModel(@NotNull Map<String, Object> model, @NotNull HttpServletRequest request,
-            @NotNull SBuildType buildType, @Nullable SUser user) {
+                          @NotNull SBuildType buildType, @Nullable SUser user) {
         String buildTypeId = request.getParameter("buildTypeId");
         SBuildRunnerDescriptor buildRunner = getFirstReleaseManagementEnabledRunner(buildType);
         if (buildRunner == null) {
@@ -91,8 +92,20 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
 
         if (parameters.containsKey(RunnerParameterKeys.URL_ID)) {
             long serverId = Long.parseLong(parameters.get(RunnerParameterKeys.URL_ID));
-            managementConfig.setSelectedArtifactoryServerHasAddons(deployableServers.serverHasAddons(serverId));
-            managementConfig.setDeployableRepoKeys(deployableServers.getServerDeployableRepos(serverId));
+            boolean overrideDeployerCredentials = false;
+            String username = "";
+            String password = "";
+            if (Boolean.valueOf(parameters.get(RunnerParameterKeys.OVERRIDE_DEFAULT_DEPLOYER))) {
+                overrideDeployerCredentials = true;
+                if (StringUtils.isNotBlank(parameters.get(RunnerParameterKeys.DEPLOYER_USERNAME))) {
+                    username = parameters.get(RunnerParameterKeys.DEPLOYER_USERNAME);
+                }
+                if (StringUtils.isNotBlank(parameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD))) {
+                    password = parameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD);
+                }
+            }
+            managementConfig.setSelectedArtifactoryServerHasAddons(deployableServers.serverHasAddons(serverId, overrideDeployerCredentials, username, password));
+            managementConfig.setDeployableRepoKeys(deployableServers.getServerDeployableRepos(serverId, overrideDeployerCredentials, username, password));
         }
 
         fillBuildSpecificModel(model, buildType, managementConfig);
@@ -128,5 +141,5 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
     protected abstract ReleaseManagementConfigModel getReleaseManagementConfigModel();
 
     protected abstract void fillBuildSpecificModel(Map<String, Object> model, SBuildType buildType,
-            ReleaseManagementConfigModel managementConfig);
+                                                   ReleaseManagementConfigModel managementConfig);
 }

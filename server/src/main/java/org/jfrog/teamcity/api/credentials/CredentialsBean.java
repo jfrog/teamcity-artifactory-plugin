@@ -42,8 +42,7 @@ public class CredentialsBean {
             username = serializableCredentials.getUsername();
 
             String password = serializableCredentials.getPassword();
-            if (StringUtils.isNotBlank(password) &&
-                    EncryptUtil.isScrambled(password)) {
+            if (StringUtils.isNotBlank(password) && EncryptUtil.isScrambled(password)) {
                 password = EncryptUtil.unscramble(password);
             }
             this.password = password;

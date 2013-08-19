@@ -17,6 +17,7 @@
 package org.jfrog.teamcity.server.runner;
 
 import jetbrains.buildServer.controllers.BaseFormXmlController;
+import jetbrains.buildServer.serverSide.crypt.RSACipher;
 import org.apache.commons.lang.StringUtils;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
@@ -38,7 +39,7 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
     private final String actualJsp;
 
     public ArtifactoryRunTypeConfigController(@NotNull final String actualUrl, @NotNull final String actualJsp,
-            @NotNull final DeployableArtifactoryServers deployableServers) {
+                                              @NotNull final DeployableArtifactoryServers deployableServers) {
         this.actualUrl = actualUrl;
         this.actualJsp = actualJsp;
         this.deployableServers = deployableServers;
@@ -71,11 +72,15 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
         if (StringUtils.isNotBlank(selectedUrl)) {
             long id = Long.parseLong(selectedUrl);
 
+            boolean overrideDeployerCredentials = Boolean.valueOf(request.getParameter("overrideDeployerCredentials"));
+            String username = request.getParameter("username");
+            String password = request.getParameter("password");
+            password = RSACipher.decryptWebRequestData(password);
+
             String loadTargetRepos = request.getParameter("loadTargetRepos");
             if (StringUtils.isNotBlank(loadTargetRepos) && Boolean.valueOf(loadTargetRepos)) {
                 Element deployableReposElement = new Element("deployableRepos");
-
-                List<String> deployableRepos = deployableServers.getServerDeployableRepos(id);
+                List<String> deployableRepos = deployableServers.getServerDeployableRepos(id, overrideDeployerCredentials, username, password);
                 for (String deployableRepo : deployableRepos) {
                     deployableReposElement.addContent(new Element("repoName").addContent(deployableRepo));
                 }
@@ -86,7 +91,7 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
             if (StringUtils.isNotBlank(loadResolvingRepos) && Boolean.valueOf(loadResolvingRepos)) {
                 Element resolvingReposElement = new Element("resolvingRepos");
 
-                List<String> resolvingRepos = deployableServers.getServerResolvingRepos(id);
+                List<String> resolvingRepos = deployableServers.getServerResolvingRepos(id, overrideDeployerCredentials, username, password);
                 for (String resolvingRepo : resolvingRepos) {
                     resolvingReposElement.addContent(new Element("repoName").addContent(resolvingRepo));
                 }
@@ -96,14 +101,14 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
             String checkArtifactoryHasAddons = request.getParameter("checkArtifactoryHasAddons");
             if (StringUtils.isNotBlank(checkArtifactoryHasAddons) && Boolean.valueOf(checkArtifactoryHasAddons)) {
                 Element hasAddonsElement = new Element("hasAddons");
-                hasAddonsElement.setText(Boolean.toString(deployableServers.serverHasAddons(id)));
+                hasAddonsElement.setText(Boolean.toString(deployableServers.serverHasAddons(id, overrideDeployerCredentials, username, password)));
                 xmlResponse.addContent(hasAddonsElement);
             }
 
             String checkCompatibleVersion = request.getParameter("checkCompatibleVersion");
             if (StringUtils.isNotBlank(checkCompatibleVersion) && Boolean.valueOf(checkCompatibleVersion)) {
                 Element compatibleVersionElement = new Element("compatibleVersion");
-                compatibleVersionElement.setText(deployableServers.isServerCompatible(id));
+                compatibleVersionElement.setText(deployableServers.isServerCompatible(id, overrideDeployerCredentials, username, password));
                 xmlResponse.addContent(compatibleVersionElement);
             }
         }

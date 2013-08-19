@@ -67,18 +67,20 @@ public class DeployableArtifactoryServers {
         return map;
     }
 
-    public List<String> getServerDeployableRepos(long serverUrlId) {
+    public List<String> getServerDeployableRepos(long serverUrlId, boolean overrideDeployerCredentials,
+                                                 String username, String password) {
 
         List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
 
         for (ServerConfigBean serverConfig : serverConfigs) {
             if (serverUrlId == serverConfig.getId()) {
 
-                CredentialsBean resolvingCredentials = CredentialsHelper.getPreferredResolvingCredentials(serverConfig);
+                CredentialsBean deployingCredentials = CredentialsHelper.getPreferredDeployingCredentials(serverConfig,
+                        overrideDeployerCredentials, username, password);
                 ProxyInfo proxyInfo = null;
                 try {
                     ArtifactoryBuildInfoClient client = new ArtifactoryBuildInfoClient(serverConfig.getUrl(),
-                            resolvingCredentials.getUsername(), resolvingCredentials.getPassword(),
+                            deployingCredentials.getUsername(), deployingCredentials.getPassword(),
                             new TeamcityServerBuildInfoLog());
                     client.setConnectionTimeout(serverConfig.getTimeout());
 
@@ -92,7 +94,7 @@ public class DeployableArtifactoryServers {
                     String message =
                             String.format("Error occurred while retrieving deployable repository list from url: " +
                                     "'%s', username: '%s', password: '%s', timeout: '%s'", serverConfig.getUrl(),
-                                    resolvingCredentials.getUsername(), resolvingCredentials.getPassword(),
+                                    deployingCredentials.getUsername(), deployingCredentials.getPassword(),
                                     serverConfig.getTimeout());
                     if (proxyInfo != null) {
                         message += String.format(", proxy host: '%s', proxy port: '%s', proxy username: '%s', " +
@@ -107,14 +109,16 @@ public class DeployableArtifactoryServers {
         return Lists.newArrayList();
     }
 
-    public List<String> getServerResolvingRepos(long serverUrlId) {
+    public List<String> getServerResolvingRepos(long serverUrlId, boolean overrideDeployerCredentials,
+                                                String username, String password) {
 
         List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
 
         for (ServerConfigBean serverConfig : serverConfigs) {
             if (serverUrlId == serverConfig.getId()) {
 
-                CredentialsBean resolvingCredentials = CredentialsHelper.getPreferredResolvingCredentials(serverConfig);
+                CredentialsBean resolvingCredentials = CredentialsHelper.getPreferredResolvingCredentials(serverConfig,
+                        overrideDeployerCredentials, username, password);
                 ProxyInfo proxyInfo = null;
                 try {
                     ArtifactoryBuildInfoClient client = new ArtifactoryBuildInfoClient(serverConfig.getUrl(),
@@ -147,17 +151,18 @@ public class DeployableArtifactoryServers {
         return Lists.newArrayList();
     }
 
-    public boolean serverHasAddons(long serverUrlId) {
+    public boolean serverHasAddons(long serverUrlId, boolean overrideDeployerCredentials, String username, String password) {
         List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
 
         for (ServerConfigBean serverConfig : serverConfigs) {
             if (serverUrlId == serverConfig.getId()) {
 
-                CredentialsBean resolvingCredentials = CredentialsHelper.getPreferredResolvingCredentials(serverConfig);
+                CredentialsBean deployerCredentials = CredentialsHelper.getPreferredResolvingCredentials(serverConfig,
+                        overrideDeployerCredentials, username, password);
                 ProxyInfo proxyInfo = null;
                 try {
                     ArtifactoryBuildInfoClient client = new ArtifactoryBuildInfoClient(serverConfig.getUrl(),
-                            resolvingCredentials.getUsername(), resolvingCredentials.getPassword(),
+                            deployerCredentials.getUsername(), deployerCredentials.getPassword(),
                             new TeamcityServerBuildInfoLog());
                     client.setConnectionTimeout(serverConfig.getTimeout());
 
@@ -174,7 +179,7 @@ public class DeployableArtifactoryServers {
                     String message =
                             String.format("Error occurred while determining addon existence from url: " +
                                     "'%s', username: '%s', password: '%s', timeout: '%s'", serverConfig.getUrl(),
-                                    resolvingCredentials.getUsername(), resolvingCredentials.getPassword(),
+                                    deployerCredentials.getUsername(), deployerCredentials.getPassword(),
                                     serverConfig.getTimeout());
                     if (proxyInfo != null) {
                         message += String.format(", proxy host: '%s', proxy port: '%s', proxy username: '%s', " +
@@ -189,17 +194,18 @@ public class DeployableArtifactoryServers {
         return false;
     }
 
-    public String isServerCompatible(long serverUrlId) {
+    public String isServerCompatible(long serverUrlId, boolean overrideDeployerCredentials, String username, String password) {
         List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
 
         for (ServerConfigBean serverConfig : serverConfigs) {
             if (serverUrlId == serverConfig.getId()) {
 
-                CredentialsBean resolvingCredentials = CredentialsHelper.getPreferredResolvingCredentials(serverConfig);
+                CredentialsBean deployerCredentials = CredentialsHelper.getPreferredResolvingCredentials(serverConfig,
+                        overrideDeployerCredentials, username, password);
                 ProxyInfo proxyInfo = null;
                 try {
                     ArtifactoryBuildInfoClient client = new ArtifactoryBuildInfoClient(serverConfig.getUrl(),
-                            resolvingCredentials.getUsername(), resolvingCredentials.getPassword(),
+                            deployerCredentials.getUsername(), deployerCredentials.getPassword(),
                             new TeamcityServerBuildInfoLog());
                     client.setConnectionTimeout(serverConfig.getTimeout());
 
@@ -224,7 +230,7 @@ public class DeployableArtifactoryServers {
                     String message =
                             String.format("Error occurred while determining version compatibility from url: " +
                                     "'%s', username: '%s', password: '%s', timeout: '%s'", serverConfig.getUrl(),
-                                    resolvingCredentials.getUsername(), resolvingCredentials.getPassword(),
+                                    deployerCredentials.getUsername(), deployerCredentials.getPassword(),
                                     serverConfig.getTimeout());
                     if (proxyInfo != null) {
                         message += String.format(", proxy host: '%s', proxy port: '%s', proxy username: '%s', " +

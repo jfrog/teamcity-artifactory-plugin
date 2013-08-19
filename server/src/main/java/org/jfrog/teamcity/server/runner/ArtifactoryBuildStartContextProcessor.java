@@ -58,8 +58,8 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
     private ProjectManager projectManager;
 
     public ArtifactoryBuildStartContextProcessor(@NotNull final SBuildServer buildServer,
-            @NotNull final DeployableArtifactoryServers deployableServers,
-            @NotNull final ProjectManager projectManager) {
+                                                 @NotNull final DeployableArtifactoryServers deployableServers,
+                                                 @NotNull final ProjectManager projectManager) {
         this.buildServer = buildServer;
         this.deployableServers = deployableServers;
         this.projectManager = projectManager;
@@ -87,12 +87,24 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
             String serverConfigUrl = serverConfig.getUrl();
             runnerContext.addRunnerParameter(RunnerParameterKeys.URL, serverConfigUrl);
 
+            boolean overrideDeployerCredentials = false;
+            String username = "";
+            String password = "";
+            if (Boolean.valueOf(runParameters.get(RunnerParameterKeys.OVERRIDE_DEFAULT_DEPLOYER))) {
+                overrideDeployerCredentials = true;
+                if (StringUtils.isNotBlank(runParameters.get(RunnerParameterKeys.DEPLOYER_USERNAME))) {
+                    username = runParameters.get(RunnerParameterKeys.DEPLOYER_USERNAME);
+                }
+                if (StringUtils.isNotBlank(runParameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD))) {
+                    password = runParameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD);
+                }
+            }
             CredentialsBean preferredDeploying =
-                    CredentialsHelper.getPreferredDeployingCredentials(runParameters, serverConfig);
+                    CredentialsHelper.getPreferredDeployingCredentials(serverConfig, overrideDeployerCredentials, username, password);
             runnerContext.addRunnerParameter(RunnerParameterKeys.DEPLOYER_USERNAME, preferredDeploying.getUsername());
             runnerContext.addRunnerParameter(RunnerParameterKeys.DEPLOYER_PASSWORD, preferredDeploying.getPassword());
 
-            CredentialsBean preferredResolving = CredentialsHelper.getPreferredResolvingCredentials(serverConfig);
+            CredentialsBean preferredResolving = CredentialsHelper.getPreferredResolvingCredentials(serverConfig, overrideDeployerCredentials, username, password);
             runnerContext.addRunnerParameter(RunnerParameterKeys.RESOLVER_USERNAME, preferredResolving.getUsername());
             runnerContext.addRunnerParameter(RunnerParameterKeys.RESOLVER_PASSWORD, preferredResolving.getPassword());
 

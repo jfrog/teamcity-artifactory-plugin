@@ -23,6 +23,7 @@ import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.serverSide.SBuildType;
+import jetbrains.buildServer.serverSide.crypt.RSACipher;
 import jetbrains.buildServer.web.util.SessionUser;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -63,7 +64,7 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
     private DeployableArtifactoryServers deployableServers;
 
     public PromotionResultsFragmentController(SBuildServer buildServer,
-            DeployableArtifactoryServers deployableServers) {
+                                              DeployableArtifactoryServers deployableServers) {
         this.buildServer = buildServer;
         this.deployableServers = deployableServers;
     }
@@ -107,7 +108,11 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
         if (StringUtils.isNotBlank(loadTargetRepos) && Boolean.valueOf(loadTargetRepos)) {
             Element deployableReposElement = new Element("deployableRepos");
 
-            List<String> deployableRepos = deployableServers.getServerDeployableRepos(selectedUrlId);
+            boolean overrideDeployerCredentials = Boolean.valueOf(request.getParameter("overrideDeployerCredentials"));
+            String username = request.getParameter("username");
+            String password = request.getParameter("password");
+            password = RSACipher.decryptWebRequestData(password);
+            List<String> deployableRepos = deployableServers.getServerDeployableRepos(selectedUrlId, overrideDeployerCredentials, username, password);
             for (String deployableRepo : deployableRepos) {
                 deployableReposElement.addContent(new Element("repoName").addContent(deployableRepo));
             }
@@ -177,9 +182,21 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
     }
 
     private ArtifactoryBuildInfoClient getBuildInfoClient(ServerConfigBean serverConfigBean,
-            Map<String, String> parameters) {
-        CredentialsBean preferredDeployer =
-                CredentialsHelper.getPreferredDeployingCredentials(parameters, serverConfigBean);
+                                                          Map<String, String> parameters) {
+        boolean overrideDeployerCredentials = false;
+        String username = "";
+        String password = "";
+        if (Boolean.valueOf(parameters.get(RunnerParameterKeys.OVERRIDE_DEFAULT_DEPLOYER))) {
+            overrideDeployerCredentials = true;
+            if (StringUtils.isNotBlank(parameters.get(RunnerParameterKeys.DEPLOYER_USERNAME))) {
+                username = parameters.get(RunnerParameterKeys.DEPLOYER_USERNAME);
+            }
+            if (StringUtils.isNotBlank(parameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD))) {
+                password = parameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD);
+            }
+        }
+        CredentialsBean preferredDeployer = CredentialsHelper.getPreferredDeployingCredentials(serverConfigBean,
+                overrideDeployerCredentials, username, password);
         ArtifactoryBuildInfoClient infoClient = new ArtifactoryBuildInfoClient(serverConfigBean.getUrl(),
                 preferredDeployer.getUsername(), preferredDeployer.getPassword(), new TeamcityServerBuildInfoLog());
         infoClient.setConnectionTimeout(serverConfigBean.getTimeout());

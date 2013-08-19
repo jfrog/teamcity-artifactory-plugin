@@ -53,7 +53,8 @@
     </td>
 </tr>
 
-<tr class="noBorder" id="deployerUsername.container" style="${shouldDisplayCredentialFields ? '' : 'display: none;'}">
+<tr class="noBorder updateOnChange" id="deployerUsername.container"
+    style="${shouldDisplayCredentialFields ? '' : 'display: none;'}">
     <th>
         <label for="org.jfrog.artifactory.selectedDeployableServer.deployerUsername">
             Deployer username:
@@ -67,7 +68,8 @@
     </td>
 </tr>
 
-<tr class="noBorder" id="deployerPassword.container" style="${shouldDisplayCredentialFields ? '' : 'display: none;'}">
+<tr class="noBorder updateOnChange" id="deployerPassword.container"
+    style="${shouldDisplayCredentialFields ? '' : 'display: none;'}">
     <th>
         <label for="secure:org.jfrog.artifactory.selectedDeployableServer.deployerPassword">
             Deployer password:
