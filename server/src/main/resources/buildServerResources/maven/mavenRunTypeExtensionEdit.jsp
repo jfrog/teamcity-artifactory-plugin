@@ -301,7 +301,7 @@ display:inline-block;
             //console.log(jQuery(this).attr("name") + " = " + jQuery(this).val());
             var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId');
             var selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
-            BS.local.loadTargetRepos(selectedUrlId, false, true);
+            BS.local.loadTargetRepos(selectedUrlId, true, true);
         })
     </script>
 
