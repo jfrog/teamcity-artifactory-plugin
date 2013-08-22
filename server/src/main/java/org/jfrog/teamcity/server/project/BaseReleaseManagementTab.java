@@ -26,15 +26,12 @@ import static org.jfrog.teamcity.common.ConstantValues.NAME;
  */
 public abstract class BaseReleaseManagementTab extends BuildTypeTab {
 
-    private ProjectManager projectManager;
     private DeployableArtifactoryServers deployableServers;
 
     public BaseReleaseManagementTab(@NotNull WebControllerManager manager, @NotNull ProjectManager projectManager,
                                     @NotNull String includeUrl, @NotNull String controllerUrl, @NotNull BaseFormXmlController controller,
                                     @NotNull DeployableArtifactoryServers deployableServers) {
         super(NAME, "Artifactory Release Management", manager, projectManager, includeUrl);
-
-        this.projectManager = projectManager;
         this.deployableServers = deployableServers;
         register();
 
@@ -43,7 +40,7 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
 
     @Override
     public boolean isAvailable(@NotNull HttpServletRequest request) {
-        SBuildType buildType = projectManager.findBuildTypeById(request.getParameter("buildTypeId"));
+        SBuildType buildType = getBuildType(request);
         if ((buildType == null) || !buildHasAppropriateRunner(buildType)) {
             return false;
         }
@@ -59,7 +56,7 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
     @Override
     public void fillModel(@NotNull Map<String, Object> model, @NotNull HttpServletRequest request,
                           @NotNull SBuildType buildType, @Nullable SUser user) {
-        String buildTypeId = request.getParameter("buildTypeId");
+        String buildTypeId = buildType.getBuildTypeId();
         SBuildRunnerDescriptor buildRunner = getFirstReleaseManagementEnabledRunner(buildType);
         if (buildRunner == null) {
             setIncludeUrl("releaseManagementErrorTab.jsp");
