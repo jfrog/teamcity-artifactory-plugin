@@ -75,7 +75,7 @@
             <span class="smallNote">
                 Comma or space-separated list of
     <a href="http://ant.apache.org/manual/dirtasks.html#patterns" target="_blank">Ant-style patterns</a>
-    of files that will be excluded from publishing. Exclude patterns are applied on the published file path before any
+    of files that will be excluded from publishing. Exclude patterns are applied on the published file path after any
     include patterns.
             </span>
     </td>
