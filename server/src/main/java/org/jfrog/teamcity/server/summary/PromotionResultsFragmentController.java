@@ -141,7 +141,7 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
         //Promotion
         ArtifactoryBuildInfoClient client = null;
         try {
-            client = getBuildInfoClient(server, username, password);
+            client = getBuildInfoClient(server, preferredDeployer.getUsername(), preferredDeployer.getPassword());
             // do a dry run first
             PromotionBuilder promotionBuilder = new PromotionBuilder()
                     .status(PromotionTargetStatusType.valueOf(request.getParameter("targetStatus")).
