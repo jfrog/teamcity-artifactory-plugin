@@ -144,7 +144,7 @@
                         } else if (compatibleVersionValue == "true") {
 
                             if (hasAddonsValue == "true") {
-                                //BS.local.showAll(foundExistingConfig, selectedUrlId);
+                                BS.local.showAll(foundExistingConfig, selectedUrlId);
                             } else {
                                 errorMessage = '${disabledMessage}';
                                 //BS.local.hideAll();
@@ -152,7 +152,7 @@
                         } else {
                             if (hasAddonsValue == "true") {
                                 errorMessage = '${incompatibleVersionMessage}';
-                                //BS.local.showAll(foundExistingConfig, selectedUrlId);
+                                BS.local.showAll(foundExistingConfig, selectedUrlId);
                             } else {
                                 errorMessage = '${disabledMessage}';
                                 //BS.local.hideAll();
