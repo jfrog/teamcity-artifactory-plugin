@@ -153,8 +153,8 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
     private ArtifactoryDependenciesClient newClient() {
         ArtifactoryDependenciesClient client =
                 new ArtifactoryDependenciesClient(serverUrl,
-                        runnerParams.get(RunnerParameterKeys.DEPLOYER_USERNAME),
-                        runnerParams.get(RunnerParameterKeys.DEPLOYER_PASSWORD),
+                        runnerParams.get(RunnerParameterKeys.RESOLVER_USERNAME),
+                        runnerParams.get(RunnerParameterKeys.RESOLVER_PASSWORD),
                         log);
 
         client.setConnectionTimeout(Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
