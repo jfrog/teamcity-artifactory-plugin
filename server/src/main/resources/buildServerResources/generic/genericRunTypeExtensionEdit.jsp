@@ -227,6 +227,7 @@ display:inline-block;
             var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId');
             var selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
             BS.local.loadTargetRepos(selectedUrlId);
+            BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
         })
     </script>
 
