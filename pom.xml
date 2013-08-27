@@ -408,7 +408,7 @@
                 <repository>
                     <id>jfrog-libs-releases</id>
                     <name>The jfrog repository for 3rd party releases</name>
-                    <url>https://oss.jfrog.org/libs-releases</url>
+                    <url>https://oss.jfrog.org/libs-release</url>
                     <snapshots>
                         <enabled>false</enabled>
                     </snapshots>
@@ -416,7 +416,7 @@
                 <repository>
                     <id>jfrog-libs-snapshots</id>
                     <name>The jfrog repository for 3rd party snapshots</name>
-                    <url>https://oss.jfrog.org/libs-snapshots</url>
+                    <url>https://oss.jfrog.org/libs-snapshot</url>
                     <releases>
                         <enabled>false</enabled>
                     </releases>
@@ -426,7 +426,7 @@
                 <pluginRepository>
                     <id>jfrog-plugins-releases</id>
                     <name>The jfrog repository for plugin releases</name>
-                    <url>https://oss.jfrog.org/plugins-releases</url>
+                    <url>https://oss.jfrog.org/plugins-release</url>
                     <snapshots>
                         <enabled>false</enabled>
                     </snapshots>
@@ -434,7 +434,7 @@
                 <pluginRepository>
                     <id>jfrog-plugins-snapshots</id>
                     <name>The jfrog repository for plugin snapshots</name>
-                    <url>https://oss.jfrog.org/plugins-snapshots</url>
+                    <url>https://oss.jfrog.org/plugins-snapshot</url>
                     <releases>
                         <enabled>false</enabled>
                     </releases>
