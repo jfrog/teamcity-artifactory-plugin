@@ -37,7 +37,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <plugin.version>${project.version}</plugin.version>
         <teamcity.version>7.1.0</teamcity.version>
-        <build.info.version>2.1.2</build.info.version>
+        <build.info.version>2.2.x-SNAPSHOT</build.info.version>
     </properties>
 
     <developers>
@@ -231,7 +231,7 @@
             <dependency>
                 <groupId>org.jfrog.buildinfo</groupId>
                 <artifactId>build-info-extractor-ivy</artifactId>
-                <version>2.1.0</version>
+                <version>2.2.x-SNAPSHOT</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.ant</groupId>
@@ -250,7 +250,7 @@
             <dependency>
                 <groupId>org.jfrog.buildinfo</groupId>
                 <artifactId>build-info-extractor-gradle</artifactId>
-                <version>2.1.0</version>
+                <version>2.2.x-SNAPSHOT</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.ivy</groupId>
@@ -261,7 +261,7 @@
             <dependency>
                 <groupId>org.jfrog.buildinfo</groupId>
                 <artifactId>build-info-extractor-maven3</artifactId>
-                <version>2.1.0</version>
+                <version>2.2.x-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.tmatesoft.svnkit</groupId>
@@ -408,7 +408,7 @@
                 <repository>
                     <id>jfrog-libs-releases</id>
                     <name>The jfrog repository for 3rd party releases</name>
-                    <url>http://repo.jfrog.org/artifactory/libs-releases</url>
+                    <url>http://oss.jfrog.org/libs-releases</url>
                     <snapshots>
                         <enabled>false</enabled>
                     </snapshots>
@@ -416,7 +416,7 @@
                 <repository>
                     <id>jfrog-libs-snapshots</id>
                     <name>The jfrog repository for 3rd party snapshots</name>
-                    <url>http://repo.jfrog.org/artifactory/libs-snapshots</url>
+                    <url>http://oss.jfrog.org/libs-snapshots</url>
                     <releases>
                         <enabled>false</enabled>
                     </releases>
@@ -426,7 +426,7 @@
                 <pluginRepository>
                     <id>jfrog-plugins-releases</id>
                     <name>The jfrog repository for plugin releases</name>
-                    <url>http://repo.jfrog.org/artifactory/plugins-releases</url>
+                    <url>http://oss.jfrog.org/plugins-releases</url>
                     <snapshots>
                         <enabled>false</enabled>
                     </snapshots>
@@ -434,7 +434,7 @@
                 <pluginRepository>
                     <id>jfrog-plugins-snapshots</id>
                     <name>The jfrog repository for plugin snapshots</name>
-                    <url>http://repo.jfrog.org/artifactory/plugins-snapshots</url>
+                    <url>http://oss.jfrog.org/plugins-snapshots</url>
                     <releases>
                         <enabled>false</enabled>
                     </releases>
