@@ -26,7 +26,6 @@ import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.TriggerParameterKeys;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
 
@@ -44,8 +43,8 @@ public class ArtifactoryBuildTriggerService extends BuildTriggerService {
     private DeployableArtifactoryServers deployableServers;
 
     public ArtifactoryBuildTriggerService(@NotNull final PluginDescriptor descriptor,
-            @NotNull final WebControllerManager wcm,
-            @NotNull final DeployableArtifactoryServers deployableServers) {
+                                          @NotNull final WebControllerManager wcm,
+                                          @NotNull final DeployableArtifactoryServers deployableServers) {
         this.deployableServers = deployableServers;
         actualUrl = descriptor.getPluginResourcesPath("editArtifactoryTrigger.html");
         final String actualJsp = descriptor.getPluginResourcesPath("editArtifactoryTrigger.jsp");
@@ -74,9 +73,6 @@ public class ArtifactoryBuildTriggerService extends BuildTriggerService {
         long urlIdToCheck = Long.parseLong(urlId);
 
         if (StringUtils.isNotBlank(urlId) && deployableServers.isUrlIdConfigured(urlIdToCheck)) {
-            if (!deployableServers.serverHasAddons(urlIdToCheck)) {
-                return "Trigger disabled: " + ConstantValues.DISABLED_MESSAGE;
-            }
             String url = deployableServers.getServerConfigById(urlIdToCheck).getUrl();
             String targetRepo = map.get(TriggerParameterKeys.TARGET_REPO);
             return String.format("Watching items of the repository '%s' on the server '%s'", targetRepo, url);
@@ -118,9 +114,6 @@ public class ArtifactoryBuildTriggerService extends BuildTriggerService {
                     if (!deployableServers.isUrlIdConfigured(id)) {
                         invalidProperties.add(new InvalidProperty(TriggerParameterKeys.URL_ID,
                                 "Selected server ID is not configured."));
-                    } else if (!deployableServers.serverHasAddons(id)) {
-                        invalidProperties.add(new InvalidProperty(TriggerParameterKeys.URL_ID,
-                                ConstantValues.DISABLED_MESSAGE));
                     }
                 }
 

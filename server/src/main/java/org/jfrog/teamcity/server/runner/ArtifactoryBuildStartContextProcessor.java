@@ -58,8 +58,8 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
     private ProjectManager projectManager;
 
     public ArtifactoryBuildStartContextProcessor(@NotNull final SBuildServer buildServer,
-            @NotNull final DeployableArtifactoryServers deployableServers,
-            @NotNull final ProjectManager projectManager) {
+                                                 @NotNull final DeployableArtifactoryServers deployableServers,
+                                                 @NotNull final ProjectManager projectManager) {
         this.buildServer = buildServer;
         this.deployableServers = deployableServers;
         this.projectManager = projectManager;
@@ -87,24 +87,31 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
             String serverConfigUrl = serverConfig.getUrl();
             runnerContext.addRunnerParameter(RunnerParameterKeys.URL, serverConfigUrl);
 
+            boolean overrideDeployerCredentials = false;
+            String username = "";
+            String password = "";
+            if (Boolean.valueOf(runParameters.get(RunnerParameterKeys.OVERRIDE_DEFAULT_DEPLOYER))) {
+                overrideDeployerCredentials = true;
+                if (StringUtils.isNotBlank(runParameters.get(RunnerParameterKeys.DEPLOYER_USERNAME))) {
+                    username = runParameters.get(RunnerParameterKeys.DEPLOYER_USERNAME);
+                }
+                if (StringUtils.isNotBlank(runParameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD))) {
+                    password = runParameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD);
+                }
+            }
             CredentialsBean preferredDeploying =
-                    CredentialsHelper.getPreferredDeployingCredentials(runParameters, serverConfig);
+                    CredentialsHelper.getPreferredDeployingCredentials(serverConfig, overrideDeployerCredentials, username, password);
             runnerContext.addRunnerParameter(RunnerParameterKeys.DEPLOYER_USERNAME, preferredDeploying.getUsername());
             runnerContext.addRunnerParameter(RunnerParameterKeys.DEPLOYER_PASSWORD, preferredDeploying.getPassword());
 
-            CredentialsBean preferredResolving = CredentialsHelper.getPreferredResolvingCredentials(serverConfig);
+            CredentialsBean preferredResolving = CredentialsHelper.getPreferredResolvingCredentials(serverConfig, overrideDeployerCredentials, username, password);
             runnerContext.addRunnerParameter(RunnerParameterKeys.RESOLVER_USERNAME, preferredResolving.getUsername());
             runnerContext.addRunnerParameter(RunnerParameterKeys.RESOLVER_PASSWORD, preferredResolving.getPassword());
 
             runnerContext.addRunnerParameter(RunnerParameterKeys.TIMEOUT, Integer.toString(serverConfig.getTimeout()));
 
             //TODO: [by yl] See how we can get a nicer build name...
-            String fullBuildName = build.getFullName();
-            String runnerContextName = runnerContext.getName();
-            if (StringUtils.isNotBlank(runnerContextName)) {
-                fullBuildName += " :: " + runnerContextName;
-            }
-            runnerContext.addRunnerParameter(BUILD_NAME, fullBuildName);
+            runnerContext.addRunnerParameter(BUILD_NAME, build.getFullName());
 
             runnerContext.addRunnerParameter(BUILD_NUMBER, build.getBuildNumber());
 
@@ -130,16 +137,12 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
             if (buildType != null) {
                 if (shouldStoreBuildInRunHistory(runParameters)) {
                     String runnerCustomStorageId = Long.toString(build.getBuildId()) + "#" + runnerContext.getId();
-
-                    CustomDataStorage runHistory = buildType.getCustomDataStorage(CustomDataStorageKeys.RUN_HISTORY);
-
                     StringBuilder artifactoryUrlBuilder = new StringBuilder().append(serverConfigUrl);
                     if (!serverConfigUrl.endsWith("/")) {
                         artifactoryUrlBuilder.append("/");
                     }
-                    String artifactoryUrl = artifactoryUrlBuilder.append("webapp/builds/").append(fullBuildName).
-                            append("/").append(build.getBuildNumber()).toString();
-
+                    String artifactoryUrl = artifactoryUrlBuilder.append("webapp/builds/").toString();
+                    CustomDataStorage runHistory = buildType.getCustomDataStorage(CustomDataStorageKeys.RUN_HISTORY);
                     runHistory.putValue(runnerCustomStorageId, artifactoryUrl);
                 }
             }

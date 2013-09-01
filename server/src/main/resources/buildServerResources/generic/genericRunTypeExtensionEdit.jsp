@@ -35,7 +35,7 @@
 <script type="text/javascript">
     <%@ include file="../common/artifactoryCommon.js" %>
     BS.local = {
-        onServerChange:function (foundExistingConfig) {
+        onServerChange: function (foundExistingConfig) {
             var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId');
             var publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo');
 
@@ -123,7 +123,7 @@
             BS.MultilineProperties.updateVisible();
         },
 
-        togglePublishBuildInfoSelection:function () {
+        togglePublishBuildInfoSelection: function () {
             if (BS.artifactory.isPublishBuildInfoSelected()) {
                 BS.Util.show($('includeEnvVars.container'));
                 BS.Util.show($('runLicenseChecks.container'));
@@ -148,10 +148,21 @@
             BS.MultilineProperties.updateVisible();
         },
 
-        loadTargetRepos:function (selectedUrlId) {
+        loadTargetRepos: function (selectedUrlId) {
+            var publicKey = $('publicKey').value;
+            var pass = $('secure:org.jfrog.artifactory.selectedDeployableServer.deployerPassword').value;
+            var encyptedPass;
+            if ($('prop:encrypted:secure:org.jfrog.artifactory.selectedDeployableServer.deployerPassword').value != '') {
+                encyptedPass = $('prop:encrypted:secure:org.jfrog.artifactory.selectedDeployableServer.deployerPassword').value;
+            } else {
+                encyptedPass = BS.Encrypt.encryptData(pass, publicKey);
+            }
             BS.ajaxRequest(base_uri + '${controllerUrl}', {
-                parameters:'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadTargetRepos=true',
-                onComplete:function (response, options) {
+                parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadTargetRepos=true'
+                        + '&overrideDeployerCredentials=' + BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()
+                        + '&username=' + $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value
+                        + '&password=' + encyptedPass,
+                onComplete: function (response, options) {
 
                     var publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo');
                     BS.artifactory.populateRepoSelect(response, options, publishRepoSelect,
@@ -191,10 +202,12 @@ display:inline-block;
             </props:selectProperty>
             <c:if test="${foundExistingConfig}">
                 <script type="text/javascript">
-                    var existingUrlId = '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}';
-                    BS.local.loadTargetRepos(existingUrlId);
-                    BS.artifactory.checkArtifactoryHasAddons(existingUrlId);
-                    BS.artifactory.checkCompatibleVersion(existingUrlId);
+                    jQuery(document).ready(function () {
+                        var existingUrlId = '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}';
+                        BS.local.loadTargetRepos(existingUrlId);
+                        BS.artifactory.checkArtifactoryHasAddons(existingUrlId);
+                        BS.artifactory.checkCompatibleVersion(existingUrlId);
+                    })
                 </script>
             </c:if>
             <span class="smallNote">
@@ -207,6 +220,16 @@ display:inline-block;
     <jsp:include page="../common/credentialsEdit.jsp">
         <jsp:param name="shouldDisplay" value="${foundExistingConfig}"/>
     </jsp:include>
+
+    <script>
+        jQuery(".updateOnChange td input").change(function () {
+            //console.log(jQuery(this).attr("name") + " = " + jQuery(this).val());
+            var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId');
+            var selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
+            BS.local.loadTargetRepos(selectedUrlId);
+            BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
+        })
+    </script>
 
     <tr class="noBorder" id="publishBuildInfo.container"
         style="${foundExistingConfig ? '' : 'display: none;'}">

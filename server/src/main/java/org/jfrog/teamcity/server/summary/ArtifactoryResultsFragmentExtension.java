@@ -18,11 +18,7 @@ package org.jfrog.teamcity.server.summary;
 
 import jetbrains.buildServer.controllers.BuildDataExtensionUtil;
 import jetbrains.buildServer.messages.Status;
-import jetbrains.buildServer.serverSide.CustomDataStorage;
-import jetbrains.buildServer.serverSide.SBuild;
-import jetbrains.buildServer.serverSide.SBuildRunnerDescriptor;
-import jetbrains.buildServer.serverSide.SBuildServer;
-import jetbrains.buildServer.serverSide.SBuildType;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.PlaceId;
 import jetbrains.buildServer.web.openapi.SimplePageExtension;
@@ -42,7 +38,7 @@ public class ArtifactoryResultsFragmentExtension extends SimplePageExtension {
     private SBuildServer server;
 
     public ArtifactoryResultsFragmentExtension(@NotNull final PagePlaces pagePlaces,
-            @NotNull final SBuildServer server) {
+                                               @NotNull final SBuildServer server) {
         super(pagePlaces, PlaceId.BUILD_RESULTS_FRAGMENT, ConstantValues.NAME,
                 "artifactoryResultsFragmentExtension.jsp");
         this.server = server;
@@ -87,12 +83,12 @@ public class ArtifactoryResultsFragmentExtension extends SimplePageExtension {
             String buildUrl = customDataStorage.getValue(Long.toString(build.getBuildId()) + "#" +
                     buildRunnerDescriptor.getId());
             if (StringUtils.isNotBlank(buildUrl)) {
-                return buildUrl;
+                return buildUrl + build.getFullName() + "/" + build.getBuildNumber();
             } else {
                 //Maintain backward compatibility for when there were no multi-runners and results were mapped per build
                 buildUrl = customDataStorage.getValue(Long.toString(build.getBuildId()));
                 if (StringUtils.isNotBlank(buildUrl)) {
-                    return buildUrl;
+                    return buildUrl + build.getFullName() + "/" + build.getBuildNumber();
                 }
             }
         }

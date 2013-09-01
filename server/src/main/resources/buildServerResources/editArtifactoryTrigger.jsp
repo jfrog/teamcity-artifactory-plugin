@@ -31,21 +31,22 @@
        value="${not empty propertiesBean.properties['org.jfrog.artifactory.selectedTriggerServer.urlId'] ? true : false}"/>
 
 <script type="text/javascript">
-    BS.artifactory = {
-        onServerChange : function(foundExistingConfig) {
+    BS.local = {
+        onServerChange: function (foundExistingConfig) {
             var urlIdSelect = $('org.jfrog.artifactory.selectedTriggerServer.urlId');
+            $('error_org.jfrog.artifactory.selectedTriggerServer.urlId').innerHTML = '';
 
             var selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
             if (!selectedUrlId) {
-                $('error_org.jfrog.artifactory.selectedTriggerServer.urlId').innerHTML = '';
-                BS.artifactory.hideAll();
+                BS.local.hideAll();
             } else {
-                BS.artifactory.checkArtifactoryHasAddons(foundExistingConfig, selectedUrlId);
+                BS.local.showAll(foundExistingConfig, selectedUrlId);
+                BS.local.checkArtifactoryHasAddons(foundExistingConfig, selectedUrlId);
             }
             BS.MultilineProperties.updateVisible();
         },
 
-        hideAll : function() {
+        hideAll: function () {
             $('org.jfrog.artifactory.selectedTriggerServer.targetRepo').innerHTML = '';
             $('org.jfrog.artifactory.selectedTriggerServer.pollingInterval').value = '0';
             BS.Util.hide($('targetRepo.container'));
@@ -56,9 +57,9 @@
             BS.Util.hide($('pollingInterval.container'));
         },
 
-        showAll: function(foundExistingConfig, selectedUrlId) {
+        showAll: function (foundExistingConfig, selectedUrlId) {
             $('error_org.jfrog.artifactory.selectedTriggerServer.urlId').innerHTML = '';
-            BS.artifactory.loadTargetRepos(selectedUrlId);
+            BS.local.loadTargetRepos(selectedUrlId);
 
             if (!foundExistingConfig) {
                 $('org.jfrog.artifactory.selectedTriggerServer.pollingInterval').value = '0';
@@ -71,10 +72,20 @@
             BS.Util.show($('pollingInterval.container'));
         },
 
-        loadTargetRepos : function(selectedUrlId) {
+        loadTargetRepos: function (selectedUrlId) {
+            var publicKey = jQuery('[name="publicKey"]').val();
+            var username = $('org.jfrog.artifactory.selectedTriggerServer.deployerUsername').value;
+            var pass = $('secure:org.jfrog.artifactory.selectedTriggerServer.deployerPassword').value;
+            var encyptedPass;
+            if ($('prop:encrypted:secure:org.jfrog.artifactory.selectedTriggerServer.deployerPassword').value != '') {
+                encyptedPass = $('prop:encrypted:secure:org.jfrog.artifactory.selectedTriggerServer.deployerPassword').value;
+            } else {
+                encyptedPass = BS.Encrypt.encryptData(pass, publicKey);
+            }
             BS.ajaxRequest(base_uri + '${controllerUrl}', {
-                parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadTargetRepos=true',
-                onComplete: function(response, options) {
+                parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadTargetRepos=true'
+                        + '&username=' + username + '&password=' + encyptedPass,
+                onComplete: function (response, options) {
                     var repoSelect = $('org.jfrog.artifactory.selectedTriggerServer.targetRepo');
                     var xmlDoc = response.responseXML;
                     repoSelect.innerHTML = '';
@@ -92,17 +103,29 @@
                                 repoSelect.selectedIndex = i;
                             }
                         }
+                        if (repos.length > 0) {
+                            $('error_org.jfrog.artifactory.selectedTriggerServer.urlId').innerHTML = '';
+                        }
                         BS.MultilineProperties.updateVisible();
                     }
                 }
             });
         },
 
-        checkArtifactoryHasAddons: function(foundExistingConfig, selectedUrlId) {
+        checkArtifactoryHasAddons: function (foundExistingConfig, selectedUrlId) {
+            var publicKey = jQuery('[name="publicKey"]').val();
+            var username = $('org.jfrog.artifactory.selectedTriggerServer.deployerUsername').value;
+            var encyptedPass;
+            if ($('prop:encrypted:secure:org.jfrog.artifactory.selectedTriggerServer.deployerPassword').value != '') {
+                encyptedPass = $('prop:encrypted:secure:org.jfrog.artifactory.selectedTriggerServer.deployerPassword').value;
+            } else {
+                encyptedPass = BS.Encrypt.encryptData(pass, publicKey);
+            }
             BS.ajaxRequest(base_uri + '${controllerUrl}', {
                 parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&checkArtifactoryHasAddons=true' +
-                        '&checkCompatibleVersion=true',
-                onComplete: function(response, options) {
+                        '&checkCompatibleVersion=true'
+                        + '&username=' + username + '&password=' + encyptedPass,
+                onComplete: function (response, options) {
                     var xmlDoc = response.responseXML;
                     if (xmlDoc) {
 
@@ -121,18 +144,18 @@
                         } else if (compatibleVersionValue == "true") {
 
                             if (hasAddonsValue == "true") {
-                                BS.artifactory.showAll(foundExistingConfig, selectedUrlId);
+                                BS.local.showAll(foundExistingConfig, selectedUrlId);
                             } else {
                                 errorMessage = '${disabledMessage}';
-                                BS.artifactory.hideAll();
+                                //BS.local.hideAll();
                             }
                         } else {
                             if (hasAddonsValue == "true") {
                                 errorMessage = '${incompatibleVersionMessage}';
-                                BS.artifactory.showAll(foundExistingConfig, selectedUrlId);
+                                BS.local.showAll(foundExistingConfig, selectedUrlId);
                             } else {
                                 errorMessage = '${disabledMessage}';
-                                BS.artifactory.hideAll();
+                                //BS.local.hideAll();
                             }
                         }
 
@@ -151,6 +174,15 @@ display:inline-block;
 </style>
 <![endif]-->
 
+<script>
+    jQuery(".updateOnChange td input").change(function () {
+        //console.log(jQuery(this).attr("name") + " = " + jQuery(this).val());
+        var urlIdSelect = $('org.jfrog.artifactory.selectedTriggerServer.urlId');
+        var selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
+        BS.local.loadTargetRepos(selectedUrlId);
+    })
+</script>
+
 <l:settingsGroup title="Artifactory Server Settings"/>
 <tr>
     <td style="vertical-align: top;">
@@ -160,7 +192,7 @@ display:inline-block;
     </td>
     <td>
         <props:selectProperty name="org.jfrog.artifactory.selectedTriggerServer.urlId"
-                              onchange="BS.artifactory.onServerChange(${foundExistingConfig})">
+                              onchange="BS.local.onServerChange(${foundExistingConfig})">
 
             <c:set var="selected" value="false"/>
             <c:if test="${!foundExistingConfig}">
@@ -196,7 +228,8 @@ display:inline-block;
     </td>
 </tr>
 
-<tr class="noBorder" id="deployerUsername.container" style="${foundExistingConfig ? '' : 'display: none;'}">
+<tr class="noBorder updateOnChange" id="deployerUsername.container"
+    style="${foundExistingConfig ? '' : 'display: none;'}">
     <td style="vertical-align: top;">
         <label class="rightLabel">Username:</label>
         <bs:helpIcon iconTitle="Name of a user with deployment permissions on the target repository."/>
@@ -206,7 +239,8 @@ display:inline-block;
     </td>
 </tr>
 
-<tr class="noBorder" id="deployerPassword.container" style="${foundExistingConfig ? '' : 'display: none;'}">
+<tr class="noBorder updateOnChange" id="deployerPassword.container"
+    style="${foundExistingConfig ? '' : 'display: none;'}">
     <td style="vertical-align: top;">
         <label class="rightLabel">Password:</label>
         <bs:helpIcon iconTitle="The password of the user entered above."/>
@@ -255,7 +289,7 @@ display:inline-block;
 
 <c:if test="${foundExistingConfig}">
     <script type="text/javascript">
-        BS.artifactory.checkArtifactoryHasAddons(true,
+        BS.local.checkArtifactoryHasAddons(true,
                 '${propertiesBean.properties['org.jfrog.artifactory.selectedTriggerServer.urlId']}');
     </script>
 </c:if>

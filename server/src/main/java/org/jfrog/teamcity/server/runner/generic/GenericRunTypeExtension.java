@@ -39,7 +39,10 @@ public class GenericRunTypeExtension extends BaseRunTypeExtension {
             "rake-runner",
             "simpleRunner",
             "sln2003",
-            "VS.Solution");
+            "VS.Solution",
+            "Xcode",
+            "jetbrains_powershell",
+            "jb.nuget.publish");
 
     public GenericRunTypeExtension(@NotNull final WebControllerManager webControllerManager,
             @NotNull final PluginDescriptor pluginDescriptor,

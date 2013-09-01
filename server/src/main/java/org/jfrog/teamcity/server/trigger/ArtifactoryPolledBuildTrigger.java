@@ -34,11 +34,7 @@ import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
 import org.jfrog.teamcity.server.util.TeamcityServerBuildInfoLog;
 
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -81,8 +77,7 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
 
             String serverUrlId = map.get(TriggerParameterKeys.URL_ID);
             long urlIdToCheck = Long.parseLong(serverUrlId);
-            if (!deployableArtifactoryServers.isUrlIdConfigured(urlIdToCheck) ||
-                    !deployableArtifactoryServers.serverHasAddons(urlIdToCheck)) {
+            if (!deployableArtifactoryServers.isUrlIdConfigured(urlIdToCheck)) {
                 return;
             }
             ServerConfigBean serverConfigBy = deployableArtifactoryServers.getServerConfigById(urlIdToCheck);
@@ -122,7 +117,7 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
     }
 
     private ArtifactoryBuildInfoClient getBuildInfoClient(ServerConfigBean serverConfig, String username,
-            String password) {
+                                                          String password) {
         ArtifactoryBuildInfoClient infoClient = new ArtifactoryBuildInfoClient(serverConfig.getUrl(), username,
                 password, new TeamcityServerBuildInfoLog());
         infoClient.setConnectionTimeout(serverConfig.getTimeout());
@@ -150,7 +145,7 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
         private String repoKey;
 
         private PollingRunnable(PolledTriggerContext context, ServerConfigBean serverConfig, String username,
-                String password, String repoKey) {
+                                String password, String repoKey) {
             this.context = context;
             this.serverConfig = serverConfig;
             this.username = username;

@@ -2,12 +2,7 @@ package org.jfrog.teamcity.agent.gradle;
 
 import com.google.common.collect.ImmutableMap;
 import jetbrains.buildServer.ExtensionHolder;
-import jetbrains.buildServer.agent.AgentLifeCycleAdapter;
-import jetbrains.buildServer.agent.AgentLifeCycleListener;
-import jetbrains.buildServer.agent.AgentRunningBuild;
-import jetbrains.buildServer.agent.ArtifactsPublisher;
-import jetbrains.buildServer.agent.BuildProgressLogger;
-import jetbrains.buildServer.agent.BuildRunnerContext;
+import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.util.ArchiveUtil;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.apache.commons.io.FileUtils;
@@ -17,7 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.BuildInfoConfigProperties;
 import org.jfrog.build.client.ArtifactoryClientConfiguration;
-import org.jfrog.gradle.plugin.artifactory.extractor.BuildInfoTask;
+import org.jfrog.gradle.plugin.artifactory.task.BuildInfoBaseTask;
 import org.jfrog.teamcity.agent.release.ReleaseParameters;
 import org.jfrog.teamcity.agent.util.ArtifactoryClientConfigurationBuilder;
 import org.jfrog.teamcity.common.ConstantValues;
@@ -43,7 +38,7 @@ public class GradleBuildInfoAgentListener extends AgentLifeCycleAdapter {
     private ExtensionHolder extensionsLocator;
 
     public GradleBuildInfoAgentListener(@NotNull EventDispatcher<AgentLifeCycleListener> dispatcher,
-            @NotNull ExtensionHolder extensionsLocator) {
+                                        @NotNull ExtensionHolder extensionsLocator) {
         this.extensionsLocator = extensionsLocator;
         dispatcher.addListener(this);
     }
@@ -136,7 +131,7 @@ public class GradleBuildInfoAgentListener extends AgentLifeCycleAdapter {
             if (StringUtils.isNotBlank(existingTasks)) {
                 taskBuilder.append(existingTasks).append(" ");
             }
-            taskBuilder.append(BuildInfoTask.BUILD_INFO_TASK_NAME);
+            taskBuilder.append(BuildInfoBaseTask.BUILD_INFO_TASK_NAME);
             runnerContext.addRunnerParameter("ui.gradleRunner.gradle.tasks.names", taskBuilder.toString());
             File tempPropFile = File.createTempFile("buildInfo", "properties");
             clientConf.setPropertiesFile(tempPropFile.getCanonicalPath());

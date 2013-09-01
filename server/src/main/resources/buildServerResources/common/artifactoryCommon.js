@@ -15,7 +15,7 @@
  */
 
 BS.artifactory = {
-    populateRepoSelect:function (response, options, repoSelector, existingValue, addEmpty) {
+    populateRepoSelect: function (response, options, repoSelector, existingValue, addEmpty) {
 
         var xmlDoc = response.responseXML;
         repoSelector.innerHTML = '';
@@ -51,17 +51,26 @@ BS.artifactory = {
         }
     },
 
-    checkArtifactoryHasAddons:function (selectedUrlId) {
-        //        var publishedDependencies = $('org.jfrog.artifactory.selectedDeployableServer.publishedDependencies');
+    checkArtifactoryHasAddons: function (selectedUrlId) {
+        var publicKey = jQuery('[name="publicKey"]').val();
+        var pass = $('secure:org.jfrog.artifactory.selectedDeployableServer.deployerPassword').value;
+        var encyptedPass;
+        if ($('prop:encrypted:secure:org.jfrog.artifactory.selectedDeployableServer.deployerPassword').value != '') {
+            encyptedPass = $('prop:encrypted:secure:org.jfrog.artifactory.selectedDeployableServer.deployerPassword').value;
+        } else {
+            encyptedPass = BS.Encrypt.encryptData(pass, publicKey);
+        }
         var buildDependencies = $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies');
         if (buildDependencies) {
             BS.ajaxRequest(base_uri + '${controllerUrl}', {
-                parameters:'selectedUrlId=' + selectedUrlId + '&onServerChange=true&checkArtifactoryHasAddons=true',
-                onComplete:function (response, options) {
+                parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&checkArtifactoryHasAddons=true'
+                    + '&overrideDeployerCredentials=' + BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()
+                    + '&username=' + $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value
+                    + '&password=' + encyptedPass,
+                onComplete: function (response, options) {
 
                     var xmlDoc = response.responseXML;
                     if (xmlDoc) {
-                        //                        BS.artifactory.applyDisabledMessage(publishedDependencies, xmlDoc);
                         BS.artifactory.applyDisabledMessage(buildDependencies, xmlDoc);
                         BS.MultilineProperties.updateVisible();
                     }
@@ -70,7 +79,7 @@ BS.artifactory = {
         }
     },
 
-    applyDisabledMessage:function (textAreaField, xmlDoc) {
+    applyDisabledMessage: function (textAreaField, xmlDoc) {
         var hasAddons = xmlDoc.getElementsByTagName('hasAddons')[0];
         var hasAddonsValue = hasAddons.textContent || hasAddons.text || '';
         if (hasAddonsValue == "true") {
@@ -85,10 +94,21 @@ BS.artifactory = {
         }
     },
 
-    checkCompatibleVersion:function (selectedUrlId) {
+    checkCompatibleVersion: function (selectedUrlId) {
+        var publicKey = jQuery('[name="publicKey"]').val();
+        var pass = $('secure:org.jfrog.artifactory.selectedDeployableServer.deployerPassword').value;
+        var encyptedPass;
+        if ($('prop:encrypted:secure:org.jfrog.artifactory.selectedDeployableServer.deployerPassword').value != '') {
+            encyptedPass = $('prop:encrypted:secure:org.jfrog.artifactory.selectedDeployableServer.deployerPassword').value;
+        } else {
+            encyptedPass = BS.Encrypt.encryptData(pass, publicKey);
+        }
         BS.ajaxRequest(base_uri + '${controllerUrl}', {
-            parameters:'selectedUrlId=' + selectedUrlId + '&onServerChange=true&checkCompatibleVersion=true',
-            onComplete:function (response, options) {
+            parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&checkCompatibleVersion=true'
+                + '&overrideDeployerCredentials=' + BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()
+                + '&username=' + $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value
+                + '&password=' + encyptedPass,
+            onComplete: function (response, options) {
 
                 var xmlDoc = response.responseXML;
                 if (xmlDoc) {
@@ -120,7 +140,7 @@ BS.artifactory = {
         });
     },
 
-    toggleLicenseViolationRecipientsVisibility:function () {
+    toggleLicenseViolationRecipientsVisibility: function () {
         var shouldRunLicenseChecks = $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks').checked;
         if (shouldRunLicenseChecks) {
             BS.Util.show($('licenseViolationRecipients.container'));
@@ -141,7 +161,7 @@ BS.artifactory = {
         BS.MultilineProperties.updateVisible();
     },
 
-    toggleIncludeEnvVarsVisibility:function () {
+    toggleIncludeEnvVarsVisibility: function () {
         var shouldIncludeEnvVars = $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked;
         if (shouldIncludeEnvVars) {
             BS.Util.show($('envVarsIncludePatterns.container'));
@@ -154,15 +174,15 @@ BS.artifactory = {
         BS.MultilineProperties.updateVisible();
     },
 
-    isDeployArtifactsSelected:function () {
+    isDeployArtifactsSelected: function () {
         return $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked;
     },
 
-    isPublishBuildInfoSelected:function () {
+    isPublishBuildInfoSelected: function () {
         return $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked;
     },
 
-    toggleDeployArtifactsSelection:function () {
+    toggleDeployArtifactsSelection: function () {
         if (BS.artifactory.isDeployArtifactsSelected()) {
             BS.Util.show($('deployIncludePatterns.container'));
             BS.Util.show($('deployExcludePatterns.container'));
@@ -176,11 +196,11 @@ BS.artifactory = {
         BS.MultilineProperties.updateVisible();
     },
 
-    isOverrideDefaultDeployerCredentialsSelected:function () {
+    isOverrideDefaultDeployerCredentialsSelected: function () {
         return $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked;
     },
 
-    toggleOverrideDefaultDeployerSelection:function () {
+    toggleOverrideDefaultDeployerSelection: function () {
         if (BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()) {
             BS.Util.show($('deployerUsername.container'));
             BS.Util.show($('deployerPassword.container'));
@@ -194,7 +214,7 @@ BS.artifactory = {
         BS.MultilineProperties.updateVisible();
     },
 
-    toggleReleaseManagementFieldsVisibility:function (builderName) {
+    toggleReleaseManagementFieldsVisibility: function (builderName) {
         var releaseManagementEnabled = $('org.jfrog.artifactory.selectedDeployableServer.enableReleaseManagement').checked;
         if (releaseManagementEnabled) {
             BS.Util.show($('vcsTagsBaseUrlOrName.container'));
