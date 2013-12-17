@@ -7,6 +7,7 @@ import jetbrains.buildServer.agent.BuildRunnerContextEx;
 import jetbrains.buildServer.agent.Constants;
 import jetbrains.buildServer.agent.impl.BuildRunnerContextImpl;
 import org.apache.commons.lang.StringUtils;
+import org.jfrog.build.api.BlackDuckPropertiesFields;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryClientConfiguration;
@@ -83,6 +84,28 @@ public abstract class ArtifactoryClientConfigurationBuilder {
             }
             clientConf.info.licenseControl.setAutoDiscover(
                     Boolean.valueOf(runnerParameters.get(RunnerParameterKeys.DISABLE_AUTO_LICENSE_DISCOVERY)));
+        }
+
+        boolean blackDuckRunChecks =
+                Boolean.parseBoolean(runnerParameters.get(RunnerParameterKeys.BLACKDUCK_PREFIX + BlackDuckPropertiesFields.RUN_CHECKS));
+        if (blackDuckRunChecks) {
+            clientConf.info.blackDuckProperties.setRunChecks(blackDuckRunChecks);
+            clientConf.info.blackDuckProperties.setAppName(runnerParameters.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
+                    BlackDuckPropertiesFields.APP_NAME));
+            clientConf.info.blackDuckProperties.setAppVersion(runnerParameters.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
+                    BlackDuckPropertiesFields.APP_VERSION));
+            clientConf.info.blackDuckProperties.setReportRecipients(runnerParameters.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
+                    BlackDuckPropertiesFields.REPORT_RECIPIENTS));
+            clientConf.info.blackDuckProperties.setScopes(runnerParameters.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
+                    BlackDuckPropertiesFields.SCOPES));
+            clientConf.info.blackDuckProperties.setIncludePublishedArtifacts(Boolean.valueOf(runnerParameters.get(
+                    RunnerParameterKeys.BLACKDUCK_PREFIX + BlackDuckPropertiesFields.INCLUDE_PUBLISHED_ARTIFACTS)));
+            clientConf.info.blackDuckProperties.setAutoCreateMissingComponentRequests(Boolean.valueOf(runnerParameters.
+                    get(RunnerParameterKeys.BLACKDUCK_PREFIX + BlackDuckPropertiesFields.
+                            AutoCreateMissingComponentRequests)));
+            clientConf.info.blackDuckProperties.setAutoDiscardStaleComponentRequests(Boolean.valueOf(runnerParameters.
+                    get(RunnerParameterKeys.BLACKDUCK_PREFIX + BlackDuckPropertiesFields.
+                            AutoDiscardStaleComponentRequests)));
         }
 
         addClientProperties(runnerParameters, clientConf);

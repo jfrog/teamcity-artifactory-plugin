@@ -30,10 +30,13 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Agent;
 import org.jfrog.build.api.Artifact;
+import org.jfrog.build.api.BlackDuckProperties;
+import org.jfrog.build.api.BlackDuckPropertiesFields;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.api.BuildInfoProperties;
 import org.jfrog.build.api.Dependency;
+import org.jfrog.build.api.Governance;
 import org.jfrog.build.api.LicenseControl;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.api.builder.ArtifactBuilder;
@@ -161,6 +164,27 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
         licenseControl.setAutoDiscover(!Boolean.valueOf(runnerParams.get(
                 RunnerParameterKeys.DISABLE_AUTO_LICENSE_DISCOVERY)));
 
+        //blackduck integration
+        Governance governance = new Governance();
+        BlackDuckProperties blackDuckProperties = new BlackDuckProperties();
+        governance.setBlackDuckProperties(blackDuckProperties);
+        blackDuckProperties.setRunChecks(Boolean.valueOf(runnerParams.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
+                BlackDuckPropertiesFields.RUN_CHECKS)));
+        blackDuckProperties.setAppName(runnerParams.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
+                BlackDuckPropertiesFields.APP_NAME));
+        blackDuckProperties.setAppVersion(runnerParams.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
+                BlackDuckPropertiesFields.APP_VERSION));
+        blackDuckProperties.setReportRecipients(runnerParams.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
+                BlackDuckPropertiesFields.REPORT_RECIPIENTS));
+        blackDuckProperties.setScopes(runnerParams.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
+                BlackDuckPropertiesFields.SCOPES));
+        blackDuckProperties.setIncludePublishedArtifacts(Boolean.valueOf(runnerParams.get(RunnerParameterKeys.
+                BLACKDUCK_PREFIX + BlackDuckPropertiesFields.INCLUDE_PUBLISHED_ARTIFACTS)));
+        blackDuckProperties.setAutoCreateMissingComponentRequests(Boolean.valueOf(runnerParams.get(RunnerParameterKeys.
+                BLACKDUCK_PREFIX + BlackDuckPropertiesFields.AutoCreateMissingComponentRequests)));
+        blackDuckProperties.setAutoDiscardStaleComponentRequests(Boolean.valueOf(runnerParams.get(RunnerParameterKeys.
+                BLACKDUCK_PREFIX + BlackDuckPropertiesFields.AutoDiscardStaleComponentRequests)));
+
         BuildInfoBuilder builder = new BuildInfoBuilder(runnerParams.get(BUILD_NAME)).
                 number(runnerContext.getBuild().getBuildNumber()).
                 startedDate(buildStarted).
@@ -172,7 +196,8 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
                 vcsRevision(runnerParams.get(PROP_VCS_REVISION)).
                 parentName(runnerParams.get(PROP_PARENT_NAME)).
                 parentNumber(runnerParams.get(PROP_PARENT_NUMBER)).
-                licenseControl(licenseControl);
+                licenseControl(licenseControl).
+                governance(governance);
 
         if (Boolean.valueOf(runnerParams.get(RunnerParameterKeys.INCLUDE_ENV_VARS))) {
             addBuildInfoProperties(builder);

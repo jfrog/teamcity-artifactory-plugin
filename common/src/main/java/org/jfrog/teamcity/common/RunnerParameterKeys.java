@@ -6,6 +6,7 @@ package org.jfrog.teamcity.common;
 public class RunnerParameterKeys {
 
     public final static String PREFIX = ConstantValues.PLUGIN_PREFIX + "selectedDeployableServer.";
+    public final static String BLACKDUCK_PREFIX = PREFIX + "blackduck.";
 
     public final static String IVY_INTEGRATION = PREFIX + "activateIvyIntegration";
     public final static String GRADLE_INTEGRATION = PREFIX + "activateGradleIntegration";

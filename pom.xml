@@ -33,7 +33,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <plugin.version>${project.version}</plugin.version>
         <teamcity.version>7.1.0</teamcity.version>
-        <build.info.version>2.1.2</build.info.version>
+        <build.info.version>2.2.2</build.info.version>
     </properties>
 
     <developers>
@@ -227,7 +227,7 @@
             <dependency>
                 <groupId>org.jfrog.buildinfo</groupId>
                 <artifactId>build-info-extractor-ivy</artifactId>
-                <version>2.1.0</version>
+                <version>2.2.2</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.ant</groupId>
@@ -246,7 +246,7 @@
             <dependency>
                 <groupId>org.jfrog.buildinfo</groupId>
                 <artifactId>build-info-extractor-gradle</artifactId>
-                <version>2.1.0</version>
+                <version>2.2.2</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.ivy</groupId>
@@ -399,7 +399,7 @@
 
     <profiles>
         <profile>
-            <id>rjo</id>
+            <id>oss</id>
             <repositories>
                 <repository>
                     <id>jfrog-libs-releases</id>

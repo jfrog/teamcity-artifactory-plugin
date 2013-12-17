@@ -161,6 +161,36 @@ BS.artifactory = {
         BS.MultilineProperties.updateVisible();
     },
 
+    toggleBlackDuckVisibility: function () {
+        var shouldRunChecks = $('org.jfrog.artifactory.selectedDeployableServer.blackduck.runChecks').checked;
+        if (shouldRunChecks) {
+            BS.Util.show($('blackduck.appName.container'));
+            BS.Util.show($('blackduck.appVersion.container'));
+            BS.Util.show($('blackduck.reportRecipients.container'));
+            BS.Util.show($('blackduck.scopes.container'));
+            BS.Util.show($('blackduck.includePublishedArtifacts.container'));
+            BS.Util.show($('blackduck.autoCreateMissingComponentRequests.container'));
+            BS.Util.show($('blackduck.autoDiscardStaleComponentRequests.container'));
+        }
+        else {
+            BS.Util.hide($('blackduck.appName.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.appName').value = '';
+            BS.Util.hide($('blackduck.appVersion.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.appVersion').value = '';
+            BS.Util.hide($('blackduck.reportRecipients.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.reportRecipients').value = '';
+            BS.Util.hide($('blackduck.scopes.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.scopes').value = '';
+            BS.Util.hide($('blackduck.includePublishedArtifacts.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.includePublishedArtifacts').checked = false;
+            BS.Util.hide($('blackduck.autoCreateMissingComponentRequests.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.autoCreateMissingComponentRequests').checked = true;
+            BS.Util.hide($('blackduck.autoDiscardStaleComponentRequests.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.autoDiscardStaleComponentRequests').checked = true;
+        }
+        BS.MultilineProperties.updateVisible();
+    },
+
     toggleIncludeEnvVarsVisibility: function () {
         var shouldIncludeEnvVars = $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked;
         if (shouldIncludeEnvVars) {

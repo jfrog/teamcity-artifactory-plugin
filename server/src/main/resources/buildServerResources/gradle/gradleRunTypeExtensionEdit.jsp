@@ -85,6 +85,7 @@ BS.local = {
             $('org.jfrog.artifactory.selectedDeployableServer.nextIntegrationProperties').value = '';
             $('org.jfrog.artifactory.selectedDeployableServer.alternativeGradleTasks').value = '';
             $('org.jfrog.artifactory.selectedDeployableServer.alternativeGradleOptions').value = '';
+            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.runChecks').checked = false;
 
             BS.Util.hide($('targetRepo.container'));
             BS.Util.hide($('resolvingRepo.container'));
@@ -120,6 +121,7 @@ BS.local = {
             BS.Util.hide($('nextIntegrationProperties.container'));
             BS.Util.hide($('alternativeGradleTasks.container'));
             BS.Util.hide($('alternativeGradleOptions.container'));
+            BS.Util.hide($('blackduck.runChecks.container'));
         } else {
 
             if (!foundExistingConfig) {
@@ -187,6 +189,19 @@ BS.local = {
                     BS.Util.show($('limitChecksToScopes.container'));
                     BS.Util.show($('includePublishedArtifacts.container'));
                     BS.Util.show($('disableAutoLicenseDiscovery.container'));
+                }
+
+                BS.Util.show($('blackduck.runChecks.container'));
+                var shouldRunLicenseChecks = $('org.jfrog.artifactory.selectedDeployableServer.blackduck.runChecks')
+                        .checked;
+                if (shouldRunLicenseChecks) {
+                    BS.Util.show($('blackduck.appName.container'));
+                    BS.Util.show($('blackduck.appVersion.container'));
+                    BS.Util.show($('blackduck.reportRecipients.container'));
+                    BS.Util.show($('blackduck.scopes.container'));
+                    BS.Util.show($('blackduck.includePublishedArtifacts.container'));
+                    BS.Util.show($('blackduck.autoCreateMissingComponentRequests.container'));
+                    BS.Util.show($('blackduck.autoDiscardStaleComponentRequests.container'));
                 }
             }
 
@@ -293,6 +308,7 @@ BS.local = {
         if (BS.artifactory.isPublishBuildInfoSelected()) {
             BS.Util.show($('includeEnvVars.container'));
             BS.Util.show($('runLicenseChecks.container'));
+            BS.Util.show($('blackduck.runChecks.container'));
         } else {
             BS.Util.hide($('includeEnvVars.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked = false;
@@ -310,6 +326,14 @@ BS.local = {
             $('org.jfrog.artifactory.selectedDeployableServer.includePublishedArtifacts').checked = false;
             BS.Util.hide($('disableAutoLicenseDiscovery.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.disableAutoLicenseDiscovery').checked = false;
+            BS.Util.hide($('blackduck.runChecks.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.runChecks').checked = false;
+            BS.Util.hide($('blackduck.includePublishedArtifacts.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.includePublishedArtifacts').checked = false;
+            BS.Util.hide($('blackduck.autoCreateMissingComponentRequests.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.autoCreateMissingComponentRequests').checked = false;
+            BS.Util.hide($('blackduck.autoDiscardStaleComponentRequests.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.autoDiscardStaleComponentRequests').checked = false;
         }
         BS.MultilineProperties.updateVisible();
     },
@@ -519,6 +543,10 @@ The TeamCity plugin automatically applies the Artifactory plugin (and, consequen
     <jsp:include page="../common/licensesEdit.jsp">
         <jsp:param name="shouldDisplay"
                    value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
+    </jsp:include>
+
+    <jsp:include page="../common/blackDuckEdit.jsp">
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
     </jsp:include>
 
     <jsp:include page="../common/genericItemsEdit.jsp">
