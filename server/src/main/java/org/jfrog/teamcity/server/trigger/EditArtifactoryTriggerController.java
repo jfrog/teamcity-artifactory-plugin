@@ -79,9 +79,9 @@ public class EditArtifactoryTriggerController extends BaseFormXmlController {
             String loadTargetRepos = request.getParameter("loadTargetRepos");
             if (StringUtils.isNotBlank(loadTargetRepos) && Boolean.valueOf(loadTargetRepos)) {
                 Element deployableReposElement = new Element("deployableRepos");
-                List<String> deployableRepos = deployableServers.getServerDeployableRepos(id, useTriggerCredentials, username, password);
-                for (String deployableRepo : deployableRepos) {
-                    deployableReposElement.addContent(new Element("repoName").addContent(deployableRepo));
+                List<String> repos = deployableServers.getServerLocalAndCacheRepos(id, useTriggerCredentials, username, password);
+                for (String repo : repos) {
+                    deployableReposElement.addContent(new Element("repoName").addContent(repo));
                 }
                 element.addContent(deployableReposElement);
             }
