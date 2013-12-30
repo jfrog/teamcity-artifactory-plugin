@@ -30,7 +30,6 @@ import jetbrains.buildServer.agent.impl.artifacts.ArtifactsBuilder;
 import jetbrains.buildServer.agent.impl.artifacts.ArtifactsCollection;
 import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.util.ArchiveUtil;
-import jetbrains.buildServer.util.StringUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Dependency;
@@ -56,7 +55,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static org.jfrog.teamcity.common.ConstantValues.*;
+import static org.jfrog.teamcity.common.ConstantValues.BUILD_INFO_FILE_NAME;
+import static org.jfrog.teamcity.common.ConstantValues.BUILD_STARTED;
+import static org.jfrog.teamcity.common.ConstantValues.PROXY_HOST;
+import static org.jfrog.teamcity.common.ConstantValues.PROXY_PASSWORD;
+import static org.jfrog.teamcity.common.ConstantValues.PROXY_PORT;
+import static org.jfrog.teamcity.common.ConstantValues.PROXY_USERNAME;
 
 /**
  * @author Noam Y. Tenne
@@ -155,7 +159,7 @@ public class AgentListenerBuildInfoHelper {
             }
 
             String publishBuildInfoValue = runnerParams.get(RunnerParameterKeys.PUBLISH_BUILD_INFO);
-            if (StringUtil.isEmpty(publishBuildInfoValue) || Boolean.parseBoolean(publishBuildInfoValue)) {
+            if (Boolean.parseBoolean(publishBuildInfoValue)) {
                 publishBuildInfoToTeamCityServer(build, extractedBuildInfo.getBuildInfo());
                 sendBuildInfo(build, extractedBuildInfo.getBuildInfo(), infoClient);
             }
