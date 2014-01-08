@@ -16,7 +16,8 @@
 
 package org.jfrog.teamcity.server.trigger;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import jetbrains.buildServer.buildTriggers.BuildTriggerDescriptor;
 import jetbrains.buildServer.buildTriggers.BuildTriggerException;
@@ -35,24 +36,21 @@ import org.jfrog.teamcity.server.util.TeamcityServerBuildInfoLog;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * @author Noam Y. Tenne
  */
 public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
 
-    private DeployableArtifactoryServers deployableArtifactoryServers;
-    private HashMap<String, Long> watchedItems;
-    private ExecutorService executorService;
-    private Future<?> future;
+    private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
-    public ArtifactoryPolledBuildTrigger(DeployableArtifactoryServers deployableArtifactoryServers) {
+    private DeployableArtifactoryServers deployableArtifactoryServers;
+    private Multimap<String, BuildWatchedItem> watchedItems;
+
+    public ArtifactoryPolledBuildTrigger(DeployableArtifactoryServers deployableArtifactoryServers,
+                                         Multimap<String, BuildWatchedItem> watchedItems) {
         this.deployableArtifactoryServers = deployableArtifactoryServers;
-        watchedItems = Maps.newHashMap();
-        executorService = Executors.newSingleThreadExecutor();
+        this.watchedItems = watchedItems;
     }
 
     @Override
@@ -71,29 +69,26 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
 
     @Override
     public void triggerBuild(@NotNull PolledTriggerContext context) throws BuildTriggerException {
-        if ((future == null) || future.isDone()) {
-            BuildTriggerDescriptor descriptor = context.getTriggerDescriptor();
-            Map<String, String> map = descriptor.getProperties();
+        BuildTriggerDescriptor descriptor = context.getTriggerDescriptor();
+        Map<String, String> map = descriptor.getProperties();
 
-            String serverUrlId = map.get(TriggerParameterKeys.URL_ID);
-            long urlIdToCheck = Long.parseLong(serverUrlId);
-            if (!deployableArtifactoryServers.isUrlIdConfigured(urlIdToCheck)) {
-                return;
-            }
-            ServerConfigBean serverConfigBy = deployableArtifactoryServers.getServerConfigById(urlIdToCheck);
-            String targetRepo = map.get(TriggerParameterKeys.TARGET_REPO);
-
-            String username = map.get(TriggerParameterKeys.DEPLOYER_USERNAME);
-            String password = map.get(TriggerParameterKeys.DEPLOYER_PASSWORD);
-
-            syncWatchedItems(map.get(TriggerParameterKeys.TARGET_ITEMS));
-
-            Runnable runnable = new PollingRunnable(context, serverConfigBy, username, password, targetRepo);
-            future = executorService.submit(runnable);
+        String serverUrlId = map.get(TriggerParameterKeys.URL_ID);
+        long urlIdToCheck = Long.parseLong(serverUrlId);
+        if (!deployableArtifactoryServers.isUrlIdConfigured(urlIdToCheck)) {
+            return;
         }
+        ServerConfigBean serverConfigBy = deployableArtifactoryServers.getServerConfigById(urlIdToCheck);
+        String targetRepo = map.get(TriggerParameterKeys.TARGET_REPO);
+
+        String username = map.get(TriggerParameterKeys.DEPLOYER_USERNAME);
+        String password = map.get(TriggerParameterKeys.DEPLOYER_PASSWORD);
+
+        syncWatchedItems(context.getBuildType().getExtendedName(), map.get(TriggerParameterKeys.TARGET_ITEMS));
+
+        triggerPolling(context, serverConfigBy, username, password, targetRepo);
     }
 
-    private void syncWatchedItems(String targetItems) {
+    private void syncWatchedItems(String buildName, String targetItems) {
         Set<String> itemPaths = Sets.newHashSet();
 
         String[] splitByNewLine = StringUtils.split(targetItems, "\n");
@@ -103,16 +98,68 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
         }
 
         for (String itemPath : itemPaths) {
-            if (StringUtils.isNotBlank(itemPath) && !watchedItems.containsKey(itemPath)) {
-                watchedItems.put(itemPath, 0L);
+            if (StringUtils.isNotBlank(itemPath)) {
+                BuildWatchedItem buildWatchedItem = new BuildWatchedItem(itemPath, 0L);
+                if (!watchedItems.containsEntry(buildName, buildWatchedItem)) {
+                    watchedItems.put(buildName, buildWatchedItem);
+                }
             }
         }
 
-        Iterator<String> mapPathIterator = watchedItems.keySet().iterator();
-        while (mapPathIterator.hasNext()) {
-            if (!itemPaths.contains(mapPathIterator.next())) {
-                mapPathIterator.remove();
+        Iterator<BuildWatchedItem> iterator = watchedItems.get(buildName).iterator();
+        while (iterator.hasNext()) {
+            if (!itemPaths.contains(iterator.next().getItemPath())) {
+                iterator.remove();
             }
+        }
+    }
+
+    private void triggerPolling(PolledTriggerContext context, ServerConfigBean serverConfig, String username, String password, String repoKey) {
+        String buildName = context.getBuildType().getExtendedName();
+        boolean foundChange = false;
+        ArtifactoryBuildInfoClient client = getBuildInfoClient(serverConfig, username, password);
+        List<BuildWatchedItem> replacedValues = Lists.newArrayList();
+        try {
+            Iterator<BuildWatchedItem> iterator = watchedItems.get(buildName).iterator();
+            while (iterator.hasNext()) {
+                BuildWatchedItem buildWatchedItem = iterator.next();
+                //Preserve the user entered item path as is to keep it persistent with the map key
+                String itemPath = buildWatchedItem.getItemPath();
+
+                //Format the path in another variable for use in a request
+                String formattedPath = StringUtils.removeStart(itemPath.trim(), "/");
+                formattedPath = StringUtils.removeEnd(formattedPath, "/");
+                long itemValue = buildWatchedItem.getItemLastModified();
+
+                String itemUrl = repoKey + "/" + formattedPath;
+                try {
+                    String itemLastModifiedString = client.getItemLastModified(itemUrl);
+                    long itemLastModified = format.parse(itemLastModifiedString).getTime();
+                    if (itemValue != itemLastModified) {
+                        if (itemLastModified != 0) {
+                            replacedValues.add(new BuildWatchedItem(itemPath, itemLastModified));
+                            String message = String.format("Artifactory trigger has found changes on the watched " +
+                                    "item '%s' for build '%s'. Last modified time was %s and is now %s.", itemUrl,
+                                    buildName, format.format(itemValue), itemLastModifiedString);
+                            Loggers.SERVER.info(message);
+                            foundChange = true;
+                        }
+                    } else {
+                        replacedValues.add(buildWatchedItem);
+                    }
+                } catch (Exception e) {
+                    Loggers.SERVER.error("Error occurred while polling for changes for build '" + buildName
+                            + "' on path '" + serverConfig.getUrl() + "/" + itemUrl + "': " + e.getMessage());
+                }
+            }
+        } finally {
+            client.shutdown();
+        }
+
+        if (foundChange) {
+            watchedItems.replaceValues(buildName, replacedValues);
+            SBuildType buildType = context.getBuildType();
+            buildType.addToQueue(context.getTriggerDescriptor().getTriggerName());
         }
     }
 
@@ -132,72 +179,5 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
             }
         }
         return infoClient;
-    }
-
-    private class PollingRunnable implements Runnable {
-
-        private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-
-        private PolledTriggerContext context;
-        private ServerConfigBean serverConfig;
-        private String username;
-        private String password;
-        private String repoKey;
-
-        private PollingRunnable(PolledTriggerContext context, ServerConfigBean serverConfig, String username,
-                                String password, String repoKey) {
-            this.context = context;
-            this.serverConfig = serverConfig;
-            this.username = username;
-            this.password = password;
-            this.repoKey = repoKey;
-        }
-
-        public void run() {
-            ArtifactoryBuildInfoClient client = getBuildInfoClient(serverConfig, username, password);
-            try {
-                boolean foundChange = false;
-
-                for (Map.Entry<String, Long> watchedItem : watchedItems.entrySet()) {
-
-                    //Preserve the user entered item path as is to keep it persistent with the map key
-                    String itemPath = watchedItem.getKey();
-
-                    //Format the path in another variable for use in a request
-                    String formattedPath = StringUtils.removeStart(itemPath.trim(), "/");
-                    formattedPath = StringUtils.removeEnd(formattedPath, "/");
-                    Long itemValue = watchedItem.getValue();
-
-                    String itemUrl = repoKey + "/" + formattedPath;
-                    try {
-                        String itemLastModifiedString = client.getItemLastModified(itemUrl);
-                        long itemLastModified = format.parse(itemLastModifiedString).getTime();
-                        if (itemValue != itemLastModified) {
-                            watchedItems.put(itemPath, itemLastModified);
-                            if (itemValue != 0) {
-                                String message = String.format("Artifactory trigger has found changes on the watched " +
-                                        "item '%s'. Last modified time was %s and is now %s.", itemUrl,
-                                        format.format(itemValue), itemLastModifiedString);
-                                Loggers.SERVER.info(message);
-                                if (!foundChange) {
-                                    foundChange = true;
-                                }
-                            }
-                        }
-                    } catch (Exception e) {
-                        Loggers.SERVER.error("Error occurred while polling for changes on " + serverConfig.getUrl() +
-                                "/" + itemUrl + ": " + e.getMessage());
-                        Loggers.SERVER.error(e);
-                    }
-                }
-
-                if (foundChange) {
-                    SBuildType buildType = context.getBuildType();
-                    buildType.addToQueue(context.getTriggerDescriptor().getTriggerName());
-                }
-            } finally {
-                client.shutdown();
-            }
-        }
     }
 }

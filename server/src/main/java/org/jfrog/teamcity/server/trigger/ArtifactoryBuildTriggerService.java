@@ -16,7 +16,10 @@
 
 package org.jfrog.teamcity.server.trigger;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import jetbrains.buildServer.buildTriggers.BuildTriggerDescriptor;
 import jetbrains.buildServer.buildTriggers.BuildTriggerService;
 import jetbrains.buildServer.buildTriggers.BuildTriggeringPolicy;
@@ -39,13 +42,15 @@ import java.util.Map;
 public class ArtifactoryBuildTriggerService extends BuildTriggerService {
 
     private final String actualUrl;
-    private ArtifactoryPolledBuildTrigger trigger;
     private DeployableArtifactoryServers deployableServers;
+    private Multimap<String, BuildWatchedItem> watchedItems;
 
     public ArtifactoryBuildTriggerService(@NotNull final PluginDescriptor descriptor,
                                           @NotNull final WebControllerManager wcm,
                                           @NotNull final DeployableArtifactoryServers deployableServers) {
         this.deployableServers = deployableServers;
+        this.watchedItems = HashMultimap.create();
+        this.watchedItems = Multimaps.synchronizedMultimap(watchedItems);
         actualUrl = descriptor.getPluginResourcesPath("editArtifactoryTrigger.html");
         final String actualJsp = descriptor.getPluginResourcesPath("editArtifactoryTrigger.jsp");
         wcm.registerController(actualUrl,
@@ -83,10 +88,7 @@ public class ArtifactoryBuildTriggerService extends BuildTriggerService {
     @NotNull
     @Override
     public BuildTriggeringPolicy getBuildTriggeringPolicy() {
-        if (trigger == null) {
-            trigger = new ArtifactoryPolledBuildTrigger(deployableServers);
-        }
-        return trigger;
+        return new ArtifactoryPolledBuildTrigger(deployableServers, watchedItems);
     }
 
     @Override
