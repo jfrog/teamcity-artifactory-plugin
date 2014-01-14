@@ -185,8 +185,7 @@ public abstract class ArtifactoryClientConfigurationBuilder {
 
 
         String publishBuildInfoValue = runParameters.get(RunnerParameterKeys.PUBLISH_BUILD_INFO);
-        boolean isPublishBuildInfo = StringUtils.isEmpty(publishBuildInfoValue) || Boolean.valueOf(
-                publishBuildInfoValue);
+        boolean isPublishBuildInfo = Boolean.valueOf(publishBuildInfoValue);
         clientConf.publisher.setPublishBuildInfo(isPublishBuildInfo);
         clientConf.setIncludeEnvVars(Boolean.valueOf(runParameters.get(RunnerParameterKeys.INCLUDE_ENV_VARS)));
         clientConf.setEnvVarsIncludePatterns(runParameters.get(RunnerParameterKeys.ENV_VARS_INCLUDE_PATTERNS));

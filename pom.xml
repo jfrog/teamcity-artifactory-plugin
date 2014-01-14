@@ -33,7 +33,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <plugin.version>${project.version}</plugin.version>
         <teamcity.version>7.1.0</teamcity.version>
-        <build.info.version>2.2.2</build.info.version>
+        <build.info.version>2.2.4</build.info.version>
     </properties>
 
     <developers>

@@ -199,7 +199,7 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
 
     private boolean shouldStoreBuildInRunHistory(Map<String, String> runParameters) {
         String publishBuildInfoValue = runParameters.get(RunnerParameterKeys.PUBLISH_BUILD_INFO);
-        return StringUtils.isEmpty(publishBuildInfoValue) || Boolean.valueOf(publishBuildInfoValue);
+        return Boolean.valueOf(publishBuildInfoValue);
     }
 
     private void modifyReleaseManagementParamsIfNeeded(SRunnerContext runnerContext) {
