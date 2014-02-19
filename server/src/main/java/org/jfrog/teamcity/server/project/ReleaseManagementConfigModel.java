@@ -17,6 +17,7 @@
 package org.jfrog.teamcity.server.project;
 
 import com.google.common.collect.Lists;
+import jetbrains.buildServer.serverSide.BranchEx;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
@@ -41,6 +42,8 @@ public abstract class ReleaseManagementConfigModel {
     protected boolean svnVcs = false;
     private boolean selectedArtifactoryServerHasAddons = false;
     private List<String> deployableRepoKeys = Lists.newArrayList();
+    private BranchEx defaultCheckoutBranch;
+    private List<BranchEx> checkoutBranches = Lists.newArrayList();
 
     public void setCurrentVersion(String currentVersion) {
         this.currentVersion = currentVersion;
@@ -150,6 +153,22 @@ public abstract class ReleaseManagementConfigModel {
 
     public void setDeployableRepoKeys(List<String> deployableRepoKeys) {
         this.deployableRepoKeys = deployableRepoKeys;
+    }
+
+    public BranchEx getDefaultCheckoutBranch() {
+        return defaultCheckoutBranch;
+    }
+
+    public void setDefaultCheckoutBranch(BranchEx defaultCheckoutBranch) {
+        this.defaultCheckoutBranch = defaultCheckoutBranch;
+    }
+
+    public List<BranchEx> getCheckoutBranches() {
+        return checkoutBranches;
+    }
+
+    public void setCheckoutBranches(List<BranchEx> checkoutBranches) {
+        this.checkoutBranches = checkoutBranches;
     }
 
     protected String getVcsSpecificTagBaseUrlOrName() {

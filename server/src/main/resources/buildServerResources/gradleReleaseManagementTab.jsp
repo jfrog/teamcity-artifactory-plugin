@@ -231,6 +231,31 @@
 </div>
 
 <div style="${managementConfig.gitVcs ? '' : 'display: none'}">
+    <table class="runnerFormTable">
+        <tr>
+            <th style="border-bottom: none">
+                <label style="font-weight: normal"
+                       for="org.jfrog.artifactory.releaseManagement.checkoutBranch">Checkout branch: </label>
+            </th>
+            <td style="border-bottom: none">
+                <forms:select name="org.jfrog.artifactory.releaseManagement.checkoutBranch">
+                    <c:forEach var="branch" items="${managementConfig.checkoutBranches}">
+                        <c:set var="selected" value="false"/>
+                        <c:if test="${branch.name == managementConfig.defaultCheckoutBranch.name}">
+                            <c:set var="selected" value="true"/>
+                        </c:if>
+                        <props:option value="${branch.name}" selected="${selected}">
+                            <c:out value="${branch.name}"/>
+                        </props:option>
+                    </c:forEach>
+                </forms:select>
+                <span class="smallNote">Choose the Git checkout branch to work on.</span>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div style="${managementConfig.gitVcs ? '' : 'display: none'}">
     <forms:checkbox name="org.jfrog.artifactory.releaseManagement.createReleaseBranch"
                     checked="${foundDefaultReleaseBranch}"
                     onclick="BS.local.defaultReleaseBranchCheckboxClicked()"/>
