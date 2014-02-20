@@ -166,9 +166,9 @@ public abstract class BaseReleaseManagementController extends BaseFormXmlControl
             } else {
                 errors.addError("tagUrlOrNameError", "Tag URL/name is mandatory.");
             }
-            customParameters.put(ReleaseManagementParameterKeys.TAG_COMMENT,
-                    request.getParameter(ReleaseManagementParameterKeys.TAG_COMMENT));
         }
+        customParameters.put(ReleaseManagementParameterKeys.TAG_COMMENT,
+                request.getParameter(ReleaseManagementParameterKeys.TAG_COMMENT));
     }
 
     private void handleStagingSettings(HttpServletRequest request, Map<String, String> customParameters,
