@@ -156,6 +156,7 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
             List<BuildRevision> revisionList = build.getRevisions();
             if ((revisionList != null) && !revisionList.isEmpty()) {
                 runnerContext.addRunnerParameter(PROP_VCS_REVISION, revisionList.get(0).getRevisionDisplayName());
+                runnerContext.addRunnerParameter(PROP_VCS_URL, revisionList.get(0).getRoot().getProperties().get("url"));
             }
 
             readAndAddFileProps(runnerContext, Constants.ENV_PREFIX, Constants.SYSTEM_PREFIX);
