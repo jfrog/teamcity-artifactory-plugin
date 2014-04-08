@@ -32,5 +32,5 @@
             <logo>http://www.jfrog.org/images/logos/jfrog.logo.teamcity.png</logo>
         </vendor>
     </info>
-    <deployment use-separate-classloader="false"/>
+    <deployment use-separate-classloader="true"/>
 </teamcity-plugin>
