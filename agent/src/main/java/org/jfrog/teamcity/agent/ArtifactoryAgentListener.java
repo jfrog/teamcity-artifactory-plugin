@@ -18,14 +18,8 @@ package org.jfrog.teamcity.agent;
 
 import com.google.common.collect.Lists;
 import jetbrains.buildServer.ExtensionHolder;
-import jetbrains.buildServer.agent.AgentLifeCycleAdapter;
-import jetbrains.buildServer.agent.AgentLifeCycleListener;
-import jetbrains.buildServer.agent.AgentRunningBuildEx;
-import jetbrains.buildServer.agent.BuildAgent;
-import jetbrains.buildServer.agent.BuildFinishedStatus;
-import jetbrains.buildServer.agent.BuildInterruptReason;
-import jetbrains.buildServer.agent.BuildProgressLogger;
-import jetbrains.buildServer.agent.BuildRunnerContext;
+import jetbrains.buildServer.agent.*;
+import jetbrains.buildServer.agent.artifacts.ArtifactsWatcher;
 import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.apache.commons.lang.StringUtils;
@@ -50,10 +44,12 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
     private List<BuildDependency> userBuildDependencies = Lists.newArrayList();
     private AgentListenerBuildInfoHelper buildInfoHelper;
     private AgentListenerReleaseHelper releaseHelper;
+    private ArtifactsWatcher watcher;
 
     public ArtifactoryAgentListener(@NotNull EventDispatcher<AgentLifeCycleListener> dispatcher,
-            @NotNull ExtensionHolder extensionsLocator) {
+                                    @NotNull ExtensionHolder extensionsLocator, @NotNull ArtifactsWatcher watcher) {
         this.extensionsLocator = extensionsLocator;
+        this.watcher = watcher;
         dispatcher.addListener(this);
     }
 
@@ -78,7 +74,7 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
 
         publishedDependencies.clear();
         userBuildDependencies.clear();
-        buildInfoHelper = new AgentListenerBuildInfoHelper(extensionsLocator);
+        buildInfoHelper = new AgentListenerBuildInfoHelper(extensionsLocator, watcher);
 
         try {
             buildInfoHelper.beforeRunnerStart(runner, publishedDependencies, userBuildDependencies);
