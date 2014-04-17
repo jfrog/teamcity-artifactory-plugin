@@ -28,26 +28,12 @@ import jetbrains.buildServer.agent.impl.BuildRunnerContextImpl;
 import jetbrains.buildServer.log.Loggers;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jfrog.build.api.Agent;
-import org.jfrog.build.api.Artifact;
-import org.jfrog.build.api.BlackDuckProperties;
-import org.jfrog.build.api.BlackDuckPropertiesFields;
-import org.jfrog.build.api.Build;
-import org.jfrog.build.api.BuildInfoFields;
-import org.jfrog.build.api.BuildInfoProperties;
-import org.jfrog.build.api.Dependency;
-import org.jfrog.build.api.Governance;
-import org.jfrog.build.api.LicenseControl;
-import org.jfrog.build.api.Module;
+import org.jfrog.build.api.*;
 import org.jfrog.build.api.builder.ArtifactBuilder;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.api.util.FileChecksumCalculator;
-import org.jfrog.build.client.ClientProperties;
-import org.jfrog.build.client.DeployDetails;
-import org.jfrog.build.client.DeployDetailsArtifact;
-import org.jfrog.build.client.IncludeExcludePatterns;
-import org.jfrog.build.client.PatternMatcher;
+import org.jfrog.build.client.*;
 import org.jfrog.build.extractor.BuildInfoExtractor;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
@@ -58,12 +44,7 @@ import org.jfrog.teamcity.common.RunnerParameterKeys;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import static org.jfrog.teamcity.common.ConstantValues.*;
 
@@ -81,7 +62,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
     private Map<String, Map<String, String>> calculatedChecksumCache;
 
     public BaseBuildInfoExtractor(BuildRunnerContext runnerContext, Multimap<File, String> artifactsToPublish,
-            List<Dependency> publishedDependencies) {
+                                  List<Dependency> publishedDependencies) {
         this.runnerContext = runnerContext;
         this.artifactsToPublish = artifactsToPublish;
         this.publishedDependencies = publishedDependencies;
@@ -194,6 +175,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
                 agent(new Agent(runnerParams.get(AGENT_NAME), runnerParams.get(AGENT_VERSION))).
                 principal(runnerParams.get(TRIGGERED_BY)).
                 vcsRevision(runnerParams.get(PROP_VCS_REVISION)).
+                vcsUrl(runnerParams.get(PROP_VCS_URL)).
                 parentName(runnerParams.get(PROP_PARENT_NAME)).
                 parentNumber(runnerParams.get(PROP_PARENT_NUMBER)).
                 licenseControl(licenseControl).
@@ -383,7 +365,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
     }
 
     private void gatherBuildInfoParams(Map<String, String> allParamMap, Map propertyReceiver, final String propPrefix,
-            final String... propTypes) {
+                                       final String... propTypes) {
         Map<String, String> filteredProperties = Maps.filterKeys(allParamMap, new Predicate<String>() {
             public boolean apply(String key) {
                 if (StringUtils.isNotBlank(key)) {

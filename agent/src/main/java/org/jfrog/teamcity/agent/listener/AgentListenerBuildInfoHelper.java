@@ -17,15 +17,10 @@
 package org.jfrog.teamcity.agent.listener;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import jetbrains.buildServer.ExtensionHolder;
-import jetbrains.buildServer.agent.AgentRunningBuild;
-import jetbrains.buildServer.agent.ArtifactsPreprocessor;
-import jetbrains.buildServer.agent.ArtifactsPublisher;
-import jetbrains.buildServer.agent.BuildFinishedStatus;
-import jetbrains.buildServer.agent.BuildProgressLogger;
-import jetbrains.buildServer.agent.BuildRunnerContext;
+import jetbrains.buildServer.agent.*;
+import jetbrains.buildServer.agent.artifacts.ArtifactsWatcher;
 import jetbrains.buildServer.agent.impl.artifacts.ArtifactsBuilder;
 import jetbrains.buildServer.agent.impl.artifacts.ArtifactsCollection;
 import jetbrains.buildServer.log.Loggers;
@@ -55,12 +50,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static org.jfrog.teamcity.common.ConstantValues.BUILD_INFO_FILE_NAME;
-import static org.jfrog.teamcity.common.ConstantValues.BUILD_STARTED;
-import static org.jfrog.teamcity.common.ConstantValues.PROXY_HOST;
-import static org.jfrog.teamcity.common.ConstantValues.PROXY_PASSWORD;
-import static org.jfrog.teamcity.common.ConstantValues.PROXY_PORT;
-import static org.jfrog.teamcity.common.ConstantValues.PROXY_USERNAME;
+import static org.jfrog.teamcity.common.ConstantValues.*;
 
 /**
  * @author Noam Y. Tenne
@@ -68,9 +58,11 @@ import static org.jfrog.teamcity.common.ConstantValues.PROXY_USERNAME;
 public class AgentListenerBuildInfoHelper {
 
     private ExtensionHolder extensionHolder;
+    private ArtifactsWatcher watcher;
 
-    public AgentListenerBuildInfoHelper(ExtensionHolder extensionHolder) {
+    public AgentListenerBuildInfoHelper(ExtensionHolder extensionHolder, ArtifactsWatcher watcher) {
         this.extensionHolder = extensionHolder;
+        this.watcher = watcher;
     }
 
     public void beforeRunnerStart(BuildRunnerContext runner,
@@ -222,11 +214,11 @@ public class AgentListenerBuildInfoHelper {
      */
     private void publishBuildInfoToTeamCityServer(AgentRunningBuild build, Build buildInfo) {
         try {
-            ArtifactsPublisher publisher = extensionHolder.getExtensions(ArtifactsPublisher.class).iterator().next();
             File buildInfoFile = new File(build.getAgentTempDirectory(), BUILD_INFO_FILE_NAME);
             BuildInfoExtractorUtils.saveBuildInfoToFile(buildInfo, buildInfoFile);
             File buildInfoPacked = ArchiveUtil.packFile(buildInfoFile);
-            publisher.publishFiles(ImmutableMap.of(buildInfoPacked, ".teamcity"));
+            watcher.addNewArtifactsPath(buildInfoPacked.getAbsolutePath() + "=>.teamcity");
+
         } catch (IOException e) {
             throw new RuntimeException("Failed to publish build info on TeamCity server", e);
         }

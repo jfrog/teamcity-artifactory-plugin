@@ -1,10 +1,8 @@
 package org.jfrog.teamcity.server.project;
 
+import com.google.common.collect.Lists;
 import jetbrains.buildServer.controllers.BaseFormXmlController;
-import jetbrains.buildServer.serverSide.ProjectManager;
-import jetbrains.buildServer.serverSide.SBuildRunnerDescriptor;
-import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.SFinishedBuild;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.vcs.VcsRootInstance;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
@@ -105,10 +103,24 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
             managementConfig.setDeployableRepoKeys(deployableServers.getServerDeployableRepos(serverId, overrideDeployerCredentials, username, password));
         }
 
+        List<BranchEx> checkoutBranches = getCheckoutBranches(buildType);
+        if (!checkoutBranches.isEmpty()) {
+            managementConfig.setDefaultCheckoutBranch(checkoutBranches.get(0));
+        }
+        managementConfig.setCheckoutBranches(checkoutBranches);
+
         fillBuildSpecificModel(model, buildType, managementConfig);
 
         model.put("managementConfig", managementConfig);
         model.put("buildTypeId", buildTypeId);
+    }
+
+    private List<BranchEx> getCheckoutBranches(SBuildType buildType) {
+        if(buildType instanceof BuildTypeEx) {
+            return ((BuildTypeEx) buildType).getActiveBranches();
+        } else {
+            return Lists.newArrayList();
+        }
     }
 
     protected abstract boolean buildHasAppropriateRunner(SBuildType buildType);

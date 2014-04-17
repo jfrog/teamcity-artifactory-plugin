@@ -58,9 +58,18 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
     }
 
     public String getTargetDir(String targetDir, String relativeDir) throws IOException {
+        /*
+        * In Linux, an empty target directory cause to root destination path.
+        */
+        if (StringUtils.isBlank(targetDir)) {
+            targetDir = runnerContext.getWorkingDirectory().getAbsolutePath();
+        }
+
         final File targetDirFile = new File(targetDir, relativeDir);
         final File workingDir = targetDirFile.isAbsolute() ? targetDirFile :
                 new File(runnerContext.getWorkingDirectory(), targetDirFile.getPath());
+        log.info("Target directory: " + workingDir.getAbsolutePath());
+
         return workingDir.getAbsolutePath();
     }
 

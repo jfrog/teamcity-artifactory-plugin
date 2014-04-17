@@ -33,7 +33,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <plugin.version>${project.version}</plugin.version>
         <teamcity.version>7.1.0</teamcity.version>
-        <build.info.version>2.2.4</build.info.version>
+        <build.info.version>2.2.6</build.info.version>
     </properties>
 
     <developers>
@@ -91,6 +91,7 @@
                 <groupId>com.thoughtworks.xstream</groupId>
                 <artifactId>xstream</artifactId>
                 <version>1.4.2</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
@@ -107,6 +108,7 @@
                 <groupId>org.jdom</groupId>
                 <artifactId>jdom</artifactId>
                 <version>1.1</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains.teamcity.agent</groupId>
@@ -227,7 +229,7 @@
             <dependency>
                 <groupId>org.jfrog.buildinfo</groupId>
                 <artifactId>build-info-extractor-ivy</artifactId>
-                <version>2.2.2</version>
+                <version>2.2.3</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.ant</groupId>
@@ -246,7 +248,7 @@
             <dependency>
                 <groupId>org.jfrog.buildinfo</groupId>
                 <artifactId>build-info-extractor-gradle</artifactId>
-                <version>2.2.2</version>
+                <version>2.2.4</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.ivy</groupId>
@@ -257,7 +259,7 @@
             <dependency>
                 <groupId>org.jfrog.buildinfo</groupId>
                 <artifactId>build-info-extractor-maven3</artifactId>
-                <version>2.1.0</version>
+                <version>2.2.3</version>
             </dependency>
             <dependency>
                 <groupId>org.tmatesoft.svnkit</groupId>

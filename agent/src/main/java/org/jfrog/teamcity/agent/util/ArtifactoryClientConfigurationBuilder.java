@@ -59,6 +59,9 @@ public abstract class ArtifactoryClientConfigurationBuilder {
         clientConf.publisher.addMatrixParam(BuildInfoFields.VCS_REVISION, vcsRevision);
         clientConf.info.setBuildUrl(runnerParameters.get(ConstantValues.BUILD_URL));
 
+        String vcsUrl = runnerParameters.get(ConstantValues.PROP_VCS_URL);
+        clientConf.info.setVcsUrl(vcsUrl);
+
         addParentProperties(runnerParameters, clientConf);
         clientConf.info.setPrincipal(runnerParameters.get(ConstantValues.TRIGGERED_BY));
         clientConf.info.setAgentName(runnerParameters.get(ConstantValues.AGENT_NAME));
@@ -115,7 +118,7 @@ public abstract class ArtifactoryClientConfigurationBuilder {
     }
 
     private static void addParentProperties(Map<String, String> runParameters,
-            ArtifactoryClientConfiguration clientConf) {
+                                            ArtifactoryClientConfiguration clientConf) {
         String parentName = runParameters.get(ConstantValues.PROP_PARENT_NAME);
         if (StringUtils.isNotBlank(parentName)) {
             clientConf.info.setParentBuildName(parentName);
@@ -128,7 +131,7 @@ public abstract class ArtifactoryClientConfigurationBuilder {
     }
 
     private static void addClientProperties(Map<String, String> runParameters,
-            ArtifactoryClientConfiguration clientConf) {
+                                            ArtifactoryClientConfiguration clientConf) {
         String serverUrl = runParameters.get(RunnerParameterKeys.URL);
         clientConf.publisher.setContextUrl(serverUrl);
         String timeout = runParameters.get(RunnerParameterKeys.TIMEOUT);
@@ -203,7 +206,7 @@ public abstract class ArtifactoryClientConfigurationBuilder {
     }
 
     private static void addMatrixParamProperties(BuildRunnerContext runnerContext,
-            ArtifactoryClientConfiguration clientConf) {
+                                                 ArtifactoryClientConfiguration clientConf) {
         Properties fileAndSystemProperties =
                 BuildInfoExtractorUtils.mergePropertiesWithSystemAndPropertyFile(new Properties());
         Properties filteredMatrixParams = BuildInfoExtractorUtils
@@ -221,8 +224,8 @@ public abstract class ArtifactoryClientConfigurationBuilder {
     }
 
     private static void gatherBuildInfoParams(Map<String, String> allParamMap,
-            ArtifactoryClientConfiguration.PublisherHandler configuration, final String propPrefix,
-            final String... propTypes) {
+                                              ArtifactoryClientConfiguration.PublisherHandler configuration, final String propPrefix,
+                                              final String... propTypes) {
         Map<String, String> filteredProperties = Maps.filterKeys(allParamMap, new Predicate<String>() {
             public boolean apply(String key) {
                 if (StringUtils.isNotBlank(key)) {

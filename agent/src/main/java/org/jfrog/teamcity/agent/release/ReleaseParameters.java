@@ -104,6 +104,10 @@ public class ReleaseParameters {
         return buildParams.get(ReleaseManagementParameterKeys.RELEASE_BRANCH);
     }
 
+    public String getCheckoutBranch() {
+        return buildParams.get(ReleaseManagementParameterKeys.CHECKOUT_BRANCH);
+    }
+
     public String getStagingComment() {
         return buildParams.get(ReleaseManagementParameterKeys.STAGING_COMMENT);
     }

@@ -51,6 +51,7 @@ public class ConstantValues {
     public final static String PROP_PARENT_NAME = BUILD_PREFIX + "parent.name";
     public final static String PROP_PARENT_NUMBER = BUILD_PREFIX + "parent.number";
     public final static String PROP_VCS_REVISION = BUILD_PREFIX + "vcs.revision";
+    public final static String PROP_VCS_URL = BUILD_PREFIX + "vcs.url";
     public final static String PROP_BUILD_TIMESTAMP = BUILD_PREFIX + "timestamp";
 
     public final static String PROXY_HOST = PLUGIN_PREFIX + "proxy.host";

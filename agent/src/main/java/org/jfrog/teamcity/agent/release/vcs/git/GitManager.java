@@ -86,7 +86,7 @@ public class GitManager extends AbstractScmManager {
 
     public String push(String remoteRepository, String branch) throws IOException {
         log(String.format("Pushing branch '%s' to '%s'", branch, remoteRepository));
-        String pushOutput = git.launchCommand("push", remoteRepository, "refs/heads/" + branch);
+        String pushOutput = git.launchCommand("push", remoteRepository, expandHeadsRef(branch));
         debuggingLogger.fine(String.format("Push command output:%n%s", pushOutput));
         return pushOutput;
     }
@@ -95,7 +95,7 @@ public class GitManager extends AbstractScmManager {
             throws IOException {
         String escapedTagName = tagName.replace(' ', '_');
         log(String.format("Pushing tag '%s' to '%s'", tagName, remoteRepository));
-        String pushOutput = git.launchCommand("push", remoteRepository, "refs/tags/" + escapedTagName);
+        String pushOutput = git.launchCommand("push", remoteRepository, expandTagsRef(escapedTagName));
         debuggingLogger.fine(String.format("Push tag command output:%n%s", pushOutput));
         return pushOutput;
     }
@@ -124,7 +124,7 @@ public class GitManager extends AbstractScmManager {
     public String deleteRemoteBranch(String remoteRepository, String branch)
             throws IOException {
         log(String.format("Deleting remote branch '%s' on '%s'", branch, remoteRepository));
-        String pushOutput = git.launchCommand("push", remoteRepository, ":refs/heads/" + branch);
+        String pushOutput = git.launchCommand("push", remoteRepository, expandHeadsRef(branch));
         debuggingLogger.fine(String.format("Push command output:%n%s", pushOutput));
         return pushOutput;
     }
@@ -139,8 +139,24 @@ public class GitManager extends AbstractScmManager {
     public String deleteRemoteTag(String remoteRepository, String tag)
             throws IOException {
         log(String.format("Deleting remote tag '%s' from '%s'", tag, remoteRepository));
-        String output = git.launchCommand("push", remoteRepository, ":refs/tags/" + tag);
+        String output = git.launchCommand("push", remoteRepository, expandTagsRef(tag));
         debuggingLogger.fine(String.format("Delete tag output:%n%s", output));
         return output;
+    }
+
+    public static String expandHeadsRef(String ref) {
+        if (ref.startsWith("refs/")) {
+            return ref;
+        } else {
+            return "refs/heads/" + ref;
+        }
+    }
+
+    public static String expandTagsRef(String ref) {
+        if (ref.startsWith("refs/")) {
+            return ref;
+        } else {
+            return "refs/tags/" + ref;
+        }
     }
 }

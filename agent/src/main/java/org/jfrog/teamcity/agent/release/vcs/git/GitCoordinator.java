@@ -17,6 +17,7 @@
 package org.jfrog.teamcity.agent.release.vcs.git;
 
 import jetbrains.buildServer.agent.BuildRunnerContext;
+import jetbrains.buildServer.serverSide.Branch;
 import jetbrains.buildServer.vcs.VcsRoot;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -65,7 +66,13 @@ public class GitCoordinator extends AbstractVcsCoordinator {
 
         releaseBranch = releaseParameters.getReleaseBranch();
 
-        checkoutBranch = gitProps.get(ConstantValues.Git.BRANCH_NAME);
+        String checkoutBranch = releaseParameters.getCheckoutBranch();
+        log(String.format("checkout branch is: %s", checkoutBranch));
+        if (StringUtils.isNotBlank(checkoutBranch) && !StringUtils.equals(checkoutBranch, Branch.DEFAULT_BRANCH_NAME)) {
+            this.checkoutBranch = checkoutBranch;
+        } else {
+            this.checkoutBranch = gitProps.get(ConstantValues.Git.BRANCH_NAME);
+        }
 
         String gitAgentPath = gitProps.get(ConstantValues.Git.AGENT_GIT_PATH);
         if (StringUtils.isBlank(gitAgentPath)) {
@@ -80,6 +87,7 @@ public class GitCoordinator extends AbstractVcsCoordinator {
     public void beforeReleaseVersionChange() throws IOException {
         if (releaseParameters.isCreateReleaseBranch()) {
             // create a new branch for the release and start it
+            log(String.format("checkout branch is: %s", checkoutBranch));
             git.checkoutBranch(releaseBranch, true);
             state.currentWorkingBranch = releaseBranch;
             state.releaseBranchCreated = true;

@@ -82,6 +82,7 @@ public abstract class BaseReleaseManagementController extends BaseFormXmlControl
 
         BuildPromotionEx promotion = ((BuildTypeEx) buildType).createBuildPromotion();
         promotion.setCustomParameters(customParameters);
+        promotion.setDesiredBranchName(request.getParameter(ReleaseManagementParameterKeys.CHECKOUT_BRANCH));
         promotion.addToQueue(SessionUser.getUser(request).getUsername());
         WebLinks webLinks = new WebLinks(server);
         Element redirectUrl = new Element("redirectUrl");
@@ -119,6 +120,7 @@ public abstract class BaseReleaseManagementController extends BaseFormXmlControl
         handleVersioning(request, customParameters, errors);
 
         if (gitVcs) {
+            handleCheckoutBranch(request, customParameters);
             handleReleaseBranch(request, customParameters, errors);
         }
 
@@ -132,6 +134,11 @@ public abstract class BaseReleaseManagementController extends BaseFormXmlControl
 
     protected abstract void handleVersioning(HttpServletRequest request, Map<String, String> customParameters,
                                              ActionErrors errors);
+
+    private void handleCheckoutBranch(HttpServletRequest request, Map<String, String> customParameters) {
+        customParameters.put(ReleaseManagementParameterKeys.CHECKOUT_BRANCH,
+                request.getParameter(ReleaseManagementParameterKeys.CHECKOUT_BRANCH));
+    }
 
     private void handleReleaseBranch(HttpServletRequest request, Map<String, String> customParameters,
                                      ActionErrors errors) {
@@ -159,9 +166,9 @@ public abstract class BaseReleaseManagementController extends BaseFormXmlControl
             } else {
                 errors.addError("tagUrlOrNameError", "Tag URL/name is mandatory.");
             }
-            customParameters.put(ReleaseManagementParameterKeys.TAG_COMMENT,
-                    request.getParameter(ReleaseManagementParameterKeys.TAG_COMMENT));
         }
+        customParameters.put(ReleaseManagementParameterKeys.TAG_COMMENT,
+                request.getParameter(ReleaseManagementParameterKeys.TAG_COMMENT));
     }
 
     private void handleStagingSettings(HttpServletRequest request, Map<String, String> customParameters,

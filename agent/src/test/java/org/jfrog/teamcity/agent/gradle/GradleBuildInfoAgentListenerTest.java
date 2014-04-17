@@ -1,15 +1,9 @@
 package org.jfrog.teamcity.agent.gradle;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.common.io.Files;
-import jetbrains.buildServer.ExtensionHolder;
-import jetbrains.buildServer.agent.AgentRunningBuild;
-import jetbrains.buildServer.agent.ArtifactsPublisher;
-import jetbrains.buildServer.agent.BuildAgentConfiguration;
-import jetbrains.buildServer.agent.BuildParametersMap;
-import jetbrains.buildServer.agent.BuildProgressLogger;
-import jetbrains.buildServer.agent.BuildRunnerContext;
+import jetbrains.buildServer.agent.*;
+import jetbrains.buildServer.agent.artifacts.ArtifactsWatcher;
 import jetbrains.buildServer.agent.impl.BuildRunnerContextImpl;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.easymock.EasyMock;
@@ -22,7 +16,6 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Noam Y. Tenne
@@ -30,7 +23,7 @@ import java.util.Map;
 public class GradleBuildInfoAgentListenerTest {
 
     private GradleBuildInfoAgentListener listener;
-    private ExtensionHolder holder;
+    private ArtifactsWatcher watcher;
 
     @BeforeClass
     public void setUp() throws Exception {
@@ -38,11 +31,8 @@ public class GradleBuildInfoAgentListenerTest {
         eventDispatcher.addListener(EasyMock.isA(GradleBuildInfoAgentListener.class));
         EasyMock.expectLastCall();
 
-        holder = EasyMock.createMock(ExtensionHolder.class);
-
-        EasyMock.replay(eventDispatcher, holder);
-        listener = new GradleBuildInfoAgentListener(eventDispatcher, holder);
-        EasyMock.verify(eventDispatcher, holder);
+        watcher = EasyMock.createMock(ArtifactsWatcher.class);
+        listener = new GradleBuildInfoAgentListener(eventDispatcher, watcher);
     }
 
     @Test
@@ -194,16 +184,13 @@ public class GradleBuildInfoAgentListenerTest {
         EasyMock.expect(agentRunningBuild.getAgentConfiguration()).andReturn(buildAgentConfiguration);
         EasyMock.expect(runner.getBuild()).andReturn(agentRunningBuild).times(2);
 
-        ArtifactsPublisher artifactsPublisher = EasyMock.createMock(ArtifactsPublisher.class);
-        EasyMock.expect(artifactsPublisher.publishFiles(EasyMock.isA(Map.class))).andReturn(-1);
-
-        EasyMock.reset(holder);
-        EasyMock.expect(holder.getExtensions(ArtifactsPublisher.class)).andReturn(Sets.newHashSet(artifactsPublisher));
-
-        EasyMock.replay(runner, buildParametersMap, agentRunningBuild, holder, artifactsPublisher,
+        watcher.addNewArtifactsPath(EasyMock.isA(String.class));
+        EasyMock.expectLastCall();
+        EasyMock.replay(runner, buildParametersMap, agentRunningBuild, watcher,
                 buildAgentConfiguration);
+
         listener.beforeRunnerStart(runner);
-        EasyMock.verify(runner, buildParametersMap, agentRunningBuild, holder, artifactsPublisher,
+        EasyMock.verify(runner, buildParametersMap, agentRunningBuild, watcher,
                 buildAgentConfiguration);
     }
 }

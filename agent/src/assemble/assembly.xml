@@ -26,4 +26,10 @@
             <outputDirectory>artifactory/lib</outputDirectory>
         </dependencySet>
     </dependencySets>
+    <files>
+        <file>
+            <source>${project.basedir}/src/main/resources/teamcity-plugin.xml</source>
+            <outputDirectory>artifactory</outputDirectory>
+        </file>
+    </files>
 </assembly>

@@ -1,8 +1,7 @@
 package org.jfrog.teamcity.agent.gradle;
 
-import com.google.common.collect.ImmutableMap;
-import jetbrains.buildServer.ExtensionHolder;
 import jetbrains.buildServer.agent.*;
+import jetbrains.buildServer.agent.artifacts.ArtifactsWatcher;
 import jetbrains.buildServer.util.ArchiveUtil;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.apache.commons.io.FileUtils;
@@ -35,11 +34,11 @@ import static org.jfrog.teamcity.common.RunnerParameterKeys.URL;
  */
 public class GradleBuildInfoAgentListener extends AgentLifeCycleAdapter {
 
-    private ExtensionHolder extensionsLocator;
+    private ArtifactsWatcher watcher;
 
     public GradleBuildInfoAgentListener(@NotNull EventDispatcher<AgentLifeCycleListener> dispatcher,
-                                        @NotNull ExtensionHolder extensionsLocator) {
-        this.extensionsLocator = extensionsLocator;
+                                        @NotNull ArtifactsWatcher watcher) {
+        this.watcher = watcher;
         dispatcher.addListener(this);
     }
 
@@ -76,8 +75,6 @@ public class GradleBuildInfoAgentListener extends AgentLifeCycleAdapter {
                         return;
                     }
 
-                    ArtifactsPublisher publisher =
-                            extensionsLocator.getExtensions(ArtifactsPublisher.class).iterator().next();
                     File gradlePropertiesPacked;
                     try {
                         gradlePropertiesPacked = ArchiveUtil.packFile(gradleProperties);
@@ -89,7 +86,7 @@ public class GradleBuildInfoAgentListener extends AgentLifeCycleAdapter {
                         logger.exception(e);
                         return;
                     }
-                    publisher.publishFiles(ImmutableMap.of(gradlePropertiesPacked, ".teamcity"));
+                    watcher.addNewArtifactsPath(gradlePropertiesPacked.getAbsolutePath() + "=>.teamcity");
                 }
 
                 addBuildInfoTaskAndInitScript(runner);

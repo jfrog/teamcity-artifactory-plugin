@@ -19,6 +19,7 @@ public class ReleaseManagementParameterKeys {
     public final static String PERFORCE_VCS = PREFIX + "perforceVcs";
     public final static String CREATE_RELEASE_BRANCH = PREFIX + "createReleaseBranch";
     public final static String RELEASE_BRANCH = PREFIX + "releaseBranch";
+    public final static String CHECKOUT_BRANCH = PREFIX + "checkoutBranch";
     public final static String SVN_VCS = PREFIX + "svnVcs";
     public final static String CREATE_VCS_TAG = PREFIX + "createVcsTag";
     public final static String TAG_URL_OR_NAME = PREFIX + "tagUrlOrName";
