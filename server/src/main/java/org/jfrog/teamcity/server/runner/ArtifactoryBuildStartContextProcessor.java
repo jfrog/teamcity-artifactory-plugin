@@ -156,7 +156,11 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
             List<BuildRevision> revisionList = build.getRevisions();
             if ((revisionList != null) && !revisionList.isEmpty()) {
                 runnerContext.addRunnerParameter(PROP_VCS_REVISION, revisionList.get(0).getRevisionDisplayName());
-                runnerContext.addRunnerParameter(PROP_VCS_URL, revisionList.get(0).getRoot().getProperties().get("url"));
+                if (revisionList.get(0).getRoot().getProperties().get("url") != null) {
+                    runnerContext.addRunnerParameter(PROP_VCS_URL, revisionList.get(0).getRoot().getProperties().get("url"));
+                } else {
+                    Loggers.SERVER.warn("Unsupported Version control for VCS Url property.");
+                }
             }
 
             readAndAddFileProps(runnerContext, Constants.ENV_PREFIX, Constants.SYSTEM_PREFIX);
