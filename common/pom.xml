@@ -18,7 +18,7 @@
     <groupId>org.jfrog.teamcity</groupId>
     <artifactId>teamcity-artifactory-plugin-common</artifactId>
     <packaging>jar</packaging>
-    <version>2.1.10</version>
+    <version>2.1.11-SNAPSHOT</version>
     <name>TeamCity Artifactory Plugin Common</name>
 
     <licenses>
@@ -32,7 +32,7 @@
     <parent>
         <groupId>org.jfrog.teamcity</groupId>
         <artifactId>teamcity-artifactory-plugin</artifactId>
-        <version>2.1.10</version>
+        <version>2.1.11-SNAPSHOT</version>
     </parent>
 
     <dependencies>
