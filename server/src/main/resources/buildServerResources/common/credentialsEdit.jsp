@@ -33,7 +33,7 @@
        && (propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials'] == true) ? true : false}"/>
 
 <c:set var="shouldDisplayCredentialFields" value="${shouldDisplay &&
-(foundOverrideSelected || (foundUsername || foundPassword))}" scope="request"/>
+(foundOverrideSelected)}" scope="request"/>
 
 <tr class="noBorder" id="overrideDefaultDeployerCredentials.container" style="${shouldDisplay ? '' : 'display: none;'}">
     <th>
@@ -43,7 +43,7 @@
     </th>
     <td>
         <props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials"
-                                checked="${foundOverrideSelected || (foundUsername || foundPassword)}"
+                                checked="${foundOverrideSelected}"
                                 onclick="BS.artifactory.toggleOverrideDefaultDeployerSelection()"/>
             <span class="smallNote">
                 Use different deployer user name and password than the default ones defined in the Artifactory settings
@@ -82,3 +82,12 @@
             </span>
     </td>
 </tr>
+
+
+<!--
+Trying to disable the browser autocomplete action.in some browser its works
+-->
+<script type="text/javascript">
+    jQuery('[name="prop:org.jfrog.artifactory.selectedDeployableServer.deployerUsername"]').attr('autocomplete', 'off');
+    jQuery('[name="prop:secure:org.jfrog.artifactory.selectedDeployableServer.deployerPassword"]').attr('autocomplete', 'off');
+</script>
