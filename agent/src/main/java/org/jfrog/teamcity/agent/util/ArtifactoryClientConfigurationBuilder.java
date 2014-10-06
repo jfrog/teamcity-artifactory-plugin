@@ -208,7 +208,7 @@ public abstract class ArtifactoryClientConfigurationBuilder {
     private static void addMatrixParamProperties(BuildRunnerContext runnerContext,
                                                  ArtifactoryClientConfiguration clientConf) {
         Properties fileAndSystemProperties =
-                BuildInfoExtractorUtils.mergePropertiesWithSystemAndPropertyFile(new Properties(), null);
+                BuildInfoExtractorUtils.mergePropertiesWithSystemAndPropertyFile(new Properties());
         Properties filteredMatrixParams = BuildInfoExtractorUtils
                 .filterDynamicProperties(fileAndSystemProperties, BuildInfoExtractorUtils.MATRIX_PARAM_PREDICATE);
         Enumeration<Object> propertyKeys = filteredMatrixParams.keys();
