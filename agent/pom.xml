@@ -37,7 +37,6 @@
         <groupId>org.jfrog.teamcity</groupId>
         <artifactId>teamcity-artifactory-plugin</artifactId>
         <version>2.1.x-SNAPSHOT</version>
-
     </parent>
 
     <dependencies>
@@ -45,7 +44,6 @@
             <groupId>org.jfrog.teamcity</groupId>
             <artifactId>teamcity-artifactory-plugin-common</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
@@ -145,6 +143,10 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ivy</groupId>
+            <artifactId>ivy</artifactId>
         </dependency>
     </dependencies>
 

@@ -52,12 +52,10 @@
             <groupId>org.jfrog.buildinfo</groupId>
             <artifactId>build-info-extractor-maven3</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.jfrog.teamcity</groupId>
             <artifactId>teamcity-artifactory-plugin-common</artifactId>
         </dependency>
-
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -109,6 +107,10 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ivy</groupId>
+            <artifactId>ivy</artifactId>
         </dependency>
     </dependencies>
 </project>

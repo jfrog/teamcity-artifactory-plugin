@@ -103,8 +103,8 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
         try {
             buildInfoHelper.runnerFinished(runner, buildStatus, publishedDependencies, userBuildDependencies);
             releaseHelper.runnerFinished(runner, buildStatus);
-        } catch (Exception e) {
-            logException(runner, e);
+        } catch (Throwable t) {
+            logException(runner, t);
         } finally {
             ReleaseParameters releaseParams = new ReleaseParameters(runner.getBuild());
             if (releaseParams.isReleaseBuild()) {
@@ -121,11 +121,11 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
         }
     }
 
-    private void logException(BuildRunnerContext runner, Exception e) {
+    private void logException(BuildRunnerContext runner, Throwable t) {
         BuildProgressLogger logger = runner.getBuild().getBuildLogger();
-        String errorMessage = e.getLocalizedMessage();
+        String errorMessage = t.getLocalizedMessage();
         logger.buildFailureDescription(errorMessage);
-        logger.exception(e);
+        logger.exception(t);
         logger.flush();
         ((AgentRunningBuildEx) runner.getBuild()).stopBuild(errorMessage);
     }
