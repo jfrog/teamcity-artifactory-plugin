@@ -17,6 +17,7 @@
 package org.jfrog.teamcity.agent.release.vcs.git;
 
 import jetbrains.buildServer.agent.BuildRunnerContext;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.teamcity.agent.release.vcs.AbstractScmManager;
 
@@ -42,6 +43,33 @@ public class GitManager extends AbstractScmManager {
         git = new GitCmd(checkoutDirectory, gitPath);
     }
 
+    /**
+     * Checkout 'refs/heads/<branch_name>' can lead to 'detached HEAD'
+     */
+    public static String expandNoHeadsRef(String ref) {
+        if (!ref.startsWith("refs/")) {
+            return ref;
+        } else {
+            return ref.replace("refs/heads/", StringUtils.EMPTY);
+        }
+    }
+
+    public static String expandHeadsRef(String ref) {
+        if (ref.startsWith("refs/")) {
+            return ref;
+        } else {
+            return "refs/heads/" + ref;
+        }
+    }
+
+    public static String expandTagsRef(String ref) {
+        if (ref.startsWith("refs/")) {
+            return ref;
+        } else {
+            return "refs/tags/" + ref;
+        }
+    }
+
     public String getCurrentCommitHash() throws IOException {
         // commit all the modified files
         String baseCommit = git.launchCommand("rev-parse", "--verify", "HEAD").trim();
@@ -56,7 +84,7 @@ public class GitManager extends AbstractScmManager {
         if (create) {
             command.add("-b"); // force create new branch
         }
-        command.add(branch);
+        command.add(expandNoHeadsRef(branch));
         String checkoutResult = git.launchCommand(command.toArray(new String[command.size()]));
         debuggingLogger.fine(String.format("Checkout result: %s", checkoutResult));
         return checkoutResult;
@@ -142,21 +170,5 @@ public class GitManager extends AbstractScmManager {
         String output = git.launchCommand("push", remoteRepository, expandTagsRef(tag));
         debuggingLogger.fine(String.format("Delete tag output:%n%s", output));
         return output;
-    }
-
-    public static String expandHeadsRef(String ref) {
-        if (ref.startsWith("refs/")) {
-            return ref;
-        } else {
-            return "refs/heads/" + ref;
-        }
-    }
-
-    public static String expandTagsRef(String ref) {
-        if (ref.startsWith("refs/")) {
-            return ref;
-        } else {
-            return "refs/tags/" + ref;
-        }
     }
 }

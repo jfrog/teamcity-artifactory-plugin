@@ -163,7 +163,7 @@
             <th style="border-bottom: none">
                 <label style="font-weight: normal"
                        for="org.jfrog.artifactory.releaseManagement.releaseVersion_${releaseProperty.propertyKey}">
-                    Release value:
+                    Release value (test):
                 </label>
             </th>
             <td style="border-bottom: none">
@@ -175,13 +175,7 @@
                     </span>
             </td>
         </tr>
-        <tr style="display: none">
-            <td>
-                <forms:textField
-                        name="org.jfrog.artifactory.releaseManagement.nextDevelopmentVersion_${releaseProperty.propertyKey}"
-                        value="${releaseProperty.nextIntegrationVersion}" className="longField"/>
-            </td>
-        </tr>
+
     </c:forEach>
     <c:forEach var="nextIntegrationProperty" items="${nextIntegrationProperties}">
         <tr>
@@ -189,22 +183,26 @@
                 <h3>${nextIntegrationProperty.propertyKey}</h3>
             </td>
         </tr>
-        <tr>
-            <th style="border-bottom: none">
-                <label style="font-weight: normal"
-                       for="org.jfrog.artifactory.releaseManagement.releaseVersion_${nextIntegrationProperty.propertyKey}">
-                    Release value:
-                </label>
-            </th>
-            <td style="border-bottom: none">
-                <forms:textField
-                        name="org.jfrog.artifactory.releaseManagement.releaseVersion_${nextIntegrationProperty.propertyKey}"
-                        value="${nextIntegrationProperty.releaseVersion}" className="longField"/>
+
+        <c:if test="${empty releaseProperties}">
+            <tr>
+                <th style="border-bottom: none">
+                    <label style="font-weight: normal"
+                           for="org.jfrog.artifactory.releaseManagement.releaseVersion_${nextIntegrationProperty.propertyKey}">
+                        Release value:
+                    </label>
+                </th>
+                <td style="border-bottom: none">
+                    <forms:textField
+                            name="org.jfrog.artifactory.releaseManagement.releaseVersion_${nextIntegrationProperty.propertyKey}"
+                            value="${nextIntegrationProperty.releaseVersion}" className="longField"/>
                     <span class="smallNote">
                         The release version to use in the gradle.properties and for tagging.
                     </span>
-            </td>
-        </tr>
+                </td>
+            </tr>
+        </c:if>
+
         <tr>
             <th style="border-bottom: none">
                 <label style="font-weight: normal"
