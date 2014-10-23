@@ -86,10 +86,10 @@ public class AgentListenerBuildInfoHelper {
     private void retrievePublishedAndBuildDependencies(BuildRunnerContext runner,
             List<Dependency> publishedDependencies, List<BuildDependency> buildDependencies) {
 
+        // In case the BUILD_DEPENDENCIES property contains the DISABLED_MESSAGE value, we do not want to pass it on:
         if (runner.getRunnerParameters().get(RunnerParameterKeys.BUILD_DEPENDENCIES).equals(ConstantValues.DISABLED_MESSAGE)) {
             runner.addRunnerParameter(RunnerParameterKeys.BUILD_DEPENDENCIES, "");
         }
-
 
         DependenciesResolver dependenciesResolver = new DependenciesResolver(runner);
         try {
