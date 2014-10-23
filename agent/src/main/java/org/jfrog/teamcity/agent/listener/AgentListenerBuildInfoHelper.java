@@ -41,6 +41,7 @@ import org.jfrog.teamcity.agent.LoggingArtifactsBuilderAdapter;
 import org.jfrog.teamcity.agent.MavenBuildInfoExtractor;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
+import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunTypeUtils;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
@@ -84,6 +85,12 @@ public class AgentListenerBuildInfoHelper {
 
     private void retrievePublishedAndBuildDependencies(BuildRunnerContext runner,
             List<Dependency> publishedDependencies, List<BuildDependency> buildDependencies) {
+
+        if (runner.getRunnerParameters().get(RunnerParameterKeys.BUILD_DEPENDENCIES).equals(ConstantValues.DISABLED_MESSAGE)) {
+            runner.addRunnerParameter(RunnerParameterKeys.BUILD_DEPENDENCIES, "");
+        }
+
+
         DependenciesResolver dependenciesResolver = new DependenciesResolver(runner);
         try {
             publishedDependencies.addAll(dependenciesResolver.retrievePublishedDependencies());
