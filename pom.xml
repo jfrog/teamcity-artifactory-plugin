@@ -13,12 +13,17 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0          http://maven.apache.org/maven-v4_0_0.xsd">
+  -->
+
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.jfrog.teamcity</groupId>
     <artifactId>teamcity-artifactory-plugin</artifactId>
     <packaging>pom</packaging>
-    <version>2.1.11-SNAPSHOT</version>
+    <version>2.1.x-SNAPSHOT</version>
     <name>TeamCity Artifactory Plugin Parent</name>
 
     <licenses>
@@ -33,7 +38,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <plugin.version>${project.version}</plugin.version>
         <teamcity.version>7.1.0</teamcity.version>
-        <build.info.version>2.2.6</build.info.version>
+        <build.info.version>2.3.1</build.info.version>
+        <build.info.maven3.version>2.4.0</build.info.maven3.version>
+        <build.info.gradle.version>3.0.2</build.info.gradle.version>
+        <build.info.ivy.version>2.3.1</build.info.ivy.version>
     </properties>
 
     <developers>
@@ -59,17 +67,17 @@
             <dependency>
                 <groupId>org.jfrog.teamcity</groupId>
                 <artifactId>teamcity-artifactory-plugin-agent</artifactId>
-                <version>2.1.11-SNAPSHOT</version>
+               <version>2.1.x-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.jfrog.teamcity</groupId>
                 <artifactId>teamcity-artifactory-plugin-common</artifactId>
-                <version>2.1.11-SNAPSHOT</version>
+               <version>2.1.x-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.jfrog.teamcity</groupId>
                 <artifactId>teamcity-artifactory-plugin-server</artifactId>
-                <version>2.1.11-SNAPSHOT</version>
+               <version>2.1.x-SNAPSHOT</version>
             </dependency>
 
             <dependency>
@@ -229,7 +237,7 @@
             <dependency>
                 <groupId>org.jfrog.buildinfo</groupId>
                 <artifactId>build-info-extractor-ivy</artifactId>
-                <version>2.2.3</version>
+                <version>${build.info.ivy.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.ant</groupId>
@@ -248,7 +256,7 @@
             <dependency>
                 <groupId>org.jfrog.buildinfo</groupId>
                 <artifactId>build-info-extractor-gradle</artifactId>
-                <version>2.2.4</version>
+                <version>${build.info.gradle.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.ivy</groupId>
@@ -259,12 +267,17 @@
             <dependency>
                 <groupId>org.jfrog.buildinfo</groupId>
                 <artifactId>build-info-extractor-maven3</artifactId>
-                <version>2.2.3</version>
+                <version>${build.info.maven3.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.tmatesoft.svnkit</groupId>
                 <artifactId>svnkit</artifactId>
                 <version>1.7.8</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ivy</groupId>
+                <artifactId>ivy</artifactId>
+                <version>2.2.0</version>
             </dependency>
             <dependency>
                 <groupId>org.testng</groupId>
