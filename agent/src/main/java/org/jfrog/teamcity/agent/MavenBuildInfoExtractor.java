@@ -181,22 +181,16 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
     }
 
     private Gavc addModuleArtifact(ModuleBuilder moduleBuilder, Element artifactElement) {
-
         Gavc gavc = buildGavc(artifactElement);
         if (gavc.isValid()) {
-
             String artifactPath = artifactElement.getChildText("path");
 
             if (StringUtils.isBlank(artifactPath)) {
-
-                /**
-                 * If the current "artifact" element has no path and it's a pom, then the pom path is on the "project"
-                 * element
-                 */
+                // If the current "artifact" element has no path and it's a pom, then the pom path is on the "project"
+                // element
                 if ("pom".equalsIgnoreCase(gavc.type)) {
                     artifactPath = artifactElement.getParentElement().getChildText("path");
                 }
-
                 if (StringUtils.isBlank(artifactPath)) {
                     return null;
                 }
