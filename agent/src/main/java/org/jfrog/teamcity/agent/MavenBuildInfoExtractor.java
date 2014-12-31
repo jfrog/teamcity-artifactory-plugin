@@ -206,7 +206,7 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
             ArtifactBuilder artifactBuilder = new ArtifactBuilder(artifactName);
             artifactBuilder.type(gavc.type);
 
-            if (artifactFile.exists()) {
+            if (artifactFile.isFile()) {
 
                 String deploymentRepo = getDeploymentRepo(gavc);
                 addChecksumInfo(artifactFile, deploymentRepo, deploymentPath, artifactBuilder);
