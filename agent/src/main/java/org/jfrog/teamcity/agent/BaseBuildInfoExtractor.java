@@ -58,7 +58,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
     private List<Dependency> publishedDependencies;
     protected Map<String, String> runnerParams;
     protected Map<String, String> matrixParams;
-    private BuildProgressLogger logger;
+    protected BuildProgressLogger logger;
     private Map<String, Map<String, String>> calculatedChecksumCache;
 
     public BaseBuildInfoExtractor(BuildRunnerContext runnerContext, Multimap<File, String> artifactsToPublish,

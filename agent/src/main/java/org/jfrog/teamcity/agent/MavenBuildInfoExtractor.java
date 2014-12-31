@@ -19,6 +19,7 @@ package org.jfrog.teamcity.agent;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import jetbrains.buildServer.agent.BuildRunnerContext;
+import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.util.FileUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -36,6 +37,7 @@ import org.jfrog.build.api.release.Promotion;
 import org.jfrog.build.client.DeployDetails;
 import org.jfrog.build.client.DeployDetailsArtifact;
 import org.jfrog.teamcity.agent.api.Gavc;
+import org.jfrog.teamcity.agent.listener.AgentListenerBuildInfoHelper;
 import org.jfrog.teamcity.agent.release.ReleaseParameters;
 import org.jfrog.teamcity.agent.util.InfoCollectionException;
 import org.jfrog.teamcity.common.ReleaseManagementParameterKeys;
@@ -207,9 +209,11 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
             artifactBuilder.type(gavc.type);
 
             if (artifactFile.isFile()) {
-
                 String deploymentRepo = getDeploymentRepo(gavc);
                 addChecksumInfo(artifactFile, deploymentRepo, deploymentPath, artifactBuilder);
+            } else {
+                logger.message(String.format("Warning: %s includes a path to an artifact that does not exist: %s Skipping checksum calculation for this artifact",
+                        AgentListenerBuildInfoHelper.MAVEN_BUILD_INFO_XML, artifactPath));
             }
             moduleBuilder.addArtifact(artifactBuilder.build());
         }
