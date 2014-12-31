@@ -19,7 +19,6 @@ package org.jfrog.teamcity.agent;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import jetbrains.buildServer.agent.BuildRunnerContext;
-import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.util.FileUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
