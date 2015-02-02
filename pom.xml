@@ -37,10 +37,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <plugin.version>${project.version}</plugin.version>
         <teamcity.version>7.1.0</teamcity.version>
-        <build.info.version>2.3.1</build.info.version>
-        <build.info.maven3.version>2.4.0</build.info.maven3.version>
-        <build.info.gradle.version>3.0.2</build.info.gradle.version>
-        <build.info.ivy.version>2.3.1</build.info.ivy.version>
+        <build.info.version>2.3.x-SNAPSHOT</build.info.version>
+        <build.info.maven3.version>2.4.x-SNAPSHOT</build.info.maven3.version>
+        <build.info.gradle.version>3.0.x-SNAPSHOT</build.info.gradle.version>
+        <build.info.ivy.version>2.3.x-SNAPSHOT</build.info.ivy.version>
     </properties>
 
     <developers>
@@ -109,7 +109,7 @@
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
-                <version>4.1.2</version>
+                <version>4.3.5</version>
             </dependency>
             <dependency>
                 <groupId>org.jdom</groupId>

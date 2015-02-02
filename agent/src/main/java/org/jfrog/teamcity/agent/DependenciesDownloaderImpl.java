@@ -11,9 +11,9 @@ import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.DownloadableArtifact;
 import org.jfrog.build.api.util.FileChecksumCalculator;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.client.ArtifactoryDependenciesClient;
-import org.jfrog.build.util.DependenciesDownloader;
-import org.jfrog.build.util.DependenciesDownloaderHelper;
+import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
+import org.jfrog.build.extractor.clientConfiguration.util.DependenciesDownloader;
+import org.jfrog.build.extractor.clientConfiguration.util.DependenciesDownloaderHelper;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.io.File;

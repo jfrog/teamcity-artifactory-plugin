@@ -27,7 +27,7 @@ import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.serverSide.SBuildType;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.teamcity.api.ProxyInfo;
 import org.jfrog.teamcity.api.ServerConfigBean;
 import org.jfrog.teamcity.common.TriggerParameterKeys;
