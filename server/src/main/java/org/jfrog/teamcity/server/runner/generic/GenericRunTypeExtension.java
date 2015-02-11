@@ -42,7 +42,8 @@ public class GenericRunTypeExtension extends BaseRunTypeExtension {
             "VS.Solution",
             "Xcode",
             "jetbrains_powershell",
-            "jb.nuget.publish");
+            "jb.nuget.publish",
+            "SBT");
 
     public GenericRunTypeExtension(@NotNull final WebControllerManager webControllerManager,
             @NotNull final PluginDescriptor pluginDescriptor,
