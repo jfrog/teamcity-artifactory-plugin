@@ -27,11 +27,7 @@ import org.jdom.JDOMException;
 import org.jfrog.build.api.BuildAgent;
 import org.jfrog.build.api.BuildType;
 import org.jfrog.build.api.Dependency;
-import org.jfrog.build.api.builder.ArtifactBuilder;
-import org.jfrog.build.api.builder.BuildInfoBuilder;
-import org.jfrog.build.api.builder.DependencyBuilder;
-import org.jfrog.build.api.builder.ModuleBuilder;
-import org.jfrog.build.api.builder.PromotionStatusBuilder;
+import org.jfrog.build.api.builder.*;
 import org.jfrog.build.api.release.Promotion;
 import org.jfrog.build.client.DeployDetails;
 import org.jfrog.build.client.DeployDetailsArtifact;
@@ -326,11 +322,15 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
             String pluginPath = pluginElement.getChildText("artifactPath");
             if (StringUtils.isNotBlank(pluginPath)) {
                 Map<String, String> checksumMap = getArtifactChecksumMap(pluginPath);
+                //File is not exists
+                if (checksumMap.isEmpty())
+                    return;
+
                 pluginBuilder.md5(checksumMap.get("md5"));
                 pluginBuilder.sha1(checksumMap.get("sha1"));
-            }
 
-            moduleBuilder.addDependency(pluginBuilder.build());
+                moduleBuilder.addDependency(pluginBuilder.build());
+            }
         }
     }
 }
