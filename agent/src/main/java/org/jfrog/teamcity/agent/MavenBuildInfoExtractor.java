@@ -200,11 +200,11 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
             if (artifactFile.isFile()) {
                 String deploymentRepo = getDeploymentRepo(gavc);
                 addChecksumInfo(artifactFile, deploymentRepo, deploymentPath, artifactBuilder);
+                moduleBuilder.addArtifact(artifactBuilder.build());
             } else {
                 logger.message(String.format("Warning: %s includes a path to an artifact that does not exist: %s Skipping checksum calculation for this artifact",
                         AgentListenerBuildInfoHelper.MAVEN_BUILD_INFO_XML, artifactPath));
             }
-            moduleBuilder.addArtifact(artifactBuilder.build());
         }
         return gavc;
     }
@@ -322,14 +322,12 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
             String pluginPath = pluginElement.getChildText("artifactPath");
             if (StringUtils.isNotBlank(pluginPath)) {
                 Map<String, String> checksumMap = getArtifactChecksumMap(pluginPath);
-                //File is not exists
-                if (checksumMap.isEmpty())
-                    return;
-
-                pluginBuilder.md5(checksumMap.get("md5"));
-                pluginBuilder.sha1(checksumMap.get("sha1"));
-
-                moduleBuilder.addDependency(pluginBuilder.build());
+                // If the file exists then add it:
+                if (!checksumMap.isEmpty()) {
+                    pluginBuilder.md5(checksumMap.get("md5"));
+                    pluginBuilder.sha1(checksumMap.get("sha1"));
+                    moduleBuilder.addDependency(pluginBuilder.build());
+                }
             }
         }
     }
