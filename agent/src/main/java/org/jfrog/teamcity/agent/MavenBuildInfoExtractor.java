@@ -18,6 +18,7 @@ package org.jfrog.teamcity.agent;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.util.FileUtil;
 import org.apache.commons.io.FilenameUtils;
@@ -287,7 +288,7 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
 
             String scope = dependencyElement.getChildText("scope");
             if (StringUtils.isNotBlank(scope)) {
-                dependencyBuilder.scopes(Lists.newArrayList(scope));
+                dependencyBuilder.scopes(Sets.newHashSet(scope));
             }
 
             String dependencyPath = dependencyElement.getChildText("path");
@@ -317,7 +318,7 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
         for (Element pluginElement : pluginList) {
             String id = buildItemId(pluginElement, "groupId", "artifactId", "version", "classifier");
             DependencyBuilder pluginBuilder = new DependencyBuilder().id(id).
-                    scopes(Lists.newArrayList(Dependency.SCOPE_BUILD));
+                    scopes(Sets.newHashSet(Dependency.SCOPE_BUILD));
 
             String pluginPath = pluginElement.getChildText("artifactPath");
             if (StringUtils.isNotBlank(pluginPath)) {
