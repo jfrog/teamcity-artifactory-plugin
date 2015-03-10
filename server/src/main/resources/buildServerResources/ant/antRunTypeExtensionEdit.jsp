@@ -40,8 +40,10 @@
 <%@ include file="../common/artifactoryCommon.js" %>
 BS.local = {
     onServerChange: function (foundExistingConfig) {
-        var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId');
-        var publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo');
+        var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId'),
+                publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
+                deployReleaseText = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
+                deployReleaseFlag = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag');
 
         var selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
         if (!selectedUrlId) {
@@ -104,6 +106,7 @@ BS.local = {
                 $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
                 $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked =
                         false;
+                deployReleaseFlag.checked = false;
             }
             BS.local.loadTargetRepos(selectedUrlId);
             BS.artifactory.checkCompatibleVersion(selectedUrlId);
@@ -311,11 +314,22 @@ display:inline-block;
             <props:selectProperty id="org.jfrog.artifactory.selectedDeployableServer.targetRepo"
                                   name="org.jfrog.artifactory.selectedDeployableServer.targetRepo">
             </props:selectProperty>
+            <props:textProperty id="org.jfrog.artifactory.selectedDeployableServer.deployReleaseText"
+                                name="org.jfrog.artifactory.selectedDeployableServer.deployReleaseText"/>
+            <props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag"
+                                    onclick="BS.artifactory.toggleTextAndSelect(
+                                    $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
+                                    $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
+                                    $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'))"/>
             <c:if test="${foundExistingConfig}">
                 <script type="text/javascript">
                     jQuery(document).ready(function () {
                         var existingUrlId = '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}';
                         BS.local.loadTargetRepos(existingUrlId);
+                        BS.artifactory.initTextAndSelect(
+                                $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'),
+                                $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
+                                $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'));
                     })
                 </script>
             </c:if>

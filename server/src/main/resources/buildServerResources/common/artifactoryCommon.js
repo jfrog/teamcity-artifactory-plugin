@@ -140,6 +140,16 @@ BS.artifactory = {
         });
     },
 
+    toggleTextAndSelect: function (text, select, isDynamicCheckBox) {
+        if (isDynamicCheckBox.checked) {
+            BS.Util.show(text);
+            BS.Util.hide(select);
+        } else {
+            BS.Util.hide(text);
+            BS.Util.show(select);
+        }
+    },
+
     toggleLicenseViolationRecipientsVisibility: function () {
         var shouldRunLicenseChecks = $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks').checked;
         if (shouldRunLicenseChecks) {
@@ -281,5 +291,16 @@ BS.artifactory = {
             $('org.jfrog.artifactory.selectedDeployableServer.alternativeGradleOptions').value = '';
         }
         BS.MultilineProperties.updateVisible();
+    },
+
+    initTextAndSelect: function (checkbox, textbox, select) {
+        if (checkbox.checked) {
+            BS.Util.show(textbox);
+            BS.Util.hide(select);
+        } else {
+            BS.Util.show(select);
+            BS.Util.hide(textbox);
+        }
+
     }
 };

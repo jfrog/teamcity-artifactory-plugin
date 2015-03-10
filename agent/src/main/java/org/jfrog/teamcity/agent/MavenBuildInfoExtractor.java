@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import jetbrains.buildServer.agent.BuildRunnerContext;
+import jetbrains.buildServer.parameters.ValueResolver;
 import jetbrains.buildServer.util.FileUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -36,6 +37,7 @@ import org.jfrog.teamcity.agent.api.Gavc;
 import org.jfrog.teamcity.agent.listener.AgentListenerBuildInfoHelper;
 import org.jfrog.teamcity.agent.release.ReleaseParameters;
 import org.jfrog.teamcity.agent.util.InfoCollectionException;
+import org.jfrog.teamcity.agent.util.RepositoryHelper;
 import org.jfrog.teamcity.common.ReleaseManagementParameterKeys;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
@@ -62,8 +64,23 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
     public MavenBuildInfoExtractor(BuildRunnerContext runnerContext, Multimap<File, String> artifactsToPublish,
             List<Dependency> publishedDependencies) {
         super(runnerContext, artifactsToPublish, publishedDependencies);
-        targetRepo = runnerParams.get(RunnerParameterKeys.TARGET_REPO);
-        targetSnapshotRepo = runnerParams.get(RunnerParameterKeys.TARGET_SNAPSHOT_REPO);
+
+        ValueResolver parametersResolver = runnerContext.getParametersResolver();
+
+        targetRepo = RepositoryHelper.getRepository(
+                RunnerParameterKeys.TARGET_REPO_FLAG,
+                RunnerParameterKeys.TARGET_REPO_TEXT,
+                RunnerParameterKeys.TARGET_REPO,
+                runnerParams, parametersResolver
+        );
+
+        targetSnapshotRepo = RepositoryHelper.getRepository(
+                RunnerParameterKeys.TARGET_SNAPSHOT_FLAG,
+                RunnerParameterKeys.TARGET_SNAPSHOT_REPO_TEXT,
+                RunnerParameterKeys.TARGET_SNAPSHOT_REPO,
+                runnerParams, parametersResolver
+        );
+
         snapshotRepoConfigured = StringUtils.isNotBlank(targetSnapshotRepo);
         releaseManagementActivated = Boolean.valueOf(runnerContext.getBuild().getSharedConfigParameters().
                 get(ReleaseManagementParameterKeys.MANAGEMENT_ACTIVATED));

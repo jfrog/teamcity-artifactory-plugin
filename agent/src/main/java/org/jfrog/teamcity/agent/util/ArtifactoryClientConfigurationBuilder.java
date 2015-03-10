@@ -6,6 +6,7 @@ import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.agent.BuildRunnerContextEx;
 import jetbrains.buildServer.agent.Constants;
 import jetbrains.buildServer.agent.impl.BuildRunnerContextImpl;
+import jetbrains.buildServer.parameters.ValueResolver;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.BlackDuckPropertiesFields;
 import org.jfrog.build.api.BuildInfoFields;
@@ -111,7 +112,8 @@ public abstract class ArtifactoryClientConfigurationBuilder {
                             AutoDiscardStaleComponentRequests)));
         }
 
-        addClientProperties(runnerParameters, clientConf);
+        ValueResolver repositoryResolver = runnerContext.getParametersResolver();
+        addClientProperties(runnerParameters, repositoryResolver, clientConf);
         addMatrixParamProperties(runnerContext, clientConf);
         addEnvVars(runnerContext, clientConf);
         return clientConf;
@@ -130,7 +132,7 @@ public abstract class ArtifactoryClientConfigurationBuilder {
         }
     }
 
-    private static void addClientProperties(Map<String, String> runParameters,
+    private static void addClientProperties(Map<String, String> runParameters, ValueResolver repositoryResolver,
                                             ArtifactoryClientConfiguration clientConf) {
         String serverUrl = runParameters.get(RunnerParameterKeys.URL);
         clientConf.publisher.setContextUrl(serverUrl);
@@ -138,8 +140,23 @@ public abstract class ArtifactoryClientConfigurationBuilder {
         if (StringUtils.isNotBlank(timeout)) {
             clientConf.setTimeout(Integer.valueOf(timeout));
         }
-        clientConf.publisher.setRepoKey(runParameters.get(RunnerParameterKeys.TARGET_REPO));
-        String resolvingRepo = runParameters.get(RunnerParameterKeys.RESOLVING_REPO);
+
+        String targetRepo = RepositoryHelper.getRepository(
+                RunnerParameterKeys.TARGET_REPO_FLAG,
+                RunnerParameterKeys.TARGET_REPO_TEXT,
+                RunnerParameterKeys.TARGET_REPO,
+                runParameters,
+                repositoryResolver);
+
+        clientConf.publisher.setRepoKey(targetRepo);
+
+        String resolvingRepo = RepositoryHelper.getRepository(
+                RunnerParameterKeys.RESOLVE_RELEASE_FLAG,
+                RunnerParameterKeys.RESOLVING_REPO_TEXT,
+                RunnerParameterKeys.RESOLVING_REPO,
+                runParameters, repositoryResolver
+        );
+
         if (StringUtils.isNotBlank(resolvingRepo)) {
             clientConf.resolver.setContextUrl(serverUrl);
             clientConf.resolver.setRepoKey(resolvingRepo);
