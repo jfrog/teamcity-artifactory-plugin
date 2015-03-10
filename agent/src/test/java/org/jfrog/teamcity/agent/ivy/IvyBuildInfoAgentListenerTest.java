@@ -9,6 +9,7 @@ import jetbrains.buildServer.agent.BuildParametersMap;
 import jetbrains.buildServer.agent.BuildProgressLogger;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.agent.impl.BuildRunnerContextImpl;
+import jetbrains.buildServer.parameters.ValueResolver;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.easymock.EasyMock;
 import org.jfrog.build.api.BuildInfoConfigProperties;
@@ -131,7 +132,7 @@ public class IvyBuildInfoAgentListenerTest {
 
         BuildParametersMap buildParametersMap = EasyMock.createMock(BuildParametersMap.class);
         EasyMock.expect(buildParametersMap.getAllParameters()).andReturn(Maps.<String, String>newHashMap()).anyTimes();
-
+        EasyMock.expect(runner.getParametersResolver()).andReturn(EasyMock.createMock(ValueResolver.class)).anyTimes();
         EasyMock.expect(runner.getBuildParameters()).andReturn(buildParametersMap).anyTimes();
 
         AgentRunningBuild agentRunningBuild = EasyMock.createMock(AgentRunningBuild.class);
