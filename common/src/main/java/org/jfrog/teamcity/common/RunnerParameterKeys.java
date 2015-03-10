@@ -14,8 +14,17 @@ public class RunnerParameterKeys {
     public final static String URL_ID = PREFIX + "urlId";
     public final static String TIMEOUT = PREFIX + "timeout";
     public final static String TARGET_REPO = PREFIX + "targetRepo";
+    public final static String TARGET_REPO_TEXT = PREFIX + "deployReleaseText";
+    public final static String TARGET_REPO_FLAG = PREFIX + "deployReleaseFlag";
+    public final static String TARGET_SNAPSHOT_FLAG = PREFIX + "deploySnapshotFlag";
     public final static String TARGET_SNAPSHOT_REPO = PREFIX + "targetSnapshotRepo";
+    public final static String TARGET_SNAPSHOT_REPO_TEXT = PREFIX + "deploySnapshotText";
     public final static String RESOLVING_REPO = PREFIX + "resolvingRepo";
+    public final static String RESOLVING_REPO_TEXT = PREFIX + "resolveReleaseText";
+    public final static String RESOLVING_REPO_SNAPSHOT_TEXT = PREFIX + "resolveSnapshotText";
+    public final static String DEPLOY_RELEASE_FLAG = PREFIX + "deployReleaseDynamicFlag";
+    public final static String RESOLVE_SNAPSHOT_FLAG = PREFIX + "resolveSnapshotDynamicFlag";
+    public final static String RESOLVE_RELEASE_FLAG = PREFIX + "resolveReleaseFlag";
     public final static String OVERRIDE_DEFAULT_DEPLOYER = PREFIX + "overrideDefaultDeployerCredentials";
     public final static String DEPLOYER_USERNAME = PREFIX + "deployerUsername";
     public final static String DEPLOYER_PASSWORD = "secure:" + PREFIX + "deployerPassword";

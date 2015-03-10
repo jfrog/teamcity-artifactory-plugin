@@ -35,11 +35,16 @@
     <%@ include file="../common/artifactoryCommon.js" %>
     BS.local = {
         onServerChange: function (foundExistingConfig) {
-            var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId');
-            var publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo');
-            var publishRepoSnapshotSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo');
+            var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId'),
+                    publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
+                    publishRepoSnapshotSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo'),
+                    deployReleaseText = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
+                    deploySnapshotText = $('org.jfrog.artifactory.selectedDeployableServer.deploySnapshotText'),
+                    deploySnapshotFlag = $('org.jfrog.artifactory.selectedDeployableServer.deploySnapshotFlag'),
+                    deployReleaseFlag = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag');
 
             var selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
+
             if (!selectedUrlId) {
                 publishRepoSelect.innerHTML = '';
                 publishRepoSnapshotSelect.innerHTML = '';
@@ -108,7 +113,12 @@
                     $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
                     $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked =
                             false;
+                    deployReleaseFlag.checked = false;
+                    deploySnapshotFlag.checked = false;
+                    BS.Util.hide(deployReleaseText);
+                    BS.Util.hide(deploySnapshotText);
                 }
+
                 BS.local.loadTargetRepos(selectedUrlId, true, true);
                 BS.artifactory.checkCompatibleVersion(selectedUrlId);
                 BS.Util.show($('targetRepo.container'));
@@ -218,9 +228,9 @@
             }
             BS.ajaxRequest(base_uri + '${controllerUrl}', {
                 parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadTargetRepos=true'
-                        + '&overrideDeployerCredentials=' + BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()
-                        + '&username=' + $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value
-                        + '&password=' + encyptedPass,
+                + '&overrideDeployerCredentials=' + BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()
+                + '&username=' + $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value
+                + '&password=' + encyptedPass,
                 onComplete: function (response, options) {
 
                     if (updateRelease) {
@@ -271,20 +281,38 @@ display:inline-block;
             </label>
         </th>
         <td>
-            <props:selectProperty id="org.jfrog.artifactory.selectedDeployableServer.targetRepo"
-                                  name="org.jfrog.artifactory.selectedDeployableServer.targetRepo">
-            </props:selectProperty>
+            <div>
+                <props:selectProperty id="org.jfrog.artifactory.selectedDeployableServer.targetRepo"
+                                      name="org.jfrog.artifactory.selectedDeployableServer.targetRepo">
+                </props:selectProperty>
+                <props:textProperty id="org.jfrog.artifactory.selectedDeployableServer.deployReleaseText"
+                                    name="org.jfrog.artifactory.selectedDeployableServer.deployReleaseText"/>
+            </div>
+            <div>
+                <p><props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag"
+                                           onclick="BS.artifactory.toggleTextAndSelect(
+                                    $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
+                                    $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
+                                    $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'))"
+                                           style="float: left"/></p>
+                <span class="smallNote">Dynamic mode</span>
+            </div>
             <c:if test="${foundExistingConfig}">
                 <script type="text/javascript">
                     jQuery(document).ready(function () {
                         var existingUrlId = '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}';
                         BS.local.loadTargetRepos(existingUrlId, true, false);
                         BS.artifactory.checkCompatibleVersion(existingUrlId);
+                        BS.artifactory.initTextAndSelect(
+                                $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'),
+                                $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
+                                $('org.jfrog.artifactory.selectedDeployableServer.targetRepo')
+                        )
                     })
                 </script>
             </c:if>
             <span class="smallNote">
-                Select a target deployment repository.
+                Specify a target deployment repository.
             </span>
             <span id="error_org.jfrog.artifactory.selectedDeployableServer.targetRepo" class="error"/>
         </td>
@@ -298,19 +326,36 @@ display:inline-block;
             </label>
         </th>
         <td>
-            <props:selectProperty id="org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo"
-                                  name="org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo">
-            </props:selectProperty>
+            <div>
+                <props:selectProperty id="org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo"
+                                      name="org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo">
+                </props:selectProperty>
+                <props:textProperty id="org.jfrog.artifactory.selectedDeployableServer.deploySnapshotText"
+                                    name="org.jfrog.artifactory.selectedDeployableServer.deploySnapshotText"/>
+            </div>
+            <div>
+                <p><props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.deploySnapshotFlag"
+                                           onclick="BS.artifactory.toggleTextAndSelect(
+                                    $('org.jfrog.artifactory.selectedDeployableServer.deploySnapshotText'),
+                                    $('org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo'),
+                                    $('org.jfrog.artifactory.selectedDeployableServer.deploySnapshotFlag'))"
+                                           style="float: left"/></p>
+                <span class="smallNote">Dynamic mode</span>
+            </div>
             <c:if test="${foundExistingConfig}">
                 <script type="text/javascript">
                     jQuery(document).ready(function () {
                         var existingUrlId = '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}';
                         BS.local.loadTargetRepos(existingUrlId, false, true);
+                        BS.artifactory.initTextAndSelect($('org.jfrog.artifactory.selectedDeployableServer.deploySnapshotFlag'),
+                                $('org.jfrog.artifactory.selectedDeployableServer.deploySnapshotText'),
+                                $('org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo'))
                     })
                 </script>
             </c:if>
+
             <span class="smallNote">
-                Select a target deployment repository.
+                Specify a target deployment.
             </span>
             <span id="error_org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo" class="error"/>
         </td>

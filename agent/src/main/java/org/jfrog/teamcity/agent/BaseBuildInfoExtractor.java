@@ -39,6 +39,7 @@ import org.jfrog.build.extractor.BuildInfoExtractorUtils;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
 import org.jfrog.teamcity.agent.api.Gavc;
 import org.jfrog.teamcity.agent.util.InfoCollectionException;
+import org.jfrog.teamcity.agent.util.RepositoryHelper;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.io.File;
@@ -342,17 +343,23 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
 
             Map<String, String> artifactChecksumMap = getArtifactChecksumMap(source.getAbsolutePath());
 
+            String targetRepository = RepositoryHelper.getRepository(
+                    RunnerParameterKeys.TARGET_REPO_FLAG,
+                    RunnerParameterKeys.TARGET_REPO_TEXT,
+                    RunnerParameterKeys.TARGET_SNAPSHOT_REPO,
+                    runnerParams, runnerContext.getParametersResolver()
+            );
+
             ArtifactBuilder artifactBuilder = new ArtifactBuilder(targetPath)
                     .md5(artifactChecksumMap.get("md5"))
                     .sha1(artifactChecksumMap.get("sha1"));
             moduleArtifactList.add(artifactBuilder.build());
-
             DeployDetails.Builder detailsBuilder = new DeployDetails.Builder().
                     artifactPath(targetPath).
                     file(source).
                     md5(artifactChecksumMap.get("md5")).
                     sha1(artifactChecksumMap.get("sha1")).
-                    targetRepository(runnerParams.get(RunnerParameterKeys.TARGET_REPO)).
+                    targetRepository(targetRepository).
                     addProperties(matrixParams);
             publishableArtifacts.add(new DeployDetailsArtifact(detailsBuilder.build()));
         }
