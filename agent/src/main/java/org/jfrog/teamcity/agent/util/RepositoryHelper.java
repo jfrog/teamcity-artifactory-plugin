@@ -15,7 +15,7 @@ public class RepositoryHelper {
      *
      * @param runnerParams       Current build parameters.
      * @param repositoryResolver Variable to value map as it was configured in TeamCity view.
-     * @return
+     * @return The chosen repository name.
      */
     public static String getResolutionRepository(Map<String, String> runnerParams, ValueResolver repositoryResolver) {
         return RepositoryHelper.getRepository(
@@ -30,13 +30,13 @@ public class RepositoryHelper {
      *
      * @param runnerParams       Current build parameters.
      * @param repositoryResolver Variable to value map as it was configured in TeamCity view.
-     * @return
+     * @return The chosen repository name.
      */
     public static String getTargetRepository(Map<String, String> runnerParams, ValueResolver repositoryResolver) {
         return RepositoryHelper.getRepository(
                 RunnerParameterKeys.TARGET_REPO_FLAG,
                 RunnerParameterKeys.TARGET_REPO_TEXT,
-                RunnerParameterKeys.TARGET_SNAPSHOT_REPO,
+                RunnerParameterKeys.TARGET_REPO,
                 runnerParams, repositoryResolver);
     }
 
@@ -45,7 +45,7 @@ public class RepositoryHelper {
      *
      * @param runnerParams       Current build parameters.
      * @param repositoryResolver Variable to value map as it was configured in TeamCity view.
-     * @return
+     * @return The chosen repository name.
      */
     public static String getTargetSnapshotRepository(Map<String, String> runnerParams, ValueResolver repositoryResolver) {
         return RepositoryHelper.getRepository(
