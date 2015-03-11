@@ -343,12 +343,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
 
             Map<String, String> artifactChecksumMap = getArtifactChecksumMap(source.getAbsolutePath());
 
-            String targetRepository = RepositoryHelper.getRepository(
-                    RunnerParameterKeys.TARGET_REPO_FLAG,
-                    RunnerParameterKeys.TARGET_REPO_TEXT,
-                    RunnerParameterKeys.TARGET_SNAPSHOT_REPO,
-                    runnerParams, runnerContext.getParametersResolver()
-            );
+            String targetRepository = RepositoryHelper.getTargetRepository(runnerParams, runnerContext.getParametersResolver());
 
             ArtifactBuilder artifactBuilder = new ArtifactBuilder(targetPath)
                     .md5(artifactChecksumMap.get("md5"))

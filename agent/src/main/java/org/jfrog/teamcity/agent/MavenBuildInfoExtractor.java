@@ -69,19 +69,9 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
 
         ValueResolver parametersResolver = runnerContext.getParametersResolver();
 
-        targetRepo = RepositoryHelper.getRepository(
-                RunnerParameterKeys.TARGET_REPO_FLAG,
-                RunnerParameterKeys.TARGET_REPO_TEXT,
-                RunnerParameterKeys.TARGET_REPO,
-                runnerParams, parametersResolver
-        );
+        targetRepo = RepositoryHelper.getTargetRepository(runnerParams, parametersResolver);
 
-        targetSnapshotRepo = RepositoryHelper.getRepository(
-                RunnerParameterKeys.TARGET_SNAPSHOT_FLAG,
-                RunnerParameterKeys.TARGET_SNAPSHOT_REPO_TEXT,
-                RunnerParameterKeys.TARGET_SNAPSHOT_REPO,
-                runnerParams, parametersResolver
-        );
+        targetSnapshotRepo = RepositoryHelper.getTargetSnapshotRepository(runnerParams, parametersResolver);
 
         snapshotRepoConfigured = StringUtils.isNotBlank(targetSnapshotRepo);
         releaseManagementActivated = Boolean.valueOf(runnerContext.getBuild().getSharedConfigParameters().
