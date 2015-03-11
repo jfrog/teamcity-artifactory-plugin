@@ -43,8 +43,19 @@
 
     <c:if test="${foundActivateGradleIntegrationSelected}">
         <div class="nestedParameter">
-            Resolving repository: <props:displayValue
-                name="org.jfrog.artifactory.selectedDeployableServer.resolvingRepo" emptyValue="not specified"/>
+            Resolving repository:
+            <c:set var="resolveDynamicFlag"
+                   value="${(propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.resolveReleaseFlag'])}"/>
+            <c:choose>
+                <c:when test="${resolveDynamicFlag}">
+                    <props:displayValue
+                        name="org.jfrog.artifactory.selectedDeployableServer.resolveReleaseText" emptyValue="not specified"/>
+                </c:when>
+                <c:otherwise>
+                    <props:displayValue
+                        name="org.jfrog.artifactory.selectedDeployableServer.resolvingRepo" emptyValue="not specified"/>
+                </c:otherwise>
+            </c:choose>
         </div>
     </c:if>
 

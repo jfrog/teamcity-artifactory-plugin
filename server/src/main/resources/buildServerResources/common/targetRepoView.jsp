@@ -1,4 +1,5 @@
 <%@ taglib prefix="props" tagdir="/WEB-INF/tags/props" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <%--
   ~ Copyright (C) 2010 JFrog Ltd.
@@ -23,6 +24,17 @@
             targetRepoLabel = "Target repository";
         }
     %>
-    <%= targetRepoLabel %>: <props:displayValue
-        name="org.jfrog.artifactory.selectedDeployableServer.targetRepo" emptyValue="not specified"/>
+    <c:set var="dynamicFlag"
+           value="${(propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'])}"/>
+    <c:choose>
+        <c:when test="${dynamicFlag}">
+            <%= targetRepoLabel %>: <props:displayValue
+                name="org.jfrog.artifactory.selectedDeployableServer.deployReleaseText" emptyValue="not specified"/>
+        </c:when>
+        <c:otherwise>
+            <%= targetRepoLabel %>: <props:displayValue
+                name="org.jfrog.artifactory.selectedDeployableServer.targetRepo" emptyValue="not specified"/>
+        </c:otherwise>
+    </c:choose>
+
 </div>
