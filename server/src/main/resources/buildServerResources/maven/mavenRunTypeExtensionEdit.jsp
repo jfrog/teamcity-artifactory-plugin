@@ -285,13 +285,15 @@ display:inline-block;
                 <props:selectProperty id="org.jfrog.artifactory.selectedDeployableServer.targetRepo"
                                       name="org.jfrog.artifactory.selectedDeployableServer.targetRepo">
                 </props:selectProperty>
-                <props:textProperty id="org.jfrog.artifactory.selectedDeployableServer.deployReleaseText"
-                                    name="org.jfrog.artifactory.selectedDeployableServer.deployReleaseText"/>
+                <div id="mavenTargetReleaseText">
+                    <props:textProperty id="org.jfrog.artifactory.selectedDeployableServer.deployReleaseText"
+                                        name="org.jfrog.artifactory.selectedDeployableServer.deployReleaseText"/>
+                </div>
             </div>
             <div>
                 <p><props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag"
                                            onclick="BS.artifactory.toggleTextAndSelect(
-                                    $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
+                                    mavenTargetReleaseText,
                                     $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
                                     $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'))"
                                            style="float: left"/></p>
@@ -301,11 +303,12 @@ display:inline-block;
                 <script type="text/javascript">
                     jQuery(document).ready(function () {
                         var existingUrlId = '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}';
+                        var textBoxDiv = document.getElementById('mavenTargetReleaseText');
                         BS.local.loadTargetRepos(existingUrlId, true, false);
                         BS.artifactory.checkCompatibleVersion(existingUrlId);
                         BS.artifactory.initTextAndSelect(
                                 $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'),
-                                $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
+                                textBoxDiv,
                                 $('org.jfrog.artifactory.selectedDeployableServer.targetRepo')
                         )
                     })
@@ -330,13 +333,15 @@ display:inline-block;
                 <props:selectProperty id="org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo"
                                       name="org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo">
                 </props:selectProperty>
-                <props:textProperty id="org.jfrog.artifactory.selectedDeployableServer.deploySnapshotText"
-                                    name="org.jfrog.artifactory.selectedDeployableServer.deploySnapshotText"/>
+                <div id="mavenSnapshotRepoText">
+                    <props:textProperty id="org.jfrog.artifactory.selectedDeployableServer.deploySnapshotText"
+                                        name="org.jfrog.artifactory.selectedDeployableServer.deploySnapshotText"/>
+                </div>
             </div>
             <div>
                 <p><props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.deploySnapshotFlag"
                                            onclick="BS.artifactory.toggleTextAndSelect(
-                                    $('org.jfrog.artifactory.selectedDeployableServer.deploySnapshotText'),
+                                    mavenSnapshotRepoText,
                                     $('org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo'),
                                     $('org.jfrog.artifactory.selectedDeployableServer.deploySnapshotFlag'))"
                                            style="float: left"/></p>
@@ -345,10 +350,11 @@ display:inline-block;
             <c:if test="${foundExistingConfig}">
                 <script type="text/javascript">
                     jQuery(document).ready(function () {
-                        var existingUrlId = '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}';
+                        var existingUrlId = '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}',
+                                mavenSnapshotRepoText = document.getElementById('mavenSnapshotRepoText');
                         BS.local.loadTargetRepos(existingUrlId, false, true);
                         BS.artifactory.initTextAndSelect($('org.jfrog.artifactory.selectedDeployableServer.deploySnapshotFlag'),
-                                $('org.jfrog.artifactory.selectedDeployableServer.deploySnapshotText'),
+                                mavenSnapshotRepoText,
                                 $('org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo'))
                     })
                 </script>
