@@ -141,6 +141,9 @@ BS.artifactory = {
     },
 
     toggleTextAndSelect: function (text, select, isDynamicCheckBox) {
+        if (typeof text == "string") {
+            text = document.getElementsById(text);
+        }
         if (isDynamicCheckBox.checked) {
             BS.Util.show(text);
             BS.Util.hide(select);
