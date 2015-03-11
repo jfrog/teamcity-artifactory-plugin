@@ -141,21 +141,11 @@ public abstract class ArtifactoryClientConfigurationBuilder {
             clientConf.setTimeout(Integer.valueOf(timeout));
         }
 
-        String targetRepo = RepositoryHelper.getRepository(
-                RunnerParameterKeys.TARGET_REPO_FLAG,
-                RunnerParameterKeys.TARGET_REPO_TEXT,
-                RunnerParameterKeys.TARGET_REPO,
-                runParameters,
-                repositoryResolver);
+        String targetRepo = RepositoryHelper.getTargetRepository(runParameters, repositoryResolver);
 
         clientConf.publisher.setRepoKey(targetRepo);
 
-        String resolvingRepo = RepositoryHelper.getRepository(
-                RunnerParameterKeys.RESOLVE_RELEASE_FLAG,
-                RunnerParameterKeys.RESOLVING_REPO_TEXT,
-                RunnerParameterKeys.RESOLVING_REPO,
-                runParameters, repositoryResolver
-        );
+        String resolvingRepo = RepositoryHelper.getResolutionRepository(runParameters, repositoryResolver);
 
         if (StringUtils.isNotBlank(resolvingRepo)) {
             clientConf.resolver.setContextUrl(serverUrl);

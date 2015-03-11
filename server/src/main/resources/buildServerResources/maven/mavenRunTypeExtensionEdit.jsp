@@ -41,9 +41,8 @@
                     deployReleaseText = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
                     deploySnapshotText = $('org.jfrog.artifactory.selectedDeployableServer.deploySnapshotText'),
                     deploySnapshotFlag = $('org.jfrog.artifactory.selectedDeployableServer.deploySnapshotFlag'),
-                    deployReleaseFlag = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag');
-
-            var selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
+                    deployReleaseFlag = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'),
+                    selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
 
             if (!selectedUrlId) {
                 publishRepoSelect.innerHTML = '';

@@ -44,14 +44,12 @@
 <%@ include file="../common/artifactoryCommon.js" %>
 BS.local = {
     onServerChange: function (foundExistingConfig) {
-        var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId');
-        var publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo');
-        var resolvingRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.resolvingRepo');
-
-        var deployReleaseText = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
-                resolveReleaseText = $('org.jfrog.artifactory.selectedDeployableServer.resolveReleaseText');
-
-        var deployReleaseFlag = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'),
+        var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId'),
+                publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
+                resolvingRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.resolvingRepo'),
+                deployReleaseText = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
+                resolveReleaseText = $('org.jfrog.artifactory.selectedDeployableServer.resolveReleaseText'),
+                deployReleaseFlag = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'),
                 resolveReleaseFlag = $('org.jfrog.artifactory.selectedDeployableServer.resolveReleaseFlag');
 
         var selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
@@ -404,13 +402,15 @@ display:inline-block;
                 <props:selectProperty id="org.jfrog.artifactory.selectedDeployableServer.resolvingRepo"
                                       name="org.jfrog.artifactory.selectedDeployableServer.resolvingRepo">
                 </props:selectProperty>
-                <props:textProperty id="org.jfrog.artifactory.selectedDeployableServer.resolveReleaseText"
-                                    name="org.jfrog.artifactory.selectedDeployableServer.resolveReleaseText"/>
+                <div id="gradleResolveReleaseText">
+                    <props:textProperty id="org.jfrog.artifactory.selectedDeployableServer.resolveReleaseText"
+                                        name="org.jfrog.artifactory.selectedDeployableServer.resolveReleaseText"/>
+                </div>
             </div>
             <div>
                 <p><props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.resolveReleaseFlag"
                                            onclick="BS.artifactory.toggleTextAndSelect(
-                                    $('org.jfrog.artifactory.selectedDeployableServer.resolveReleaseText'),
+                                    gradleResolveReleaseText,
                                     $('org.jfrog.artifactory.selectedDeployableServer.resolvingRepo'),
                                     $('org.jfrog.artifactory.selectedDeployableServer.resolveReleaseFlag'))"
                                            style="float: left"/></p>
@@ -419,9 +419,10 @@ display:inline-block;
             <f:if test="${foundExistingConfig}">
                 <script type="text/javascript">
                     jQuery(document).ready(function () {
+                        var gradleResolveReleaseText = document.getElementById('gradleResolveReleaseText');
                         BS.artifactory.initTextAndSelect(
                                 $('org.jfrog.artifactory.selectedDeployableServer.resolveReleaseFlag'),
-                                $('org.jfrog.artifactory.selectedDeployableServer.resolveReleaseText'),
+                                gradleResolveReleaseText,
                                 $('org.jfrog.artifactory.selectedDeployableServer.resolvingRepo')
                         )
                     })
@@ -446,14 +447,16 @@ display:inline-block;
                 <props:selectProperty id="org.jfrog.artifactory.selectedDeployableServer.targetRepo"
                                       name="org.jfrog.artifactory.selectedDeployableServer.targetRepo">
                 </props:selectProperty>
-                <props:textProperty id="org.jfrog.artifactory.selectedDeployableServer.deployReleaseText"
-                                    name="org.jfrog.artifactory.selectedDeployableServer.deployReleaseText"/>
+                <div id="gradleDeployReleaseText">
+                    <props:textProperty id="org.jfrog.artifactory.selectedDeployableServer.deployReleaseText"
+                                        name="org.jfrog.artifactory.selectedDeployableServer.deployReleaseText"/>
+                </div>
             </div>
             <div>
                 <p><props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag"
                                            onclick="
             BS.artifactory.toggleTextAndSelect(
-                                    $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
+                                    gradleDeployReleaseText,
                                     $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
                                     $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'))"
                                            style="float: left"/></p>
@@ -462,13 +465,14 @@ display:inline-block;
             <c:if test="${foundExistingConfig}">
                 <script type="text/javascript">
                     jQuery(document).ready(function () {
-                        var existingUrlId = '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}';
+                        var existingUrlId = '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}',
+                                gradleDeployReleaseText = document.getElementById('gradleDeployReleaseText');
                         BS.local.loadTargetRepos(existingUrlId);
                         BS.artifactory.checkArtifactoryHasAddons(existingUrlId);
                         BS.artifactory.checkCompatibleVersion(existingUrlId);
                         BS.artifactory.initTextAndSelect(
                                 $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'),
-                                $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
+                                gradleDeployReleaseText,
                                 $('org.jfrog.artifactory.selectedDeployableServer.targetRepo')
                         );
                     })
