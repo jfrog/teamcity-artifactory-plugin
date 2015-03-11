@@ -36,8 +36,19 @@
     <jsp:include page="../common/targetRepoView.jsp"/>
 
     <div class="nestedParameter">
-        Target snapshot repository : <props:displayValue
-            name="org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo" emptyValue="not specified"/>
+        Target snapshot repository :
+        <c:set var="deploySnapshotFlag"
+               value="${(propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.deploySnapshotFlag'])}"/>
+        <c:choose>
+            <c:when test="${deploySnapshotFlag}">
+                <props:displayValue
+                        name="org.jfrog.artifactory.selectedDeployableServer.deploySnapshotText" emptyValue="not specified"/>
+            </c:when>
+            <c:otherwise>
+                <props:displayValue
+                        name="org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo" emptyValue="not specified"/>
+            </c:otherwise>
+        </c:choose>
     </div>
 
     <jsp:include page="../common/credentialsView.jsp"/>
