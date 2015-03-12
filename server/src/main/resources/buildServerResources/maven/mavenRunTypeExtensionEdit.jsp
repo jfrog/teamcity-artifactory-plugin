@@ -46,12 +46,7 @@
                     deploySnapshotTextDiv = document.getElementById('mavenSnapshotRepoText'),
                     selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
 
-            deployTextDiv.style.display = 'none';
-            deploySnapshotTextDiv.style.display = 'none';
-
             if (!selectedUrlId) {
-                publishRepoSelect.innerHTML = '';
-                publishRepoSnapshotSelect.innerHTML = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value = '';
                 $('secure:org.jfrog.artifactory.selectedDeployableServer.deployerPassword').value = '';
@@ -117,24 +112,15 @@
                     $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
                     $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked =
                             false;
-                    deployReleaseFlag.checked = false;
-                    deploySnapshotFlag.checked = false;
                 }
 
                 BS.local.loadTargetRepos(selectedUrlId, true, true);
                 BS.artifactory.checkCompatibleVersion(selectedUrlId);
                 BS.Util.show($('targetRepo.container'));
                 BS.Util.show($('targetSnapshotRepo.container'));
-                BS.Util.show($('overrideDefaultDeployerCredentials.container'));
-                if (BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()) {
-                    BS.Util.show($('deployerUsername.container'));
-                    BS.Util.show($('deployerPassword.container'));
-                }
-                BS.Util.show($('deployArtifacts.container'));
-                if (BS.artifactory.isDeployArtifactsSelected()) {
-                    BS.Util.show($('deployIncludePatterns.container'));
-                    BS.Util.show($('deployExcludePatterns.container'));
-                }
+
+                BS.artifactory.initTextAndSelect(deployReleaseFlag, deployTextDiv, publishRepoSelect);
+                BS.artifactory.initTextAndSelect(deploySnapshotFlag, deploySnapshotTextDiv, publishRepoSnapshotSelect);
 
                 BS.Util.show($('publishBuildInfo.container'));
                 var publishBuildInfo = BS.artifactory.isPublishBuildInfoSelected();

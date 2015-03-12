@@ -298,11 +298,11 @@ BS.artifactory = {
 
     initTextAndSelect: function (checkbox, textbox, select) {
         if (checkbox.checked) {
-            BS.Util.show(textbox);
+            textbox.style.dispaly = '';
             BS.Util.hide(select);
         } else {
             BS.Util.show(select);
-            BS.Util.hide(textbox);
+            textbox.style.display = 'none';
         }
 
     }

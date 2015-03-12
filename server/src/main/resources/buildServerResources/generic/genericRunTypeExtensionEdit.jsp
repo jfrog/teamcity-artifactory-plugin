@@ -43,10 +43,7 @@
                     selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value,
                     targetTextDiv = document.getElementById('genericDeployReleaseText');
 
-            targetTextDiv.style.display = 'none';
-
             if (!selectedUrlId) {
-                publishRepoSelect.innerHTML = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value = '';
                 $('secure:org.jfrog.artifactory.selectedDeployableServer.deployerPassword').value = '';
@@ -89,8 +86,6 @@
                             false;
                     $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
                     $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
-                    deployReleaseFlag.checked = false;
-                    //BS.Util.hide(deployReleaseText);
                 }
                 BS.local.loadTargetRepos(selectedUrlId);
                 BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
@@ -101,6 +96,8 @@
                     BS.Util.show($('deployerUsername.container'));
                     BS.Util.show($('deployerPassword.container'));
                 }
+
+                BS.artifactory.initTextAndSelect(deployReleaseFlag, targetTextDiv, publishRepoSelect);
 
                 BS.Util.show($('publishBuildInfo.container'));
                 var publishBuildInfo = BS.artifactory.isPublishBuildInfoSelected();

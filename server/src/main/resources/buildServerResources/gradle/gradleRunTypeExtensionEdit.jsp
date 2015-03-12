@@ -55,12 +55,7 @@ BS.local = {
                 resolveTextDiv = document.getElementById('gradleResolveReleaseText'),
                 selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
 
-        deployTextDiv.style.display = 'none';
-        resolveTextDiv.style.display = 'none';
-
         if (!selectedUrlId) {
-            publishRepoSelect.innerHTML = '';
-            resolvingRepoSelect.innerHTML = '';
             $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked = false;
             $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value = '';
             $('secure:org.jfrog.artifactory.selectedDeployableServer.deployerPassword').value = '';
@@ -141,8 +136,6 @@ BS.local = {
                 $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.publishMavenDescriptors').checked = true;
                 $('org.jfrog.artifactory.selectedDeployableServer.publishIvyDescriptors').checked = true;
-                deployReleaseFlag.checked = false;
-                resolveReleaseFlag.checked = false;
             }
             BS.local.loadTargetRepos(selectedUrlId);
             BS.artifactory.checkCompatibleVersion(selectedUrlId);
@@ -154,6 +147,10 @@ BS.local = {
                     BS.Util.show($('publishIvyDescriptors.container'));
                 }
             }
+
+            BS.artifactory.initTextAndSelect(resolveReleaseFlag, resolveTextDiv, resolvingRepoSelect);
+            BS.artifactory.initTextAndSelect(deployReleaseFlag, deployTextDiv, publishRepoSelect);
+
             BS.Util.show($('overrideDefaultDeployerCredentials.container'));
             if (BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()) {
                 BS.Util.show($('deployerUsername.container'));
