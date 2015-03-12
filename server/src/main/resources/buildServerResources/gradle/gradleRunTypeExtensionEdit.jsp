@@ -50,9 +50,14 @@ BS.local = {
                 deployReleaseText = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
                 resolveReleaseText = $('org.jfrog.artifactory.selectedDeployableServer.resolveReleaseText'),
                 deployReleaseFlag = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'),
-                resolveReleaseFlag = $('org.jfrog.artifactory.selectedDeployableServer.resolveReleaseFlag');
+                resolveReleaseFlag = $('org.jfrog.artifactory.selectedDeployableServer.resolveReleaseFlag'),
+                deployTextDiv = document.getElementById('gradleDeployReleaseText'),
+                resolveTextDiv = document.getElementById('gradleResolveReleaseText'),
+                selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
 
-        var selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
+        deployTextDiv.style.display = 'none';
+        resolveTextDiv.style.display = 'none';
+
         if (!selectedUrlId) {
             publishRepoSelect.innerHTML = '';
             resolvingRepoSelect.innerHTML = '';
@@ -138,8 +143,6 @@ BS.local = {
                 $('org.jfrog.artifactory.selectedDeployableServer.publishIvyDescriptors').checked = true;
                 deployReleaseFlag.checked = false;
                 resolveReleaseFlag.checked = false;
-                BS.Util.hide(deployReleaseText);
-                BS.Util.hide(resolveReleaseText);
             }
             BS.local.loadTargetRepos(selectedUrlId);
             BS.artifactory.checkCompatibleVersion(selectedUrlId);
@@ -455,7 +458,7 @@ display:inline-block;
             <div>
                 <p><props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag"
                                            onclick="
-            BS.artifactory.toggleTextAndSelect(
+                                    BS.artifactory.toggleTextAndSelect(
                                     gradleDeployReleaseText,
                                     $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
                                     $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'))"
