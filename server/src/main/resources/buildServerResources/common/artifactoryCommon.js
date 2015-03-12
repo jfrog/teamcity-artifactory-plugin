@@ -145,10 +145,10 @@ BS.artifactory = {
             text = document.getElementsById(text);
         }
         if (isDynamicCheckBox.checked) {
-            BS.Util.show(text);
+            text.style.display = '';
             BS.Util.hide(select);
         } else {
-            BS.Util.hide(text);
+            text.style.display = 'none';
             BS.Util.show(select);
         }
     },

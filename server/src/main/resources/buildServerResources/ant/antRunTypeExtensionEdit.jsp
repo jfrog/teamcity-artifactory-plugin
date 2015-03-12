@@ -44,7 +44,10 @@ BS.local = {
                 publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
                 deployReleaseText = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
                 deployReleaseFlag = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'),
-                selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
+                selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value,
+                targetTextDiv = document.getElementById('antTargetReleaseText');
+
+        targetTextDiv.style.display = 'none';
 
         if (!selectedUrlId) {
             publishRepoSelect.innerHTML = '';

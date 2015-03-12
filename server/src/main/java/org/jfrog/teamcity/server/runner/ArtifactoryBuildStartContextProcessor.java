@@ -245,6 +245,7 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
                 runnerContext.addRunnerParameter(ReleaseManagementParameterKeys.STAGING_REPOSITORY,
                         stagingRepositoryKey);
                 runnerContext.addRunnerParameter(RunnerParameterKeys.TARGET_REPO, stagingRepositoryKey);
+                runnerContext.addRunnerParameter(RunnerParameterKeys.TARGET_REPO_TEXT, stagingRepositoryKey);
             }
         }
     }

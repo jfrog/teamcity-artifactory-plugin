@@ -42,7 +42,12 @@
                     deploySnapshotText = $('org.jfrog.artifactory.selectedDeployableServer.deploySnapshotText'),
                     deploySnapshotFlag = $('org.jfrog.artifactory.selectedDeployableServer.deploySnapshotFlag'),
                     deployReleaseFlag = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'),
+                    deployTextDiv = document.getElementById('mavenTargetReleaseText'),
+                    deploySnapshotTextDiv = document.getElementById('mavenSnapshotRepoText'),
                     selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
+
+            deployTextDiv.style.display = 'none';
+            deploySnapshotTextDiv.style.display = 'none';
 
             if (!selectedUrlId) {
                 publishRepoSelect.innerHTML = '';
@@ -114,8 +119,6 @@
                             false;
                     deployReleaseFlag.checked = false;
                     deploySnapshotFlag.checked = false;
-                    BS.Util.hide(deployReleaseText);
-                    BS.Util.hide(deploySnapshotText);
                 }
 
                 BS.local.loadTargetRepos(selectedUrlId, true, true);
