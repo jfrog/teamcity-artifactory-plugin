@@ -137,11 +137,12 @@ BS.local = {
                 $('org.jfrog.artifactory.selectedDeployableServer.publishMavenDescriptors').checked = true;
                 $('org.jfrog.artifactory.selectedDeployableServer.publishIvyDescriptors').checked = true;
             }
+
             BS.local.loadTargetRepos(selectedUrlId);
             BS.artifactory.checkCompatibleVersion(selectedUrlId);
-            BS.Util.show($('targetRepo.container'));
+            BS.Util.show($('resolvingRepo.container'));
             if (BS.local.isActivateGradleIntegrationSelected()) {
-                BS.Util.show($('resolvingRepo.container'));
+                BS.Util.show($('targetRepo.container'));
                 if (BS.artifactory.isDeployArtifactsSelected()) {
                     BS.Util.show($('publishMavenDescriptors.container'));
                     BS.Util.show($('publishIvyDescriptors.container'));
@@ -283,7 +284,7 @@ BS.local = {
             $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
             BS.Util.hide($('buildDependencies.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '';
-            BS.Util.show($('resolvingRepo.container'));
+            BS.Util.show($('targetRepo.container'));
             BS.Util.show($('publishMavenDescriptors.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.publishMavenDescriptors').checked = true;
             BS.Util.show($('publishIvyDescriptors.container'));
@@ -303,7 +304,7 @@ BS.local = {
             $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
             BS.Util.show($('buildDependencies.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '';
-            BS.Util.hide($('resolvingRepo.container'));
+6            BS.Util.hide($('targetRepo.container'));
             BS.Util.hide($('publishMavenDescriptors.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.publishMavenDescriptors').checked = false;
             BS.Util.hide($('publishIvyDescriptors.container'));
