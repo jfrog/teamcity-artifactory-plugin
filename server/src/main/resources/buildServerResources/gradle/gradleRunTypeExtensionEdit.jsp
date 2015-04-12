@@ -415,7 +415,7 @@ display:inline-block;
                                     $('org.jfrog.artifactory.selectedDeployableServer.resolvingRepo'),
                                     $('org.jfrog.artifactory.selectedDeployableServer.resolveReleaseFlag'))"
                                            style="float: left"/></p>
-                <span class="smallNote">Dynamic mode</span>
+                <span class="smallNote">Free-text mode</span>
             </div>
             <f:if test="${foundExistingConfig}">
                 <script type="text/javascript">
@@ -461,7 +461,7 @@ display:inline-block;
                                     $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
                                     $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'))"
                                            style="float: left"/></p>
-                <span class="smallNote">Dynamic mode</span>
+                <span class="smallNote">Free-text mode</span>
             </div>
             <c:if test="${foundExistingConfig}">
                 <script type="text/javascript">
