@@ -304,7 +304,7 @@ BS.local = {
             $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
             BS.Util.show($('buildDependencies.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '';
-6            BS.Util.hide($('targetRepo.container'));
+            BS.Util.hide($('targetRepo.container'));
             BS.Util.hide($('publishMavenDescriptors.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.publishMavenDescriptors').checked = false;
             BS.Util.hide($('publishIvyDescriptors.container'));
