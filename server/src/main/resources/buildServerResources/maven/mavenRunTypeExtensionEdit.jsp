@@ -281,7 +281,7 @@ display:inline-block;
             <div>
                 <p><props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag"
                                            onclick="BS.artifactory.toggleTextAndSelect(
-                                    mavenTargetReleaseText,
+                                    'mavenTargetReleaseText',
                                     $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
                                     $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'))"
                                            style="float: left"/></p>
@@ -329,7 +329,7 @@ display:inline-block;
             <div>
                 <p><props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.deploySnapshotFlag"
                                            onclick="BS.artifactory.toggleTextAndSelect(
-                                    mavenSnapshotRepoText,
+                                    'mavenSnapshotRepoText',
                                     $('org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo'),
                                     $('org.jfrog.artifactory.selectedDeployableServer.deploySnapshotFlag'))"
                                            style="float: left"/></p>

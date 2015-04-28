@@ -411,7 +411,7 @@ display:inline-block;
             <div>
                 <p><props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.resolveReleaseFlag"
                                            onclick="BS.artifactory.toggleTextAndSelect(
-                                    gradleResolveReleaseText,
+                                    'gradleResolveReleaseText',
                                     $('org.jfrog.artifactory.selectedDeployableServer.resolvingRepo'),
                                     $('org.jfrog.artifactory.selectedDeployableServer.resolveReleaseFlag'))"
                                            style="float: left"/></p>
@@ -457,7 +457,7 @@ display:inline-block;
                 <p><props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag"
                                            onclick="
                                     BS.artifactory.toggleTextAndSelect(
-                                    gradleDeployReleaseText,
+                                    'gradleDeployReleaseText',
                                     $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
                                     $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'))"
                                            style="float: left"/></p>
@@ -467,7 +467,7 @@ display:inline-block;
                 <script type="text/javascript">
                     jQuery(document).ready(function () {
                         var existingUrlId = '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}',
-                                gradleDeployReleaseText = document.getElementById('gradleDeployReleaseText');
+                            gradleDeployReleaseText = document.getElementById('gradleDeployReleaseText');
                         BS.local.loadTargetRepos(existingUrlId);
                         BS.artifactory.checkArtifactoryHasAddons(existingUrlId);
                         BS.artifactory.checkCompatibleVersion(existingUrlId);

@@ -324,7 +324,7 @@ display:inline-block;
             <div>
                 <p><props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag"
                                            onclick="BS.artifactory.toggleTextAndSelect(
-                                    antTargetReleaseText,
+                                    'antTargetReleaseText',
                                     $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
                                     $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'))"
                                            style="float: left"/></p>

@@ -142,7 +142,7 @@ BS.artifactory = {
 
     toggleTextAndSelect: function (text, select, isDynamicCheckBox) {
         if (typeof text == "string") {
-            text = document.getElementsById(text);
+            text = document.getElementById(text);
         }
         if (isDynamicCheckBox.checked) {
             text.style.display = '';
