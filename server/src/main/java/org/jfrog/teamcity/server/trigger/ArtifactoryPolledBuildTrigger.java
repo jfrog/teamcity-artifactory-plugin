@@ -16,7 +16,6 @@
 
 package org.jfrog.teamcity.server.trigger;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import jetbrains.buildServer.buildTriggers.BuildTriggerDescriptor;
@@ -35,7 +34,10 @@ import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
 import org.jfrog.teamcity.server.util.TeamcityServerBuildInfoLog;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Noam Y. Tenne
@@ -83,15 +85,17 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
         String username = map.get(TriggerParameterKeys.DEPLOYER_USERNAME);
         String password = map.get(TriggerParameterKeys.DEPLOYER_PASSWORD);
 
-        syncWatchedItems(context.getBuildType().getExtendedName(), map.get(TriggerParameterKeys.TARGET_ITEMS));
+        syncWatchedItems(context, map.get(TriggerParameterKeys.TARGET_ITEMS));
 
         triggerPolling(context, serverConfigBy, username, password, targetRepo);
     }
 
-    private void syncWatchedItems(String buildName, String targetItems) {
+    private void syncWatchedItems(PolledTriggerContext context, String targetItems) {
         Set<String> itemPaths = Sets.newHashSet();
-
+        String serverUrlId = context.getTriggerDescriptor().getProperties().get(TriggerParameterKeys.URL_ID);
+        String triggerId = getUniqueTriggerId(context);
         String[] splitByNewLine = StringUtils.split(targetItems, "\n");
+
         for (String newLineSplit : splitByNewLine) {
             String[] splitByComma = StringUtils.split(newLineSplit, ",");
             Collections.addAll(itemPaths, splitByComma);
@@ -99,14 +103,15 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
 
         for (String itemPath : itemPaths) {
             if (StringUtils.isNotBlank(itemPath)) {
-                BuildWatchedItem buildWatchedItem = new BuildWatchedItem(itemPath, 0L);
-                if (!watchedItems.containsEntry(buildName, buildWatchedItem)) {
-                    watchedItems.put(buildName, buildWatchedItem);
+                BuildWatchedItem buildWatchedItem = new BuildWatchedItem(itemPath, serverUrlId, triggerId, 0L);
+                if (!watchedItems.containsEntry(triggerId, buildWatchedItem)) {
+                    watchedItems.put(triggerId, buildWatchedItem);
                 }
             }
         }
 
-        Iterator<BuildWatchedItem> iterator = watchedItems.get(buildName).iterator();
+        //Remove deleted paths by the user
+        Iterator<BuildWatchedItem> iterator = watchedItems.get(triggerId).iterator();
         while (iterator.hasNext()) {
             if (!itemPaths.contains(iterator.next().getItemPath())) {
                 iterator.remove();
@@ -115,12 +120,11 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
     }
 
     private void triggerPolling(PolledTriggerContext context, ServerConfigBean serverConfig, String username, String password, String repoKey) {
-        String buildName = context.getBuildType().getExtendedName();
+        String triggerId = getUniqueTriggerId(context);
         boolean foundChange = false;
         ArtifactoryBuildInfoClient client = getBuildInfoClient(serverConfig, username, password);
-        List<BuildWatchedItem> replacedValues = Lists.newArrayList();
         try {
-            Iterator<BuildWatchedItem> iterator = watchedItems.get(buildName).iterator();
+            Iterator<BuildWatchedItem> iterator = watchedItems.get(triggerId).iterator();
             while (iterator.hasNext()) {
                 BuildWatchedItem buildWatchedItem = iterator.next();
                 //Preserve the user entered item path as is to keep it persistent with the map key
@@ -135,20 +139,23 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
                 try {
                     String itemLastModifiedString = client.getItemLastModified(itemUrl);
                     long itemLastModified = format.parse(itemLastModifiedString).getTime();
-                    if (itemValue != itemLastModified) {
+                    if (itemValue != itemLastModified && itemValue != 0) {
                         if (itemLastModified != 0) {
-                            replacedValues.add(new BuildWatchedItem(itemPath, itemLastModified));
+                            buildWatchedItem.setItemLastModified(itemLastModified);
                             String message = String.format("Artifactory trigger has found changes on the watched " +
                                     "item '%s' for build '%s'. Last modified time was %s and is now %s.", itemUrl,
-                                    buildName, format.format(itemValue), itemLastModifiedString);
+                                    triggerId, format.format(itemValue), itemLastModifiedString);
                             Loggers.SERVER.info(message);
                             foundChange = true;
                         }
                     } else {
-                        replacedValues.add(buildWatchedItem);
+                        //First time, take the last Modified from Artifactory
+                        if (itemValue == 0) {
+                            buildWatchedItem.setItemLastModified(itemLastModified);
+                        }
                     }
                 } catch (Exception e) {
-                    Loggers.SERVER.error("Error occurred while polling for changes for build '" + buildName
+                    Loggers.SERVER.error("Error occurred while polling for changes for build '" + triggerId
                             + "' on path '" + serverConfig.getUrl() + "/" + itemUrl + "': " + e.getMessage());
                 }
             }
@@ -157,10 +164,16 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
         }
 
         if (foundChange) {
-            watchedItems.replaceValues(buildName, replacedValues);
             SBuildType buildType = context.getBuildType();
             buildType.addToQueue(context.getTriggerDescriptor().getTriggerName());
         }
+    }
+
+    @NotNull
+    private String getUniqueTriggerId(PolledTriggerContext context) {
+        String triggerId = context.getTriggerDescriptor().getId();
+        String serverUrlId = context.getTriggerDescriptor().getProperties().get(TriggerParameterKeys.URL_ID);
+        return context.getBuildType().getExtendedName() + ":" + triggerId + ":" + serverUrlId;
     }
 
     private ArtifactoryBuildInfoClient getBuildInfoClient(ServerConfigBean serverConfig, String username,

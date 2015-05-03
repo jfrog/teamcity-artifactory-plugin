@@ -6,19 +6,19 @@ package org.jfrog.teamcity.server.trigger;
 public class BuildWatchedItem {
 
     private String itemPath;
+    private String artifactoryUrlId;
+    private String triggerId;
     private long itemLastModified;
 
-    public BuildWatchedItem(String itemPath, long itemLastModified) {
+    public BuildWatchedItem(String itemPath, String artifactoryUrlId, String triggerId, long itemLastModified) {
         this.itemPath = itemPath;
+        this.artifactoryUrlId = artifactoryUrlId;
+        this.triggerId = triggerId;
         this.itemLastModified = itemLastModified;
     }
 
     public String getItemPath() {
         return itemPath;
-    }
-
-    public void setItemPath(String itemPath) {
-        this.itemPath = itemPath;
     }
 
     public long getItemLastModified() {
@@ -37,12 +37,17 @@ public class BuildWatchedItem {
         BuildWatchedItem that = (BuildWatchedItem) o;
 
         if (itemPath != null ? !itemPath.equals(that.itemPath) : that.itemPath != null) return false;
+        if (artifactoryUrlId != null ? !artifactoryUrlId.equals(that.artifactoryUrlId) : that.artifactoryUrlId != null)
+            return false;
+        return !(triggerId != null ? !triggerId.equals(that.triggerId) : that.triggerId != null);
 
-        return true;
     }
 
     @Override
     public int hashCode() {
-        return itemPath != null ? itemPath.hashCode() : 0;
+        int result = itemPath != null ? itemPath.hashCode() : 0;
+        result = 31 * result + (artifactoryUrlId != null ? artifactoryUrlId.hashCode() : 0);
+        result = 31 * result + (triggerId != null ? triggerId.hashCode() : 0);
+        return result;
     }
 }
