@@ -33,9 +33,13 @@ import org.jfrog.build.api.builder.ArtifactBuilder;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.api.util.FileChecksumCalculator;
-import org.jfrog.build.client.*;
+import org.jfrog.build.client.DeployDetails;
+import org.jfrog.build.client.DeployDetailsArtifact;
 import org.jfrog.build.extractor.BuildInfoExtractor;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
+import org.jfrog.build.extractor.clientConfiguration.ClientProperties;
+import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
+import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
 import org.jfrog.teamcity.agent.api.Gavc;
 import org.jfrog.teamcity.agent.util.InfoCollectionException;
@@ -55,11 +59,11 @@ import static org.jfrog.teamcity.common.ConstantValues.*;
 public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P, ExtractedBuildInfo> {
 
     protected BuildRunnerContext runnerContext;
-    private Multimap<File, String> artifactsToPublish;
-    private List<Dependency> publishedDependencies;
     protected Map<String, String> runnerParams;
     protected Map<String, String> matrixParams;
-    private BuildProgressLogger logger;
+    protected BuildProgressLogger logger;
+    private Multimap<File, String> artifactsToPublish;
+    private List<Dependency> publishedDependencies;
     private Map<String, Map<String, String>> calculatedChecksumCache;
 
     public BaseBuildInfoExtractor(BuildRunnerContext runnerContext, Multimap<File, String> artifactsToPublish,

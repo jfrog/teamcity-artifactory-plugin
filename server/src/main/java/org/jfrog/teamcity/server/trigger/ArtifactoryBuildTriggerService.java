@@ -93,7 +93,7 @@ public class ArtifactoryBuildTriggerService extends BuildTriggerService {
 
     @Override
     public boolean isMultipleTriggersPerBuildTypeAllowed() {
-        return false;
+        return true;
     }
 
     @Override

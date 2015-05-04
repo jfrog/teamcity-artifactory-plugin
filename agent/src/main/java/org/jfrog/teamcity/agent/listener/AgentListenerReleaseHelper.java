@@ -102,12 +102,22 @@ public class AgentListenerReleaseHelper {
         }
     }
 
+    private void verifyPomFileExists(File rootPom) {
+        if (!rootPom.exists()) {
+            throw new IllegalArgumentException("The root pom file does not exist at: " + rootPom);
+        }
+        if (rootPom.isDirectory()) {
+            throw new IllegalArgumentException("Found a directory instead of the root pom file at: " + rootPom);
+        }
+    }
+
     private boolean changePomVersions(BuildRunnerContext runner, BuildProgressLogger logger,
             ReleaseParameters releaseParams, boolean releaseVersion) throws IOException, InterruptedException {
         logger.progressStarted("[RELEASE] Changing versions in POM files");
         String pomLocation = runner.getRunnerParameters().get(ConstantValues.MAVEN_PARAM_POM_LOCATION);
         pomLocation = StringUtils.isNotBlank(pomLocation) ? pomLocation : "pom.xml";
         File rootPom = new File(runner.getBuild().getCheckoutDirectory(), pomLocation);
+        verifyPomFileExists(rootPom);
         Map<ModuleName, File> projectPoms = new ProjectReader(rootPom).read();
         Map<ModuleName, String> versionsByModule = Maps.newHashMap();
         for (ModuleName moduleName : projectPoms.keySet()) {

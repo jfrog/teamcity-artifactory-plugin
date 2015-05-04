@@ -64,9 +64,9 @@ BS.artifactory = {
         if (buildDependencies) {
             BS.ajaxRequest(base_uri + '${controllerUrl}', {
                 parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&checkArtifactoryHasAddons=true'
-                    + '&overrideDeployerCredentials=' + BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()
-                    + '&username=' + $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value
-                    + '&password=' + encyptedPass,
+                + '&overrideDeployerCredentials=' + BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()
+                + '&username=' + $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value
+                + '&password=' + encyptedPass,
                 onComplete: function (response, options) {
 
                     var xmlDoc = response.responseXML;
@@ -105,9 +105,9 @@ BS.artifactory = {
         }
         BS.ajaxRequest(base_uri + '${controllerUrl}', {
             parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&checkCompatibleVersion=true'
-                + '&overrideDeployerCredentials=' + BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()
-                + '&username=' + $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value
-                + '&password=' + encyptedPass,
+            + '&overrideDeployerCredentials=' + BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()
+            + '&username=' + $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value
+            + '&password=' + encyptedPass,
             onComplete: function (response, options) {
 
                 var xmlDoc = response.responseXML;
@@ -142,7 +142,7 @@ BS.artifactory = {
 
     toggleTextAndSelect: function (text, select, isDynamicCheckBox) {
         if (typeof text == "string") {
-            text = document.getElementsById(text);
+            text = document.getElementById(text);
         }
         if (isDynamicCheckBox.checked) {
             text.style.display = '';

@@ -18,6 +18,7 @@ package org.jfrog.teamcity.agent;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.parameters.ValueResolver;
 import jetbrains.buildServer.util.FileUtil;
@@ -28,15 +29,12 @@ import org.jdom.JDOMException;
 import org.jfrog.build.api.BuildAgent;
 import org.jfrog.build.api.BuildType;
 import org.jfrog.build.api.Dependency;
-import org.jfrog.build.api.builder.ArtifactBuilder;
-import org.jfrog.build.api.builder.BuildInfoBuilder;
-import org.jfrog.build.api.builder.DependencyBuilder;
-import org.jfrog.build.api.builder.ModuleBuilder;
-import org.jfrog.build.api.builder.PromotionStatusBuilder;
+import org.jfrog.build.api.builder.*;
 import org.jfrog.build.api.release.Promotion;
 import org.jfrog.build.client.DeployDetails;
 import org.jfrog.build.client.DeployDetailsArtifact;
 import org.jfrog.teamcity.agent.api.Gavc;
+import org.jfrog.teamcity.agent.listener.AgentListenerBuildInfoHelper;
 import org.jfrog.teamcity.agent.release.ReleaseParameters;
 import org.jfrog.teamcity.agent.util.InfoCollectionException;
 import org.jfrog.teamcity.agent.util.RepositoryHelper;
@@ -186,22 +184,16 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
     }
 
     private Gavc addModuleArtifact(ModuleBuilder moduleBuilder, Element artifactElement) {
-
         Gavc gavc = buildGavc(artifactElement);
         if (gavc.isValid()) {
-
             String artifactPath = artifactElement.getChildText("path");
 
             if (StringUtils.isBlank(artifactPath)) {
-
-                /**
-                 * If the current "artifact" element has no path and it's a pom, then the pom path is on the "project"
-                 * element
-                 */
+                // If the current "artifact" element has no path and it's a pom, then the pom path is on the "project"
+                // element
                 if ("pom".equalsIgnoreCase(gavc.type)) {
                     artifactPath = artifactElement.getParentElement().getChildText("path");
                 }
-
                 if (StringUtils.isBlank(artifactPath)) {
                     return null;
                 }
@@ -213,12 +205,14 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
             ArtifactBuilder artifactBuilder = new ArtifactBuilder(artifactName);
             artifactBuilder.type(gavc.type);
 
-            if (artifactFile.exists()) {
-
+            if (artifactFile.isFile()) {
                 String deploymentRepo = getDeploymentRepo(gavc);
                 addChecksumInfo(artifactFile, deploymentRepo, deploymentPath, artifactBuilder);
+                moduleBuilder.addArtifact(artifactBuilder.build());
+            } else {
+                logger.message(String.format("Warning: %s includes a path to an artifact that does not exist: %s Skipping checksum calculation for this artifact",
+                        AgentListenerBuildInfoHelper.MAVEN_BUILD_INFO_XML, artifactPath));
             }
-            moduleBuilder.addArtifact(artifactBuilder.build());
         }
         return gavc;
     }
@@ -301,7 +295,7 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
 
             String scope = dependencyElement.getChildText("scope");
             if (StringUtils.isNotBlank(scope)) {
-                dependencyBuilder.scopes(Lists.newArrayList(scope));
+                dependencyBuilder.scopes(Sets.newHashSet(scope));
             }
 
             String dependencyPath = dependencyElement.getChildText("path");
@@ -331,16 +325,18 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
         for (Element pluginElement : pluginList) {
             String id = buildItemId(pluginElement, "groupId", "artifactId", "version", "classifier");
             DependencyBuilder pluginBuilder = new DependencyBuilder().id(id).
-                    scopes(Lists.newArrayList(Dependency.SCOPE_BUILD));
+                    scopes(Sets.newHashSet(Dependency.SCOPE_BUILD));
 
             String pluginPath = pluginElement.getChildText("artifactPath");
             if (StringUtils.isNotBlank(pluginPath)) {
                 Map<String, String> checksumMap = getArtifactChecksumMap(pluginPath);
-                pluginBuilder.md5(checksumMap.get("md5"));
-                pluginBuilder.sha1(checksumMap.get("sha1"));
+                // If the file exists then add it:
+                if (!checksumMap.isEmpty()) {
+                    pluginBuilder.md5(checksumMap.get("md5"));
+                    pluginBuilder.sha1(checksumMap.get("sha1"));
+                    moduleBuilder.addDependency(pluginBuilder.build());
+                }
             }
-
-            moduleBuilder.addDependency(pluginBuilder.build());
         }
     }
 }

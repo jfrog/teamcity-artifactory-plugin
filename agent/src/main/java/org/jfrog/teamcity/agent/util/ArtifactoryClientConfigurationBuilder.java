@@ -11,10 +11,10 @@ import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.BlackDuckPropertiesFields;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.api.util.NullLog;
-import org.jfrog.build.client.ArtifactoryClientConfiguration;
-import org.jfrog.build.client.ClientProperties;
-import org.jfrog.build.client.IncludeExcludePatterns;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryClientConfiguration;
+import org.jfrog.build.extractor.clientConfiguration.ClientProperties;
+import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 

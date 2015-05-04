@@ -27,7 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.BuildInfoConfigProperties;
 import org.jfrog.build.api.BuildInfoProperties;
-import org.jfrog.build.client.ClientProperties;
+import org.jfrog.build.extractor.clientConfiguration.ClientProperties;
 import org.jfrog.teamcity.api.ProxyInfo;
 import org.jfrog.teamcity.api.ServerConfigBean;
 import org.jfrog.teamcity.api.credentials.CredentialsBean;

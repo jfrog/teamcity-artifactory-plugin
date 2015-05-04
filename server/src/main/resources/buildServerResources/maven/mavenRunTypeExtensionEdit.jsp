@@ -281,11 +281,11 @@ display:inline-block;
             <div>
                 <p><props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag"
                                            onclick="BS.artifactory.toggleTextAndSelect(
-                                    mavenTargetReleaseText,
+                                    'mavenTargetReleaseText',
                                     $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
                                     $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'))"
                                            style="float: left"/></p>
-                <span class="smallNote">Dynamic mode</span>
+                <span class="smallNote">Free-text mode</span>
             </div>
             <c:if test="${foundExistingConfig}">
                 <script type="text/javascript">
@@ -329,11 +329,11 @@ display:inline-block;
             <div>
                 <p><props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.deploySnapshotFlag"
                                            onclick="BS.artifactory.toggleTextAndSelect(
-                                    mavenSnapshotRepoText,
+                                    'mavenSnapshotRepoText',
                                     $('org.jfrog.artifactory.selectedDeployableServer.targetSnapshotRepo'),
                                     $('org.jfrog.artifactory.selectedDeployableServer.deploySnapshotFlag'))"
                                            style="float: left"/></p>
-                <span class="smallNote">Dynamic mode</span>
+                <span class="smallNote">Free-text mode</span>
             </div>
             <c:if test="${foundExistingConfig}">
                 <script type="text/javascript">

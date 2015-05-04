@@ -37,7 +37,7 @@ import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jdom.Element;
 import org.jfrog.build.api.builder.PromotionBuilder;
-import org.jfrog.build.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.teamcity.api.ProxyInfo;
 import org.jfrog.teamcity.api.ServerConfigBean;
 import org.jfrog.teamcity.api.credentials.CredentialsBean;
