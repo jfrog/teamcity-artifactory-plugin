@@ -197,8 +197,12 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
         if (proxyInfo != null) {
             runnerContext.addRunnerParameter(PROXY_HOST, proxyInfo.getHost());
             runnerContext.addRunnerParameter(PROXY_PORT, Integer.toString(proxyInfo.getPort()));
-            runnerContext.addRunnerParameter(PROXY_USERNAME, proxyInfo.getUsername());
-            runnerContext.addRunnerParameter(PROXY_PASSWORD, proxyInfo.getPassword());
+            if (proxyInfo.getUsername() != null) {
+                runnerContext.addRunnerParameter(PROXY_USERNAME, proxyInfo.getUsername());
+            }
+            if (proxyInfo.getPassword() != null) {
+                runnerContext.addRunnerParameter(PROXY_PASSWORD, proxyInfo.getPassword());
+            }
         }
     }
 
