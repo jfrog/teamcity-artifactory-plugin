@@ -123,6 +123,14 @@ public class GitCoordinator extends AbstractVcsCoordinator {
             git.pushTag(getPushUrl(), releaseParameters.getTagUrl());
             state.tagPushed = true;
         }
+
+        if (releaseParameters.isUseGitflow()) {
+            git.checkoutBranch("master", false);
+
+            git.mergeNoFF(releaseBranch, releaseParameters.getMergeReleaseIntoMasterComment());
+
+            git.push(getPushUrl(), "master");
+        }
     }
 
     public void beforeDevelopmentVersionChange() throws IOException {

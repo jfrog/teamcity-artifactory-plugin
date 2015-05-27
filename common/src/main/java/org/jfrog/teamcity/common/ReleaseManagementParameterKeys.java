@@ -7,6 +7,8 @@ public class ReleaseManagementParameterKeys {
 
     private final static String PREFIX = ConstantValues.PLUGIN_PREFIX + "releaseManagement.";
 
+    public final static String USE_GITFLOW = PREFIX + "useGitflow";
+    public final static String MERGE_MASTER_COMMENT = PREFIX + "mergeReleaseIntoMasterComment";
     public final static String MANAGEMENT_ACTIVATED = PREFIX + "activated";
     public final static String USE_GLOBAL_VERSION = PREFIX + "useGlobalVersion";
     public final static String GLOBAL_RELEASE_VERSION = PREFIX + "globalReleaseVersion";

@@ -96,6 +96,10 @@ public class ReleaseParameters {
         return buildParams.get(ReleaseManagementParameterKeys.NEXT_DEVELOPMENT_VERSION_COMMENT);
     }
 
+    public String getMergeReleaseIntoMasterComment() {
+        return buildParams.get(ReleaseManagementParameterKeys.MERGE_MASTER_COMMENT);
+    }
+
     public boolean isCreateReleaseBranch() {
         return getBoolean(ReleaseManagementParameterKeys.CREATE_RELEASE_BRANCH);
     }
@@ -122,6 +126,10 @@ public class ReleaseParameters {
 
     public boolean isGit() {
         return getBoolean(ReleaseManagementParameterKeys.GIT_VCS);
+    }
+
+    public boolean isUseGitflow() {
+        return getBoolean(ReleaseManagementParameterKeys.USE_GITFLOW);
     }
 
     public boolean isPerforce() {

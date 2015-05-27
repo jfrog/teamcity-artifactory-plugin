@@ -77,6 +77,19 @@ public class GitManager extends AbstractScmManager {
         return baseCommit;
     }
 
+    public String mergeNoFF(String mergeWith, String message) throws IOException {
+        List<String> command = new ArrayList<String>();
+        command.add("merge");
+        command.add("--no-ff");
+        command.add("-m");
+        command.add(message);
+        command.add("--log");
+        command.add(expandNoHeadsRef(mergeWith));
+        String mergeResult = git.launchCommand(command.toArray(new String[command.size()]));
+        debuggingLogger.fine(String.format("Merge result: %s", mergeResult));
+        return mergeResult;
+    }
+
     public String checkoutBranch(String branch, boolean create) throws IOException {
         // commit all the modified files
         List<String> command = new ArrayList<String>();

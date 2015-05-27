@@ -410,6 +410,28 @@ The next development version (i.e., SNAPSHOT) to use in Maven poms after a succe
             <span class="smallNote">The comment to use when committing changes for the next development version.</span>
         </td>
     </tr>
+    <tr>
+        <th>
+            <forms:checkbox name="org.jfrog.artifactory.releaseManagement.useGitflow" checked="${managementConfig.useGitflow}"/>
+            <label style="float:none; padding-left: 5px; font-weight: bold"
+                   for="org.jfrog.artifactory.releaseManagement.useGitflow">Use Gitflow workflow</label>
+        </th>
+        <td>
+
+        </td>
+    </tr>
+    <tr>
+        <th>
+            <label style="font-weight: normal"
+                   for="org.jfrog.artifactory.releaseManagement.mergeReleaseIntoMasterComment">Merge release into master comment: </label>
+        </th>
+        <td>
+            <forms:textField name="org.jfrog.artifactory.releaseManagement.mergeReleaseIntoMasterComment"
+                             value="${managementConfig.defaultMergeReleaseIntoMasterComment}"
+                             className="longField"/>
+            <span class="smallNote">The comment to use when merging the release into master.</span>
+        </td>
+    </tr>
 </table>
 
 <h2 class="noBorder" style="padding-top: 5px; padding-bottom: 15px">

@@ -38,6 +38,7 @@ public abstract class ReleaseManagementConfigModel {
     private String defaultStagingRepository;
     private String defaultModuleVersionConfiguration;
 
+    private boolean useGitflow = true;
     private boolean gitVcs = false;
     protected boolean svnVcs = false;
     private boolean selectedArtifactoryServerHasAddons = false;
@@ -125,6 +126,18 @@ public abstract class ReleaseManagementConfigModel {
 
     public String getDefaultNextDevelopmentVersionComment() {
         return COMMIT_COMMENT_PREFIX + "Next development version";
+    }
+
+    public String getDefaultMergeReleaseIntoMasterComment() {
+        return COMMIT_COMMENT_PREFIX + "Merging release into master";
+    }
+
+    public boolean isUseGitflow() {
+        return useGitflow;
+    }
+
+    public void setUseGitflow(boolean useGitflow) {
+        this.useGitflow = useGitflow;
     }
 
     public boolean isGitVcs() {
