@@ -127,7 +127,11 @@ public class GitCoordinator extends AbstractVcsCoordinator {
         if (releaseParameters.isUseGitflow()) {
             git.checkoutBranch("master", false);
 
-            git.mergeNoFF(releaseBranch, releaseParameters.getMergeReleaseIntoMasterComment());
+            if (releaseParameters.isCreateReleaseBranch()) {
+                git.mergeNoFF(releaseBranch, releaseParameters.getMergeReleaseIntoMasterComment());
+            } else {
+                git.mergeNoFF(checkoutBranch, releaseParameters.getMergeReleaseIntoMasterComment());
+            }
 
             git.push(getPushUrl(), "master");
         }
