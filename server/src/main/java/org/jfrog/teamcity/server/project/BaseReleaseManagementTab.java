@@ -2,6 +2,7 @@ package org.jfrog.teamcity.server.project;
 
 import com.google.common.collect.Lists;
 import jetbrains.buildServer.controllers.BaseFormXmlController;
+import jetbrains.buildServer.controllers.BranchBean;
 import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.vcs.VcsRootInstance;
@@ -14,6 +15,7 @@ import org.jfrog.teamcity.common.RunnerParameterKeys;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +28,7 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
 
     private DeployableArtifactoryServers deployableServers;
 
+
     public BaseReleaseManagementTab(@NotNull WebControllerManager manager, @NotNull ProjectManager projectManager,
                                     @NotNull String includeUrl, @NotNull String controllerUrl, @NotNull BaseFormXmlController controller,
                                     @NotNull DeployableArtifactoryServers deployableServers) {
@@ -35,6 +38,13 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
 
         manager.registerController(controllerUrl, controller);
     }
+
+    protected abstract boolean buildHasAppropriateRunner(SBuildType buildType);
+
+    protected abstract ReleaseManagementConfigModel getReleaseManagementConfigModel();
+
+    protected abstract void fillBuildSpecificModel(Map<String, Object> model, SBuildType buildType,
+                                                   ReleaseManagementConfigModel managementConfig);
 
     @Override
     public boolean isAvailable(@NotNull HttpServletRequest request) {
@@ -103,7 +113,8 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
             managementConfig.setDeployableRepoKeys(deployableServers.getServerDeployableRepos(serverId, overrideDeployerCredentials, username, password));
         }
 
-        List<BranchEx> checkoutBranches = getCheckoutBranches(buildType);
+        List<BranchEx> checkoutBranches = getCheckoutBranches(buildType, model);
+
         if (!checkoutBranches.isEmpty()) {
             managementConfig.setDefaultCheckoutBranch(checkoutBranches.get(0));
         }
@@ -115,15 +126,24 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
         model.put("buildTypeId", buildTypeId);
     }
 
-    private List<BranchEx> getCheckoutBranches(SBuildType buildType) {
+    private List<BranchEx> getCheckoutBranches(SBuildType buildType, Map<String, Object> model) {
         if(buildType instanceof BuildTypeEx) {
-            return ((BuildTypeEx) buildType).getActiveBranches();
+            ArrayList<BranchEx> branchExes = Lists.newArrayList();
+            BranchEx branch;
+            //If the user is on the __all_branches__ view, take the default branch
+            if (((BranchBean) model.get("branchBean")).isWildcardBranch()) {
+                branch = ((BuildTypeEx) buildType).getBranch("<default>");
+            } else {
+                String userBranch = ((BranchBean) model.get("branchBean")).getUserBranch();
+                branch = ((BuildTypeEx) buildType).getBranch(userBranch);
+            }
+
+            branchExes.add(branch);
+            return branchExes;
         } else {
             return Lists.newArrayList();
         }
     }
-
-    protected abstract boolean buildHasAppropriateRunner(SBuildType buildType);
 
     private boolean containsGitOrSvnVcsRoot(SBuildType buildType) {
         List<VcsRootInstance> roots = buildType.getVcsRootInstances();
@@ -146,9 +166,4 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
         }
         return null;
     }
-
-    protected abstract ReleaseManagementConfigModel getReleaseManagementConfigModel();
-
-    protected abstract void fillBuildSpecificModel(Map<String, Object> model, SBuildType buildType,
-                                                   ReleaseManagementConfigModel managementConfig);
 }
