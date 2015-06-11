@@ -113,10 +113,10 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
             managementConfig.setDeployableRepoKeys(deployableServers.getServerDeployableRepos(serverId, overrideDeployerCredentials, username, password));
         }
 
-        List<BranchEx> checkoutBranches = getCheckoutBranches(buildType, ((BranchBean) model.get("branchBean")));
+        BranchEx checkoutBranch = getCheckoutBranches(buildType, ((BranchBean) model.get("branchBean")));
 
-        if (!checkoutBranches.isEmpty()) {
-            managementConfig.setDefaultCheckoutBranch(checkoutBranches.get(0));
+        if (checkoutBranch != null) {
+            managementConfig.setDefaultCheckoutBranch(checkoutBranch);
         }
 
         fillBuildSpecificModel(model, buildType, managementConfig);
@@ -132,7 +132,7 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
      * @param branchBean - bean that represents the branch that the user is on it
      * @return list with the relevant branch
      */
-    private List<BranchEx> getCheckoutBranches(SBuildType buildType, BranchBean branchBean) {
+    private BranchEx getCheckoutBranches(SBuildType buildType, BranchBean branchBean) {
         if(buildType instanceof BuildTypeEx) {
             ArrayList<BranchEx> branchExes = Lists.newArrayList();
             BranchEx branch;
@@ -145,10 +145,10 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
             }
 
             branchExes.add(branch);
-            return branchExes;
-        } else {
-            return Lists.newArrayList();
+            return branch;
         }
+
+        return null;
     }
 
     private boolean containsGitOrSvnVcsRoot(SBuildType buildType) {
