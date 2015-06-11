@@ -113,12 +113,11 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
             managementConfig.setDeployableRepoKeys(deployableServers.getServerDeployableRepos(serverId, overrideDeployerCredentials, username, password));
         }
 
-        List<BranchEx> checkoutBranches = getCheckoutBranches(buildType, model);
+        List<BranchEx> checkoutBranches = getCheckoutBranches(buildType, ((BranchBean) model.get("branchBean")));
 
         if (!checkoutBranches.isEmpty()) {
             managementConfig.setDefaultCheckoutBranch(checkoutBranches.get(0));
         }
-        managementConfig.setCheckoutBranches(checkoutBranches);
 
         fillBuildSpecificModel(model, buildType, managementConfig);
 
@@ -126,15 +125,22 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
         model.put("buildTypeId", buildTypeId);
     }
 
-    private List<BranchEx> getCheckoutBranches(SBuildType buildType, Map<String, Object> model) {
+    /**
+     * Get the relevant branch according to the user choice
+     *
+     * @param buildType  - build instance
+     * @param branchBean - bean that represents the branch that the user is on it
+     * @return list with the relevant branch
+     */
+    private List<BranchEx> getCheckoutBranches(SBuildType buildType, BranchBean branchBean) {
         if(buildType instanceof BuildTypeEx) {
             ArrayList<BranchEx> branchExes = Lists.newArrayList();
             BranchEx branch;
             //If the user is on the __all_branches__ view, take the default branch
-            if (((BranchBean) model.get("branchBean")).isWildcardBranch()) {
+            if (branchBean.isWildcardBranch()) {
                 branch = ((BuildTypeEx) buildType).getBranch("<default>");
             } else {
-                String userBranch = ((BranchBean) model.get("branchBean")).getUserBranch();
+                String userBranch = branchBean.getUserBranch();
                 branch = ((BuildTypeEx) buildType).getBranch(userBranch);
             }
 

@@ -27,27 +27,20 @@ import java.util.List;
  */
 public abstract class ReleaseManagementConfigModel {
 
-    protected static final String COMMIT_COMMENT_PREFIX = "[artifactory-release] ";
     public static final String DEFAULT_CURRENT_VERSION = "UNKNOWN";
-
+    protected static final String COMMIT_COMMENT_PREFIX = "[artifactory-release] ";
     protected String rootArtifactId = "PROJECT_NAME";
     protected String currentVersion = DEFAULT_CURRENT_VERSION;
 
     protected String vcsTagBaseUrlOrName = "";
     protected String gitReleaseBranchNamePrefix;
+    protected boolean svnVcs = false;
     private String defaultStagingRepository;
     private String defaultModuleVersionConfiguration;
-
     private boolean gitVcs = false;
-    protected boolean svnVcs = false;
     private boolean selectedArtifactoryServerHasAddons = false;
     private List<String> deployableRepoKeys = Lists.newArrayList();
     private BranchEx defaultCheckoutBranch;
-    private List<BranchEx> checkoutBranches = Lists.newArrayList();
-
-    public void setCurrentVersion(String currentVersion) {
-        this.currentVersion = currentVersion;
-    }
 
     public void setRootArtifactId(String rootArtifactId) {
         this.rootArtifactId = rootArtifactId;
@@ -55,6 +48,10 @@ public abstract class ReleaseManagementConfigModel {
 
     public String getCurrentVersion() {
         return currentVersion;
+    }
+
+    public void setCurrentVersion(String currentVersion) {
+        this.currentVersion = currentVersion;
     }
 
     public String getReleaseVersion() {
@@ -161,14 +158,6 @@ public abstract class ReleaseManagementConfigModel {
 
     public void setDefaultCheckoutBranch(BranchEx defaultCheckoutBranch) {
         this.defaultCheckoutBranch = defaultCheckoutBranch;
-    }
-
-    public List<BranchEx> getCheckoutBranches() {
-        return checkoutBranches;
-    }
-
-    public void setCheckoutBranches(List<BranchEx> checkoutBranches) {
-        this.checkoutBranches = checkoutBranches;
     }
 
     protected String getVcsSpecificTagBaseUrlOrName() {

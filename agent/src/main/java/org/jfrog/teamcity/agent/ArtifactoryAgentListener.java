@@ -109,7 +109,7 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
             ReleaseParameters releaseParams = new ReleaseParameters(runner.getBuild());
             if (releaseParams.isReleaseBuild()) {
                 BuildInterruptReason buildInterruptReason =
-                        ((AgentRunningBuildEx) runner.getBuild()).getInterruptReason();
+                        runner.getBuild().getInterruptReason();
                 boolean buildSuccessful = !buildStatus.isFailed() && (buildInterruptReason == null);
 
                 try {
@@ -127,7 +127,7 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
         logger.buildFailureDescription(errorMessage);
         logger.exception(t);
         logger.flush();
-        ((AgentRunningBuildEx) runner.getBuild()).stopBuild(errorMessage);
+        runner.getBuild().stopBuild(errorMessage);
     }
 
     private boolean isBuildInfoSupportActivated(Map<String, String> runnerParams) {
