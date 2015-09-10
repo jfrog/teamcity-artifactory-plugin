@@ -55,6 +55,10 @@ public abstract class ArtifactoryClientConfigurationBuilder {
         clientConf.info.setBuildTimestamp(buildTimestamp);
         clientConf.publisher.addMatrixParam("build.timestamp", buildTimestamp);
 
+        // Retrieve the plugin version from the runner and set this into Artifactory Client Configuration to pass this to the build-info
+        String pluginVersion = runnerParameters.get(ConstantValues.ARTIFACTORY_PLUGIN_VERSION);
+        clientConf.info.setArtifactoryPluginVersion(pluginVersion);
+
         String vcsRevision = runnerParameters.get(ConstantValues.PROP_VCS_REVISION);
         clientConf.info.setVcsRevision(vcsRevision);
         clientConf.publisher.addMatrixParam(BuildInfoFields.VCS_REVISION, vcsRevision);
