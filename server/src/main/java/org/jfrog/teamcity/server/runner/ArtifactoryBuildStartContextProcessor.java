@@ -117,6 +117,9 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
 
             runnerContext.addRunnerParameter(PROP_BUILD_TIMESTAMP, build.getStartDate().getTime() + "");
 
+            // Adds the Artifactory Plugin version to runner
+            runnerContext.addRunnerParameter(ARTIFACTORY_PLUGIN_VERSION, getPluginVersion());
+
             WebLinks webLinks = new WebLinks(buildServer);
             runnerContext.addRunnerParameter(BUILD_URL, webLinks.getViewResultsUrl(build));
 

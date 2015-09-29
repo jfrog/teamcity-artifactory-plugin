@@ -170,9 +170,11 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
                 BLACKDUCK_PREFIX + BlackDuckPropertiesFields.AutoCreateMissingComponentRequests)));
         blackDuckProperties.setAutoDiscardStaleComponentRequests(Boolean.valueOf(runnerParams.get(RunnerParameterKeys.
                 BLACKDUCK_PREFIX + BlackDuckPropertiesFields.AutoDiscardStaleComponentRequests)));
-
+        // Gets the plugin version and sets into the build info
+        String pluginVersion = runnerContext.getRunnerParameters().get(ARTIFACTORY_PLUGIN_VERSION);
         BuildInfoBuilder builder = new BuildInfoBuilder(runnerParams.get(BUILD_NAME)).
                 number(runnerContext.getBuild().getBuildNumber()).
+                artifactoryPluginVersion(pluginVersion).
                 startedDate(buildStarted).
                 durationMillis(buildDuration).
                 url(runnerParams.get(BUILD_URL)).

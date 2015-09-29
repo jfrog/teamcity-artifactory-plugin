@@ -43,6 +43,7 @@ public class ConstantValues {
 
     public final static String BUILD_NAME = BUILD_PREFIX + "name";
     public final static String BUILD_NUMBER = BUILD_PREFIX + "number";
+    public final static String ARTIFACTORY_PLUGIN_VERSION = BUILD_PREFIX + "artifactoryPluginVersion";
     public final static String BUILD_STARTED = BUILD_PREFIX + "started";
     public final static String BUILD_URL = BUILD_PREFIX + "url";
     public final static String AGENT_NAME = BUILD_PREFIX + "agent.name";
@@ -67,6 +68,16 @@ public class ConstantValues {
     public static final String MAVEN_PARAM_POM_LOCATION = "pomLocation";
     public static final String GRADLE_PARAM_TASKS = "ui.gradleRunner.gradle.tasks.names";
     public static final String GRADLE_PARAM_OPTIONS = "ui.gradleRunner.additional.gradle.cmd.params";
+
+    public static String pluginVersion;
+    //retrieve the plugin version
+    public static String getPluginVersion() {
+        return pluginVersion;
+    }
+    //sets the plugin version
+    public static void setPluginVersion(String pluginVersion) {
+        ConstantValues.pluginVersion = pluginVersion;
+    }
 
     /**
      * Git plugin configuration constants (taken from jetbrains.buildServer.buildTriggers.vcs.git.Constants)
