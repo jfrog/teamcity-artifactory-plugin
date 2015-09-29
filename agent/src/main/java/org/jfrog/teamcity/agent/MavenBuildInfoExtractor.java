@@ -211,7 +211,7 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
                 moduleBuilder.addArtifact(artifactBuilder.build());
             } else {
                 logger.message(String.format("Warning: %s includes a path to an artifact that does not exist: %s Skipping checksum calculation for this artifact",
-                        AgentListenerBuildInfoHelper.MAVEN_BUILD_INFO_XML, artifactPath));
+                    AgentListenerBuildInfoHelper.MAVEN_BUILD_INFO_XML, artifactPath));
             }
         }
         return gavc;
@@ -222,20 +222,18 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
         if (StringUtils.isBlank(pomPath)) {
             return;
         }
-
         File pomFile = new File(pomPath);
-        if (pomFile.exists()) {
-
+        if (pomFile.isFile()) {
             Gavc pomGavc = new Gavc(gavc);
             pomGavc.type = "pom";
-
             String deploymentPath = getDeploymentPath(pomGavc, null);
             ArtifactBuilder pomBuilder = new ArtifactBuilder(getFileName(pomGavc, pomFile)).type("pom");
-
             String deploymentRepo = getDeploymentRepo(gavc);
             addChecksumInfo(pomFile, deploymentRepo, deploymentPath, pomBuilder);
-
             moduleBuilder.addArtifact(pomBuilder.build());
+        } else {
+            logger.message(String.format("Warning: %s includes a path to pom artifact that does not exist: %s Skipping checksum calculation for this artifact",
+                AgentListenerBuildInfoHelper.MAVEN_BUILD_INFO_XML, pomPath));
         }
     }
 
