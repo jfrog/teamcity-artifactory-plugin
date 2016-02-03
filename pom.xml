@@ -279,9 +279,9 @@
                 <version>2.2.0</version>
             </dependency>
             <dependency>
-                <groupId>xpp3</groupId>
-                <artifactId>xpp3_min</artifactId>
-                <version>1.1.4c</version>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-utils</artifactId>
+                <version>3.0.20</version>
             </dependency>
             <dependency>
                 <groupId>org.testng</groupId>
