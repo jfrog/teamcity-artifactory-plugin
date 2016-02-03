@@ -40,7 +40,7 @@
         <build.info.version>2.5.x-SNAPSHOT</build.info.version>
         <build.info.maven3.version>2.5.4</build.info.maven3.version>
         <build.info.gradle.version>4.0.x-SNAPSHOT</build.info.gradle.version>
-        <build.info.ivy.version>2.5.2</build.info.ivy.version>
+        <build.info.ivy.version>2.5.x-SNAPSHOT</build.info.ivy.version>
     </properties>
 
     <developers>
