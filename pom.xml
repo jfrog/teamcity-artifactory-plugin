@@ -38,7 +38,7 @@
         <plugin.version>${project.version}</plugin.version>
         <teamcity.version>7.1.0</teamcity.version>
         <build.info.version>2.5.x-SNAPSHOT</build.info.version>
-        <build.info.maven3.version>2.5.4</build.info.maven3.version>
+        <build.info.maven3.version>2.5.x-SNAPSHOT</build.info.maven3.version>
         <build.info.gradle.version>4.0.x-SNAPSHOT</build.info.gradle.version>
         <build.info.ivy.version>2.5.x-SNAPSHOT</build.info.ivy.version>
     </properties>
@@ -277,11 +277,6 @@
                 <groupId>org.apache.ivy</groupId>
                 <artifactId>ivy</artifactId>
                 <version>2.2.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.codehaus.plexus</groupId>
-                <artifactId>plexus-utils</artifactId>
-                <version>3.0.20</version>
             </dependency>
             <dependency>
                 <groupId>org.testng</groupId>
