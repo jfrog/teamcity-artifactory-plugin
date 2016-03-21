@@ -117,6 +117,9 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
 
             runnerContext.addRunnerParameter(PROP_BUILD_TIMESTAMP, build.getStartDate().getTime() + "");
 
+            // Adds the Artifactory Plugin version to runner
+            runnerContext.addRunnerParameter(ARTIFACTORY_PLUGIN_VERSION, getPluginVersion());
+
             WebLinks webLinks = new WebLinks(buildServer);
             runnerContext.addRunnerParameter(BUILD_URL, webLinks.getViewResultsUrl(build));
 
@@ -197,8 +200,12 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
         if (proxyInfo != null) {
             runnerContext.addRunnerParameter(PROXY_HOST, proxyInfo.getHost());
             runnerContext.addRunnerParameter(PROXY_PORT, Integer.toString(proxyInfo.getPort()));
-            runnerContext.addRunnerParameter(PROXY_USERNAME, proxyInfo.getUsername());
-            runnerContext.addRunnerParameter(PROXY_PASSWORD, proxyInfo.getPassword());
+            if (proxyInfo.getUsername() != null) {
+                runnerContext.addRunnerParameter(PROXY_USERNAME, proxyInfo.getUsername());
+            }
+            if (proxyInfo.getPassword() != null) {
+                runnerContext.addRunnerParameter(PROXY_PASSWORD, proxyInfo.getPassword());
+            }
         }
     }
 

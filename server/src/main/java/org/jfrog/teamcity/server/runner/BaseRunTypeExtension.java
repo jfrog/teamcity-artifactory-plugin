@@ -22,6 +22,7 @@ import jetbrains.buildServer.serverSide.RunTypeExtension;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jetbrains.annotations.NotNull;
+import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -45,6 +46,8 @@ public abstract class BaseRunTypeExtension extends RunTypeExtension {
             @NotNull final DeployableArtifactoryServers deployableArtifactoryServers) {
         this.webControllerManager = webControllerManager;
         this.pluginDescriptor = pluginDescriptor;
+        // Gets the plugin version from the pluginDescriptor and sets it to the pluginVersion String in ConstantValues.
+        ConstantValues.setPluginVersion(pluginDescriptor.getPluginVersion());
         this.deployableArtifactoryServers = deployableArtifactoryServers;
     }
 

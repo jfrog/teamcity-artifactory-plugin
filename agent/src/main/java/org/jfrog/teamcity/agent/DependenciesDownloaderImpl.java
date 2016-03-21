@@ -77,14 +77,18 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
         File dest = new File(filePath);
         if (dest.exists()) {
             dest.delete();
-            dest.createNewFile();
         } else {
             dest.getParentFile().mkdirs();
-            dest.createNewFile();
         }
-        FileOutputStream fileOutputStream = new FileOutputStream(dest);
+
+        FileOutputStream fileOutputStream = null;
         try {
+            dest.createNewFile();
+            fileOutputStream = new FileOutputStream(dest);
             IOUtils.copyLarge(is, fileOutputStream);
+        } catch (IOException e) {
+            throw new IOException("Could not create or write to file: " + dest.getCanonicalPath() + ". " +
+                e.getMessage());
         } finally {
             IOUtils.closeQuietly(is);
             IOUtils.closeQuietly(fileOutputStream);
