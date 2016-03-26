@@ -41,7 +41,7 @@ public class PerforceCoordinator extends AbstractVcsCoordinator {
         String labelChangeListId = runner.getRunnerParameters().get(PROP_VCS_REVISION);
         if (modifiedFilesForReleaseVersion) {
             log("Submitting release version changes");
-            labelChangeListId = currentChangeListId + "";
+            labelChangeListId = Integer.toString(currentChangeListId);
             perforce.commitWorkingCopy(currentChangeListId, releaseParameters.getTagComment());
         } else {
             safeRevertWorkingCopy();

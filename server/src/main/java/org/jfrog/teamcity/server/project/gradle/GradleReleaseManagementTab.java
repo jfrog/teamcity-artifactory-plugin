@@ -80,11 +80,9 @@ public class GradleReleaseManagementTab extends BaseReleaseManagementTab {
                 for (SBuildRunnerDescriptor runnerDescriptor : finishedBuildType.getBuildRunners()) {
 
                     Map<String, String> runnerParameters = runnerDescriptor.getParameters();
-                    if (Boolean.valueOf(runnerParameters.get(RunnerParameterKeys.ENABLE_RELEASE_MANAGEMENT))) {
-
-                        if (addGradlePropertiesToModel(model, finishedBuild, managementConfig, runnerParameters)) {
-                            return;
-                        }
+                    if (Boolean.valueOf(runnerParameters.get(RunnerParameterKeys.ENABLE_RELEASE_MANAGEMENT))
+                            && addGradlePropertiesToModel(model, finishedBuild, managementConfig, runnerParameters)) {
+                        return;
                     }
                 }
             }

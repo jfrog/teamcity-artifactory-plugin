@@ -137,17 +137,15 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
              * results page
              */
             SBuildType buildType = build.getBuildType();
-            if (buildType != null) {
-                if (shouldStoreBuildInRunHistory(runParameters)) {
-                    String runnerCustomStorageId = Long.toString(build.getBuildId()) + "#" + runnerContext.getId();
-                    StringBuilder artifactoryUrlBuilder = new StringBuilder().append(serverConfigUrl);
-                    if (!serverConfigUrl.endsWith("/")) {
-                        artifactoryUrlBuilder.append("/");
-                    }
-                    String artifactoryUrl = artifactoryUrlBuilder.append("webapp/builds/").toString();
-                    CustomDataStorage runHistory = buildType.getCustomDataStorage(CustomDataStorageKeys.RUN_HISTORY);
-                    runHistory.putValue(runnerCustomStorageId, artifactoryUrl);
+            if (buildType != null && shouldStoreBuildInRunHistory(runParameters)) {
+                String runnerCustomStorageId = Long.toString(build.getBuildId()) + "#" + runnerContext.getId();
+                StringBuilder artifactoryUrlBuilder = new StringBuilder().append(serverConfigUrl);
+                if (!serverConfigUrl.endsWith("/")) {
+                    artifactoryUrlBuilder.append("/");
                 }
+                String artifactoryUrl = artifactoryUrlBuilder.append("webapp/builds/").toString();
+                CustomDataStorage runHistory = buildType.getCustomDataStorage(CustomDataStorageKeys.RUN_HISTORY);
+                runHistory.putValue(runnerCustomStorageId, artifactoryUrl);
             }
 
             if (RunTypeUtils.isMavenRunType(runType)) {
