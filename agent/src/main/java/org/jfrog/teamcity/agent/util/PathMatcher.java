@@ -28,6 +28,8 @@ import java.util.List;
  * @author Yossi Shaul
  */
 public abstract class PathMatcher {
+    
+    private PathMatcher() {}
 
     private static AntPathMatcher antPathMatcher = new AntPathMatcher();
     private static final List<String> DEFAULT_EXCLUDES = Lists.newArrayList(

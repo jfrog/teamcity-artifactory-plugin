@@ -4,6 +4,8 @@ package org.jfrog.teamcity.common;
  * @author Noam Y. Tenne
  */
 public class TriggerParameterKeys {
+    
+    private TriggerParameterKeys() {}
 
     public final static String PREFIX = ConstantValues.PLUGIN_PREFIX + "selectedTriggerServer.";
 
