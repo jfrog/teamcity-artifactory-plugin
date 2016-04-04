@@ -250,7 +250,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
             fileNameBuilder.append(".pom");
         } else {
             String fileName = file.getName();
-            if ((file == null) || fileName.endsWith(gavc.type)) {
+            if (fileName.endsWith(gavc.type)) {
                 fileNameBuilder.append(".").append(gavc.type);
             } else if (StringUtils.isNotBlank(FilenameUtils.getExtension(fileName))) {
                 fileNameBuilder.append(".").append(FilenameUtils.getExtension(fileName));
