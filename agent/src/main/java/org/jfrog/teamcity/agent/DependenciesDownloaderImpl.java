@@ -164,26 +164,26 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
      * @return Artifactory HTTP client.
      */
     private ArtifactoryDependenciesClient newClient() {
-        ArtifactoryDependenciesClient client =
+        ArtifactoryDependenciesClient cl =
                 new ArtifactoryDependenciesClient(serverUrl,
                         runnerParams.get(RunnerParameterKeys.RESOLVER_USERNAME),
                         runnerParams.get(RunnerParameterKeys.RESOLVER_PASSWORD),
                         log);
 
-        client.setConnectionTimeout(Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
+        cl.setConnectionTimeout(Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
 
         if (runnerParams.containsKey(PROXY_HOST)) {
             if (StringUtils.isNotBlank(runnerParams.get(PROXY_USERNAME))) {
-                client.setProxyConfiguration(runnerParams.get(PROXY_HOST),
+                cl.setProxyConfiguration(runnerParams.get(PROXY_HOST),
                         Integer.parseInt(runnerParams.get(PROXY_PORT)), runnerParams.get(PROXY_USERNAME),
                         runnerParams.get(PROXY_PASSWORD));
             } else {
-                client.setProxyConfiguration(runnerParams.get(PROXY_HOST),
+                cl.setProxyConfiguration(runnerParams.get(PROXY_HOST),
                         Integer.parseInt(runnerParams.get(PROXY_PORT)));
             }
         }
 
-        return client;
+        return cl;
     }
 
     @Override

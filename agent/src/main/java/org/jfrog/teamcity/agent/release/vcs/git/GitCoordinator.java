@@ -66,10 +66,10 @@ public class GitCoordinator extends AbstractVcsCoordinator {
 
         releaseBranch = releaseParameters.getReleaseBranch();
 
-        String checkoutBranch = releaseParameters.getCheckoutBranch();
-        log(String.format("checkout branch is: %s", checkoutBranch));
-        if (StringUtils.isNotBlank(checkoutBranch) && !StringUtils.equals(checkoutBranch, Branch.DEFAULT_BRANCH_NAME)) {
-            this.checkoutBranch = checkoutBranch;
+        String branch = releaseParameters.getCheckoutBranch();
+        log(String.format("checkout branch is: %s", branch));
+        if (StringUtils.isNotBlank(branch) && !StringUtils.equals(branch, Branch.DEFAULT_BRANCH_NAME)) {
+            this.checkoutBranch = branch;
         } else {
             this.checkoutBranch = gitProps.get(ConstantValues.Git.BRANCH_NAME);
         }
