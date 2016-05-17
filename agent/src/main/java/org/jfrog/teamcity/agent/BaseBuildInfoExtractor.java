@@ -299,7 +299,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
     }
 
     private Map<String, String> getMatrixParams() {
-        Map<String, String> matrixParams = Maps.newHashMap();
+        Map<String, String> params = Maps.newHashMap();
 
         Properties buildInfoProperties =
                 BuildInfoExtractorUtils.mergePropertiesWithSystemAndPropertyFile(new Properties());
@@ -309,30 +309,30 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
         Enumeration<Object> propertyKeys = filteredMatrixParams.keys();
         while (propertyKeys.hasMoreElements()) {
             String key = propertyKeys.nextElement().toString();
-            matrixParams.put(key, filteredMatrixParams.getProperty(key));
+            params.put(key, filteredMatrixParams.getProperty(key));
         }
-        matrixParams.put("build.name", runnerParams.get(BUILD_NAME));
-        matrixParams.put("build.number", runnerContext.getBuild().getBuildNumber());
-        matrixParams.put("build.timestamp", runnerParams.get(PROP_BUILD_TIMESTAMP));
+        params.put("build.name", runnerParams.get(BUILD_NAME));
+        params.put("build.number", runnerContext.getBuild().getBuildNumber());
+        params.put("build.timestamp", runnerParams.get(PROP_BUILD_TIMESTAMP));
 
         if (StringUtils.isNotBlank(runnerParams.get(PROP_PARENT_NAME))) {
-            matrixParams.put("build.parentName", runnerParams.get(PROP_PARENT_NAME));
+            params.put("build.parentName", runnerParams.get(PROP_PARENT_NAME));
         }
 
         if (StringUtils.isNotBlank(runnerParams.get(PROP_PARENT_NUMBER))) {
-            matrixParams.put("build.parentNumber", runnerParams.get(PROP_PARENT_NUMBER));
+            params.put("build.parentNumber", runnerParams.get(PROP_PARENT_NUMBER));
         }
 
         if (StringUtils.isNotBlank(runnerParams.get(PROP_VCS_REVISION))) {
-            matrixParams.put(BuildInfoFields.VCS_REVISION, runnerParams.get(PROP_VCS_REVISION));
+            params.put(BuildInfoFields.VCS_REVISION, runnerParams.get(PROP_VCS_REVISION));
         }
 
         HashMap<String, String> allParamMap = Maps.newHashMap(runnerContext.getBuildParameters().getAllParameters());
         allParamMap.putAll(((BuildRunnerContextImpl) runnerContext).getConfigParameters());
-        gatherBuildInfoParams(allParamMap, matrixParams, ClientProperties.PROP_DEPLOY_PARAM_PROP_PREFIX,
+        gatherBuildInfoParams(allParamMap, params, ClientProperties.PROP_DEPLOY_PARAM_PROP_PREFIX,
                 Constants.ENV_PREFIX, Constants.SYSTEM_PREFIX);
 
-        return matrixParams;
+        return params;
     }
 
     private List<DeployDetailsArtifact> getPublishableArtifacts(ModuleBuilder genericModuleBuilder) {

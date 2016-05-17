@@ -38,11 +38,11 @@ public class SerializableCredentials implements Serializable {
         if ((credentialsBean != null) && !credentialsBean.isEmpty()) {
             username = credentialsBean.getUsername();
 
-            String password = credentialsBean.getPassword();
-            if (StringUtils.isNotBlank(password) && !EncryptUtil.isScrambled(password)) {
-                password = EncryptUtil.scramble(password);
+            String pass = credentialsBean.getPassword();
+            if (StringUtils.isNotBlank(pass) && !EncryptUtil.isScrambled(pass)) {
+                pass = EncryptUtil.scramble(pass);
             }
-            this.password = password;
+            this.password = pass;
         }
     }
 
