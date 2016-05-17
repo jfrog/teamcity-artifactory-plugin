@@ -4,6 +4,8 @@ package org.jfrog.teamcity.common;
  * @author Noam Y. Tenne
  */
 public class RunnerParameterKeys {
+    
+    private RunnerParameterKeys() {}
 
     public final static String PREFIX = ConstantValues.PLUGIN_PREFIX + "selectedDeployableServer.";
     public final static String BLACKDUCK_PREFIX = PREFIX + "blackduck.";

@@ -10,6 +10,8 @@ import java.util.Map;
  */
 public class RepositoryHelper {
 
+    private RepositoryHelper() {}
+    
     /**
      * Get job resolution repository from the view
      *

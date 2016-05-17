@@ -6,6 +6,8 @@ import java.util.Map;
  * @author Noam Y. Tenne
  */
 public abstract class RunTypeUtils {
+    
+    private RunTypeUtils() {}
 
     public static final String ANT_RUNNER = "Ant";
     public static final String GRADLE_RUNNER = "gradle-runner";

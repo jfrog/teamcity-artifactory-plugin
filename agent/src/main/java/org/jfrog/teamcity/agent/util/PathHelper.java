@@ -29,6 +29,8 @@ import java.util.Map;
  * @author Noam Y. Tenne
  */
 public abstract class PathHelper {
+    
+    private PathHelper() {}
 
     public static Map<String, String> getPublishedArtifactsPatternPairs(String publishedArtifactsPropertyValue) {
         Map<String, String> patternPairMap = Maps.newHashMap();
