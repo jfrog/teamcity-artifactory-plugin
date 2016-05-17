@@ -88,27 +88,45 @@ public class SerializableServer implements Serializable {
         this.timeout = timeout;
     }
 
+    /**
+     * @deprecated kept for backward compatibility
+     */
     @Deprecated
     private String username;
 
+    /**
+     * @deprecated kept for backward compatibility
+     */
     @Deprecated
     private String password;
 
+    /**
+     * @deprecated kept for backward compatibility
+     */
     @Deprecated
     public String getUsername() {
         return username;
     }
 
+    /**
+     * @deprecated kept for backward compatibility
+     */
     @Deprecated
     public void setUsername(String username) {
         this.username = username;
     }
 
+    /**
+     * @deprecated kept for backward compatibility
+     */
     @Deprecated
     public String getPassword() {
         return password;
     }
 
+    /**
+     * @deprecated kept for backward compatibility
+     */
     @Deprecated
     public void setPassword(String password) {
         this.password = password;
