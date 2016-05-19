@@ -4,6 +4,8 @@ package org.jfrog.teamcity.common;
  * @author Noam Y. Tenne
  */
 public class CustomDataStorageKeys {
+    
+    private CustomDataStorageKeys() {}
 
     //Key of the history for builds that have been run with build info activated
     public final static String RUN_HISTORY = "artifactoryPluginRunHistory";

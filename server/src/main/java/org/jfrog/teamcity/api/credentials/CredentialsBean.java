@@ -41,11 +41,11 @@ public class CredentialsBean {
         if ((serializableCredentials != null) && !serializableCredentials.isEmpty()) {
             username = serializableCredentials.getUsername();
 
-            String password = serializableCredentials.getPassword();
-            if (StringUtils.isNotBlank(password) && EncryptUtil.isScrambled(password)) {
-                password = EncryptUtil.unscramble(password);
+            String pass = serializableCredentials.getPassword();
+            if (StringUtils.isNotBlank(pass) && EncryptUtil.isScrambled(pass)) {
+                pass = EncryptUtil.unscramble(pass);
             }
-            this.password = password;
+            this.password = pass;
         }
     }
 

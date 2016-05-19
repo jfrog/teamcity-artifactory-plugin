@@ -74,13 +74,13 @@ public abstract class ReleaseManagementConfigModel {
                     int nextBuildNumber = Integer.parseInt(buildNumber) + 1;
                     nextMinorVersion = minorVersionToken.substring(0, lastDashIndex + 1) + nextBuildNumber;
                 } else {
-                    nextMinorVersion = Integer.parseInt(minorVersionToken) + 1 + "";
+                    nextMinorVersion = Integer.toString(Integer.parseInt(minorVersionToken) + 1);
                 }
                 nextVersion = fromVersion.substring(0, lastDotIndex + 1) + nextMinorVersion;
             } else {
                 // maybe it's just a major version; try to parse as an int
                 int nextMajorVersion = Integer.parseInt(fromVersion) + 1;
-                nextVersion = nextMajorVersion + "";
+                nextVersion = Integer.toString(nextMajorVersion);
             }
         } catch (NumberFormatException e) {
             return fromVersion;
