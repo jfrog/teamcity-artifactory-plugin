@@ -39,8 +39,8 @@
         <props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.blackduck.runChecks"
                                 onclick="BS.artifactory.toggleBlackDuckVisibility()"/>
             <span class="smallNote">
+                (Deprecated)
                 Check if you wish that automatic Black Duck Code Center compliance checks will occur after the build is completed.<br/>
-                (Requires Artifactory Pro).
             </span>
     </td>
 </tr>

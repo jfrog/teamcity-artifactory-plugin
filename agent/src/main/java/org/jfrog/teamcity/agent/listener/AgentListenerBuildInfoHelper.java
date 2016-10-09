@@ -25,6 +25,7 @@ import jetbrains.buildServer.agent.impl.artifacts.ArtifactsBuilder;
 import jetbrains.buildServer.agent.impl.artifacts.ArtifactsCollection;
 import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.util.ArchiveUtil;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Dependency;
@@ -80,12 +81,27 @@ public class AgentListenerBuildInfoHelper {
         }
 
         runner.addRunnerParameter(BUILD_STARTED, String.valueOf(new Date().getTime()));
+        BuildProgressLogger logger = runner.getBuild().getBuildLogger();
+        if (BooleanUtils.toBoolean(runnerParams.get(RunnerParameterKeys.USE_SPECS))) {
+            retrieveDependenciesFromSpec(runner, publishedDependencies, logger);
+        } else {
+            retrievePublishedAndBuildDependencies(runner, publishedDependencies, buildDependencies, logger);
+        }
+    }
 
-        retrievePublishedAndBuildDependencies(runner, publishedDependencies, buildDependencies);
+    private void retrieveDependenciesFromSpec(BuildRunnerContext runner, List<Dependency> publishedDependencies,
+            BuildProgressLogger logger) {
+        try {
+            DependenciesResolver dependenciesResolver = new DependenciesResolver(runner);
+            publishedDependencies.addAll(dependenciesResolver.retrieveDependenciesBySpec());
+        } catch (Exception e) {
+            String errorMessage = "Error occurred while resolving dependencies from the spec: " + e.getMessage();
+            throwExceptionAndLogError(e, errorMessage, logger);
+        }
     }
 
     private void retrievePublishedAndBuildDependencies(BuildRunnerContext runner,
-            List<Dependency> publishedDependencies, List<BuildDependency> buildDependencies) {
+            List<Dependency> publishedDependencies, List<BuildDependency> buildDependencies, BuildProgressLogger logger) {
 
         // In case the BUILD_DEPENDENCIES property value contains the DISABLED_MESSAGE value,
         // we do not want to pass it on:
@@ -100,12 +116,15 @@ public class AgentListenerBuildInfoHelper {
             buildDependencies.addAll(dependenciesResolver.retrieveBuildDependencies());
         } catch (Exception e) {
             String errorMessage = "Error occurred while resolving published or build dependencies: " + e.getMessage();
-            BuildProgressLogger logger = runner.getBuild().getBuildLogger();
-            Loggers.AGENT.error(errorMessage, e);
-            logger.buildFailureDescription(errorMessage);
-            logger.exception(e);
-            throw new RuntimeException(errorMessage, e);
+            throwExceptionAndLogError(e, errorMessage, logger);
         }
+    }
+
+    private void throwExceptionAndLogError(Exception e, String errorMessage, BuildProgressLogger logger) {
+        Loggers.AGENT.error(errorMessage, e);
+        logger.buildFailureDescription(errorMessage);
+        logger.exception(e);
+        throw new RuntimeException(errorMessage, e);
     }
 
     public void runnerFinished(BuildRunnerContext runner,
