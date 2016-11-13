@@ -7,13 +7,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.extractor.clientConfiguration.util.BuildDependenciesHelper;
-import org.jfrog.build.extractor.clientConfiguration.util.DependenciesDownloader;
-import org.jfrog.build.extractor.clientConfiguration.util.DependenciesHelper;
+import org.jfrog.build.extractor.clientConfiguration.util.*;
+import org.jfrog.build.extractor.clientConfiguration.util.spec.*;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +31,7 @@ public class DependenciesResolver {
     private String serverUrl;
     private String selectedPublishedDependencies;
     private DependenciesDownloader dependenciesDownloader;
+    private String downloadSpec;
 
     public DependenciesResolver(@NotNull BuildRunnerContext runnerContext) {
         this.runnerContext = runnerContext;
@@ -44,38 +44,46 @@ public class DependenciesResolver {
 
     public List<Dependency> retrievePublishedDependencies() throws IOException, InterruptedException {
         if (!verifyParameters()) {
-            Lists.newArrayList();
+            return Lists.newArrayList();
         }
-        DependenciesHelper helper = new DependenciesHelper(dependenciesDownloader, log);
+        AntPatternsDependenciesHelper helper = new AntPatternsDependenciesHelper(dependenciesDownloader, log);
         return helper.retrievePublishedDependencies(selectedPublishedDependencies);
     }
 
     public List<BuildDependency> retrieveBuildDependencies() throws IOException, InterruptedException {
         if (!verifyParameters()) {
-            Lists.newArrayList();
+            return Lists.newArrayList();
         }
         BuildDependenciesHelper helper = new BuildDependenciesHelper(dependenciesDownloader, log);
         return helper.retrieveBuildDependencies(selectedPublishedDependencies);
     }
 
+    /**
+     * Downloads Dependencies according to a spec which should be provided by the RunnerParameterKeys.DOWNLOAD_SPEC property.
+     *
+     * @return list of the downloaded dependencies represented by List of Dependency objects
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public List<Dependency> retrieveDependenciesBySpec() throws IOException, InterruptedException {
+        this.downloadSpec = runnerParams.get(RunnerParameterKeys.DOWNLOAD_SPEC);
+        if (StringUtils.isBlank(this.downloadSpec) || StringUtils.isBlank(serverUrl)) {
+            return Lists.newArrayList();
+        }
+        DependenciesDownloaderHelper helper = new DependenciesDownloaderHelper(dependenciesDownloader, log);
+        SpecsHelper specsHelper = new SpecsHelper(log);
+        Spec downloadSpec = specsHelper.getDownloadUploadSpec(this.downloadSpec);
+        return helper.downloadDependencies(serverUrl, downloadSpec);
+    }
+
     private boolean verifyParameters() {
         // Don't run if no server was configured
-        if (!isServerUrl()) {
+        if (StringUtils.isBlank(serverUrl)) {
             return false;
         }
 
         // Don't run if no build dependency patterns were specified.
         return dependencyEnabled(selectedPublishedDependencies);
-    }
-
-    /**
-     * Determines if server URL is set.
-     *
-     * @return true if server URL is set,
-     *         false otherwise.
-     */
-    private boolean isServerUrl() {
-        return (!StringUtils.isBlank(serverUrl));
     }
 
     /**
@@ -86,7 +94,7 @@ public class DependenciesResolver {
      *         false otherwise
      */
     private boolean dependencyEnabled(String s) {
-        return !((StringUtils.isNotBlank(s)) || (DISABLED_MESSAGE.equals(s)));
+        return StringUtils.isNotBlank(s) && !DISABLED_MESSAGE.equals(s);
     }
 
     private DependenciesDownloader createDependenciesDownloader() {

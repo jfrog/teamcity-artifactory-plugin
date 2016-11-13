@@ -31,10 +31,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.jdom.Element;
 import org.jfrog.build.api.builder.PromotionBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
@@ -245,15 +245,15 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
             JsonNode resultNode = parser.readValueAsTree();
             JsonNode messagesNode = resultNode.get("messages");
             if ((messagesNode != null) && messagesNode.isArray()) {
-                Iterator<JsonNode> messageIterator = messagesNode.getElements();
+                Iterator<JsonNode> messageIterator = messagesNode.iterator();
                 while ((messageIterator != null) && messageIterator.hasNext()) {
                     JsonNode messagesIteration = messageIterator.next();
                     JsonNode levelNode = messagesIteration.get("level");
                     JsonNode messageNode = messagesIteration.get("message");
 
                     if ((levelNode != null) && (messageNode != null)) {
-                        String level = levelNode.getTextValue();
-                        String message = messageNode.getTextValue();
+                        String level = levelNode.asText();
+                        String message = messageNode.asText();
                         if (StringUtils.isNotBlank(level) && StringUtils.isNotBlank(message) &&
                                 !message.startsWith("No items were")) {
                             Loggers.SERVER.error("Promotion failed. Received " + level + ": " + message);

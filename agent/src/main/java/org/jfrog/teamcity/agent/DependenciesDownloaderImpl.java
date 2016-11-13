@@ -39,6 +39,7 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
     private Log log;
     private BuildRunnerContext runnerContext;
     private ArtifactoryDependenciesClient client;
+    private boolean flatDownload;
 
     public DependenciesDownloaderImpl(@NotNull BuildRunnerContext runnerContext, Log log) {
         this.runnerContext = runnerContext;
@@ -63,6 +64,9 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
         */
         if (StringUtils.isBlank(targetDir)) {
             targetDir = runnerContext.getWorkingDirectory().getAbsolutePath();
+        }
+        if (this.flatDownload) {
+            relativeDir = StringUtils.substringAfterLast(relativeDir, "/");
         }
 
         final File targetDirFile = new File(targetDir, relativeDir);
@@ -111,14 +115,20 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
 
         // If it's a folder return true since we don't care about it, not going to download a folder anyway
         if (dest.isDirectory()) {
-            return true;
+            throw new IOException(String.format("File can't override an existing directory: %s", dest.toString()));
         }
 
         try {
             Map<String, String> checksumsMap = FileChecksumCalculator.calculateChecksums(dest, "md5", "sha1");
-            return checksumsMap != null &&
+            boolean isExists = checksumsMap != null &&
                     StringUtils.isNotBlank(md5) && StringUtils.equals(md5, checksumsMap.get("md5")) &&
                     StringUtils.isNotBlank(sha1) && StringUtils.equals(sha1, checksumsMap.get("sha1"));
+            if (isExists) {
+                return true;
+            } else {
+                log.info(String.format("Overriding existing in destination file: %s", dest.toString()));
+                return false;
+            }
 
         } catch (NoSuchAlgorithmException e) {
             log.warn("Could not find checksum algorithm: " + e.getLocalizedMessage());
@@ -148,6 +158,10 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
                 }
             }
         }
+    }
+
+    public void setFlatDownload(boolean flat) {
+        this.flatDownload = flat;
     }
 
     private boolean isResolvedOrParentOfResolvedFile(Set<String> resolvedFiles, final String path) {

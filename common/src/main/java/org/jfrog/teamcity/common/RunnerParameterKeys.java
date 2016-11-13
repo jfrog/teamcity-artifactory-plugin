@@ -62,4 +62,7 @@ public class RunnerParameterKeys {
     public final static String NEXT_INTEGRATION_PROPERTIES = PREFIX + "nextIntegrationProperties";
     public final static String ALTERNATIVE_GRADLE_TASKS = PREFIX + "alternativeGradleTasks";
     public final static String ALTERNATIVE_GRADLE_OPTIONS = PREFIX + "alternativeGradleOptions";
+    public final static String USE_SPECS = PREFIX + "useSpecs";
+    public final static String DOWNLOAD_SPEC = PREFIX + "downloadSpec";
+    public final static String UPLOAD_SPEC = PREFIX + "uploadSpec";
 }

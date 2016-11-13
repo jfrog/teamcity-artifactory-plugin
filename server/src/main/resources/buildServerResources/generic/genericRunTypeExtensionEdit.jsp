@@ -32,6 +32,14 @@
        value="${(not empty propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo'])
        && (propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo'] == true) ? true : false}"/>
 
+<c:set var="usesSpecsForUploadAndDownload"
+       value="${(propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.useSpecs'] != false)
+                && ((empty propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts'])
+                     && ((empty propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.buildDependencies'])
+                        || (propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.buildDependencies'] == disabledMessage))) ? true : false}"/>
+
+<input type="hidden" id="usesSpecs" value="${usesSpecsForUploadAndDownload}"/>
+
 <script type="text/javascript">
     <%@ include file="../common/artifactoryCommon.js" %>
     BS.local = {
@@ -60,6 +68,9 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').disabled = true;
                 $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '${disabledMessage}';
                 $('org.jfrog.artifactory.selectedDeployableServer.blackduck.runChecks').checked = false;
+                $('org.jfrog.artifactory.selectedDeployableServer.uploadSpec').value = '';
+                $('org.jfrog.artifactory.selectedDeployableServer.downloadSpec').value = '';
+                $('org.jfrog.artifactory.selectedDeployableServer.useSpecs.true').checked = true;
 
                 BS.Util.hide($('targetRepo.container'));
                 BS.Util.hide($('version.warning.container'));
@@ -80,16 +91,18 @@
                 //                BS.Util.hide($('publishedDependencies.container'));
                 BS.Util.hide($('buildDependencies.container'));
                 BS.Util.hide($('blackduck.runChecks.container'));
+                BS.Util.hide($('uploadDownloadTypeSelector.container'));
+                BS.Util.hide($('uploadSpecsEdit.container'));
+                BS.Util.hide($('downloadSpecsEdit.container'));
             } else {
                 if (!foundExistingConfig) {
                     $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked =
                             false;
                     $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
                     $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
+                    $('org.jfrog.artifactory.selectedDeployableServer.useSpecs.true').checked = true;
                 }
-                BS.local.loadTargetRepos(selectedUrlId);
-                BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
-                BS.Util.show($('targetRepo.container'));
+
                 BS.Util.show($('overrideDefaultDeployerCredentials.container'));
 
                 if (BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()) {
@@ -97,8 +110,28 @@
                     BS.Util.show($('deployerPassword.container'));
                 }
 
-                BS.artifactory.initTextAndSelect(deployReleaseFlag, targetTextDiv, publishRepoSelect);
+                BS.Util.show($('uploadDownloadTypeSelector.container'));
 
+                BS.local.loadTargetRepos(selectedUrlId);
+                BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
+                if ($("usesSpecs").value) {
+                    $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = ''; // publishedArtifacts should be already empty or contain disable message, this removes the disable message
+                    BS.Util.hide($('targetRepo.container'));
+                    BS.Util.hide($('publishedArtifacts.container'));
+                    BS.Util.hide($('buildDependencies.container'));
+                    BS.Util.show($('uploadSpecsEdit.container'));
+                    BS.Util.show($('downloadSpecsEdit.container'));
+                    $('org.jfrog.artifactory.selectedDeployableServer.useSpecs.true').checked = true;
+                } else {
+                    BS.Util.show($('targetRepo.container'));
+                    BS.Util.show($('publishedArtifacts.container'));
+                    BS.Util.show($('buildDependencies.container'));
+                    BS.Util.hide($('uploadSpecsEdit.container'));
+                    BS.Util.hide($('downloadSpecsEdit.container'));
+                    $('org.jfrog.artifactory.selectedDeployableServer.useSpecs.false').checked = true;
+                }
+
+                BS.artifactory.initTextAndSelect(deployReleaseFlag, targetTextDiv, publishRepoSelect);
                 BS.Util.show($('publishBuildInfo.container'));
                 var publishBuildInfo = BS.artifactory.isPublishBuildInfoSelected();
                 if (publishBuildInfo) {
@@ -134,10 +167,7 @@
                     }
                 }
 
-                BS.Util.show($('publishedArtifacts.container'));
-                BS.Util.show($('buildDependencies.container'));
                 BS.artifactory.checkCompatibleVersion(selectedUrlId);
-
             }
             BS.MultilineProperties.updateVisible();
         },
@@ -217,8 +247,58 @@ display:inline-block;
 
     <jsp:include page="../common/warningsEdit.jsp"/>
 
-    <tr class="noBorder" id="targetRepo.container"
+    <jsp:include page="../common/credentialsEdit.jsp">
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig}"/>
+    </jsp:include>
+
+    <script>
+        jQuery(".updateOnChange td input").change(function () {
+            var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId');
+            var selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
+            BS.local.loadTargetRepos(selectedUrlId);
+            BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
+        })
+    </script>
+
+    <tr class="noBorder" id="publishBuildInfo.container"
         style="${foundExistingConfig ? '' : 'display: none;'}">
+        <th>
+            <label for="org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo">
+                Publish build info:
+            </label>
+        </th>
+        <td>
+            <props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo"
+                                    onclick="BS.local.togglePublishBuildInfoSelection()"/>
+            <span class="smallNote">
+                Uncheck if you do not wish to deploy build information to Artifactory.
+            </span>
+        </td>
+    </tr>
+
+    <jsp:include page="../common/envVarsEdit.jsp">
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
+    </jsp:include>
+
+    <jsp:include page="../common/licensesEdit.jsp">
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig}"/>
+    </jsp:include>
+
+    <jsp:include page="../common/blackDuckEdit.jsp">
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
+    </jsp:include>
+
+    <jsp:include page="../common/genericUploadDownloadTypeSelectorEdit.jsp">
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig}"/>
+        <jsp:param name="usesSpecs" value="${usesSpecsForUploadAndDownload}"/>
+    </jsp:include>
+
+    <jsp:include page="../common/genericSpecsEdit.jsp">
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig && usesSpecsForUploadAndDownload}"/>
+    </jsp:include>
+
+    <tr class="noBorder" id="targetRepo.container"
+        style="${foundExistingConfig && !usesSpecsForUploadAndDownload ? '' : 'display: none;'}">
         <th>
             <label for="org.jfrog.artifactory.selectedDeployableServer.targetRepo">
                 Target repository:
@@ -265,50 +345,8 @@ display:inline-block;
         </td>
     </tr>
 
-    <jsp:include page="../common/credentialsEdit.jsp">
-        <jsp:param name="shouldDisplay" value="${foundExistingConfig}"/>
-    </jsp:include>
-
-    <script>
-        jQuery(".updateOnChange td input").change(function () {
-            //console.log(jQuery(this).attr("name") + " = " + jQuery(this).val());
-            var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId');
-            var selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value;
-            BS.local.loadTargetRepos(selectedUrlId);
-            BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
-        })
-    </script>
-
-    <tr class="noBorder" id="publishBuildInfo.container"
-        style="${foundExistingConfig ? '' : 'display: none;'}">
-        <th>
-            <label for="org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo">
-                Publish build info:
-            </label>
-        </th>
-        <td>
-            <props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo"
-                                    onclick="BS.local.togglePublishBuildInfoSelection()"/>
-            <span class="smallNote">
-                Uncheck if you do not wish to deploy build information from the plugin.
-            </span>
-        </td>
-    </tr>
-
-    <jsp:include page="../common/envVarsEdit.jsp">
-        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
-    </jsp:include>
-
-    <jsp:include page="../common/licensesEdit.jsp">
-        <jsp:param name="shouldDisplay" value="${foundExistingConfig}"/>
-    </jsp:include>
-
-    <jsp:include page="../common/blackDuckEdit.jsp">
-        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
-    </jsp:include>
-
     <jsp:include page="../common/genericItemsEdit.jsp">
-        <jsp:param name="shouldDisplay" value="${foundExistingConfig}"/>
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig && !usesSpecsForUploadAndDownload}"/>
         <jsp:param name="existingUrlId"
                    value="${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}"/>
     </jsp:include>

@@ -78,7 +78,7 @@
     </th>
     <td>
         <props:multilineProperty name="org.jfrog.artifactory.selectedDeployableServer.buildDependencies"
-                                 linkTitle="Edit build dependencies" cols="49" rows="3"
+                                 linkTitle="Edit build dependencies (Requires Artifactory Pro)" cols="49" rows="3"
                                  expanded="true"/>
     <span class="smallNote">
     New line or comma separated references to other build artifacts that this build should use as dependencies.

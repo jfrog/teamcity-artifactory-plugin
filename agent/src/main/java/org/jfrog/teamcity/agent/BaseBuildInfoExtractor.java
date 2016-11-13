@@ -27,6 +27,7 @@ import jetbrains.buildServer.agent.Constants;
 import jetbrains.buildServer.agent.impl.BuildRunnerContextImpl;
 import jetbrains.buildServer.log.Loggers;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.*;
 import org.jfrog.build.api.builder.ArtifactBuilder;
@@ -42,7 +43,6 @@ import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
 import org.jfrog.teamcity.agent.api.Gavc;
-import org.jfrog.teamcity.agent.util.InfoCollectionException;
 import org.jfrog.teamcity.agent.util.RepositoryHelper;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
@@ -86,11 +86,11 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
 
         try {
             appendRunnerSpecificDetails(builder, context);
-        } catch (InfoCollectionException ice) {
-            String errorMessage = ice.getMessage();
+        } catch (Exception e) {
+            String errorMessage = e.getMessage();
             logger.error(errorMessage);
-            logger.exception(ice);
-            Loggers.AGENT.error(errorMessage, ice);
+            logger.exception(e);
+            Loggers.AGENT.error(errorMessage, e);
             return null;
         }
 
@@ -106,6 +106,11 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
         //Add a generic module to hold generically published artifacts
         if (!artifactsToPublish.isEmpty()) {
             deployableArtifacts.addAll(getPublishableArtifacts(genericModuleBuilder));
+        }
+
+        if (BooleanUtils.toBoolean(runnerContext.getRunnerParameters().get(RunnerParameterKeys.USE_SPECS))
+                && !deployableArtifacts.isEmpty()) {
+            deployableArtifacts = updatePropsAndModuleArtifacts(deployableArtifacts, genericModuleBuilder);
         }
 
         if ((publishedDependencies != null) && !publishedDependencies.isEmpty()) {
@@ -130,7 +135,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
     }
 
     protected abstract void appendRunnerSpecificDetails(BuildInfoBuilder builder, P context)
-            throws InfoCollectionException;
+            throws Exception;
 
     protected abstract List<DeployDetailsArtifact> getDeployableArtifacts();
 
@@ -403,5 +408,43 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
             key = StringUtils.remove(key, propPrefix);
             propertyReceiver.put(key, entryToAdd.getValue());
         }
+    }
+
+    /**
+     * This method is used when using specs (not the legacy pattern).
+     * This method goes over the provided DeployDetailsArtifact list and adds it to the provided moduleBuilder with
+     * the needed properties.
+     *
+     * @param deployDetailsList the deployDetails to set in the module
+     * @param moduleBuilder the moduleBuilder that contains the build information
+     * @return updated deployDetails List
+     */
+    private List<DeployDetailsArtifact> updatePropsAndModuleArtifacts(List<DeployDetailsArtifact> deployDetailsList, ModuleBuilder moduleBuilder) {
+        List<DeployDetailsArtifact> resultList = Lists.newArrayList();
+        List<Artifact> moduleArtifactList = Lists.newArrayList();
+
+        for (DeployDetailsArtifact deployDetailsArtifact : deployDetailsList) {
+            // Adds the artifact to the module list
+            StringUtils.substringAfterLast(deployDetailsArtifact.getDeployDetails().getArtifactPath(), "/");
+            ArtifactBuilder artifactBuilder =
+                    new ArtifactBuilder(StringUtils.substringAfterLast(deployDetailsArtifact.getDeployDetails().getArtifactPath(), "/"))
+                    .md5(deployDetailsArtifact.getDeployDetails().getMd5())
+                    .sha1(deployDetailsArtifact.getDeployDetails().getSha1());
+            moduleArtifactList.add(artifactBuilder.build());
+            // Generates the module with the new props
+            DeployDetails.Builder detailsBuilder = new DeployDetails.Builder().
+                    artifactPath(deployDetailsArtifact.getDeployDetails().getArtifactPath()).
+                    file(deployDetailsArtifact.getDeployDetails().getFile()).
+                    md5(deployDetailsArtifact.getDeployDetails().getMd5()).
+                    sha1(deployDetailsArtifact.getDeployDetails().getSha1()).
+                    targetRepository(deployDetailsArtifact.getDeployDetails().getTargetRepository()).
+                    addProperties(deployDetailsArtifact.getDeployDetails().getProperties()).
+                    addProperties(matrixParams);
+            resultList.add(new DeployDetailsArtifact(detailsBuilder.build()));
+        }
+        if (!moduleArtifactList.isEmpty()) {
+            moduleBuilder.artifacts(moduleArtifactList);
+        }
+        return resultList;
     }
 }
