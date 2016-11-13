@@ -24,7 +24,6 @@
              type="org.jfrog.teamcity.server.global.DeployableArtifactoryServers"/>
 
 <c:set var="shouldDisplay" value="${param.shouldDisplay}" scope="request"/>
-<c:set var="usesSpecs" value="${param.usesSpecs}" scope="request"/>
 
 <tr class="noBorder" id="urlId.container">
     <th id="urlSelectTH">
@@ -34,7 +33,7 @@
     </th>
     <td id="urlSelectTD">
         <props:selectProperty name="org.jfrog.artifactory.selectedDeployableServer.urlId"
-                              onchange="BS.local.onServerChange(${shouldDisplay},${usesSpecs})">
+                              onchange="BS.local.onServerChange(${shouldDisplay})">
 
             <c:set var="selected" value="false"/>
             <c:if test="${!shouldDisplay}">

@@ -38,11 +38,12 @@
                      && ((empty propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.buildDependencies'])
                         || (propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.buildDependencies'] == disabledMessage))) ? true : false}"/>
 
+<input type="hidden" id="usesSpecs" value="${usesSpecsForUploadAndDownload}"/>
 
 <script type="text/javascript">
     <%@ include file="../common/artifactoryCommon.js" %>
     BS.local = {
-        onServerChange: function (foundExistingConfig, usesSpecs) {
+        onServerChange: function (foundExistingConfig) {
             var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId'),
                     publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
                     deployReleaseText = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
@@ -113,7 +114,7 @@
 
                 BS.local.loadTargetRepos(selectedUrlId);
                 BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
-                if (usesSpecs) {
+                if ($("usesSpecs").value) {
                     $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = ''; // publishedArtifacts should be already empty or contain disable message, this removes the disable message
                     BS.Util.hide($('targetRepo.container'));
                     BS.Util.hide($('publishedArtifacts.container'));
@@ -242,7 +243,6 @@ display:inline-block;
 <l:settingsGroup title="Deploy Artifacts To Artifactory">
     <jsp:include page="../common/serversEdit.jsp">
         <jsp:param name="shouldDisplay" value="${foundExistingConfig}"/>
-        <jsp:param name="usesSpecs" value="${usesSpecsForUploadAndDownload}"/>
     </jsp:include>
 
     <jsp:include page="../common/warningsEdit.jsp"/>
