@@ -34,7 +34,7 @@
         <props:multilineProperty name="org.jfrog.artifactory.selectedDeployableServer.downloadSpec"
                                  linkTitle="" cols="90" rows="12" expanded="true"/>
         <span class="smallNote">
-            Download spec.
+            To download files, you need to create a File Spec. For more information, read the Artifactory Plugin documentation.
         </span>
     </td>
 </tr>
@@ -49,7 +49,7 @@
         <props:multilineProperty name="org.jfrog.artifactory.selectedDeployableServer.uploadSpec"
                                  linkTitle="" cols="90" rows="12" expanded="true"/>
             <span class="smallNote">
-                Upload spec.
+                To upload files, you need to create a File Spec. For more information, read the Artifactory Plugin documentation.
             </span>
     </td>
 </tr>
