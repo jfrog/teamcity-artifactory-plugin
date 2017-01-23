@@ -37,19 +37,27 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <plugin.version>${project.version}</plugin.version>
         <teamcity.version>7.1.0</teamcity.version>
-        <build.info.version>2.6.5</build.info.version>
-        <build.info.maven3.version>2.6.1</build.info.maven3.version>
-        <build.info.gradle.version>4.4.8</build.info.gradle.version>
+        <build.info.version>2.7.1</build.info.version>
+        <build.info.maven3.version>2.6.4</build.info.maven3.version>
+        <build.info.gradle.version>4.4.10</build.info.gradle.version>
         <build.info.ivy.version>2.6.1</build.info.ivy.version>
     </properties>
 
     <developers>
         <developer>
-            <id>noamt</id>
-            <name>Noam Y. Tenne</name>
-            <email>noamt at jfrog.org</email>
+            <id>eyalb</id>
+            <name>Eyal Ben Moshe</name>
+            <email>eyalb at jfrog.com</email>
             <roles>
-                <role>Lead Developer</role>
+                <role>Developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>diman</id>
+            <name>Dima Nevelev</name>
+            <email>diman at jfrog.com</email>
+            <roles>
+                <role>Developer</role>
             </roles>
         </developer>
     </developers>
