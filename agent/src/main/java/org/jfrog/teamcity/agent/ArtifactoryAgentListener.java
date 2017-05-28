@@ -28,6 +28,7 @@ import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.teamcity.agent.listener.AgentListenerBuildInfoHelper;
 import org.jfrog.teamcity.agent.listener.AgentListenerReleaseHelper;
+import org.jfrog.teamcity.agent.listener.AgentListenerXrayScanHelper;
 import org.jfrog.teamcity.agent.release.ReleaseParameters;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
@@ -43,6 +44,7 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
     private List<Dependency> publishedDependencies = Lists.newArrayList();
     private List<BuildDependency> userBuildDependencies = Lists.newArrayList();
     private AgentListenerBuildInfoHelper buildInfoHelper;
+    private AgentListenerXrayScanHelper xrayScanHelper;
     private AgentListenerReleaseHelper releaseHelper;
     private ArtifactsWatcher watcher;
 
@@ -91,6 +93,7 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
             logException(runner, e);
         }
 
+        xrayScanHelper = new AgentListenerXrayScanHelper();
         releaseHelper = new AgentListenerReleaseHelper();
 
         try {
@@ -111,6 +114,7 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
 
         try {
             buildInfoHelper.runnerFinished(runner, buildStatus, publishedDependencies, userBuildDependencies);
+            xrayScanHelper.runnerFinished(runner, buildStatus);
             releaseHelper.runnerFinished(runner, buildStatus);
         } catch (Throwable t) {
             logException(runner, t);

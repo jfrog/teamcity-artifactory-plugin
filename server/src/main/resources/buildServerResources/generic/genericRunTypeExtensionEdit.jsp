@@ -59,6 +59,8 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.envVarsIncludePatterns').value = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
+                $('org.jfrog.artifactory.selectedDeployableServer.xray.scan').checked = false;
+                $('org.jfrog.artifactory.selectedDeployableServer.xray.failBuild').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.licenseViolationRecipients').value = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.limitChecksToScopes').value = '';
@@ -82,6 +84,8 @@
                 BS.Util.hide($('includeEnvVars.container'));
                 BS.Util.hide($('envVarsIncludePatterns.container'));
                 BS.Util.hide($('envVarsExcludePatterns.container'));
+                BS.Util.hide($('xray.scan.container'));
+                BS.Util.hide($('xray.failBuild.container'));
                 BS.Util.hide($('runLicenseChecks.container'));
                 BS.Util.hide($('licenseViolationRecipients.container'));
                 BS.Util.hide($('limitChecksToScopes.container'));
@@ -165,6 +169,12 @@
                         BS.Util.show($('envVarsIncludePatterns.container'));
                         BS.Util.show($('envVarsExcludePatterns.container'));
                     }
+
+                    BS.Util.show($('xray.scan.container'));
+                    var shouldRunXrayScan = $('org.jfrog.artifactory.selectedDeployableServer.xray.scan').checked;
+                    if (shouldRunXrayScan) {
+                        BS.Util.show($('xray.failBuild.container'));
+                    }
                 }
 
                 BS.artifactory.checkCompatibleVersion(selectedUrlId);
@@ -175,6 +185,7 @@
         togglePublishBuildInfoSelection: function () {
             if (BS.artifactory.isPublishBuildInfoSelected()) {
                 BS.Util.show($('includeEnvVars.container'));
+                BS.Util.show($('xray.scan.container'));
                 BS.Util.show($('runLicenseChecks.container'));
                 BS.Util.show($('blackduck.runChecks.container'));
             } else {
@@ -184,6 +195,10 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.envVarsIncludePatterns').value = '';
                 BS.Util.hide($('envVarsExcludePatterns.container'));
                 $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
+                BS.Util.hide($('xray.scan.container'));
+                $('org.jfrog.artifactory.selectedDeployableServer.xray.scan').checked = false;
+                BS.Util.hide($('xray.failBuild.container'));
+                $('org.jfrog.artifactory.selectedDeployableServer.xray.failBuild').checked = false;
                 BS.Util.hide($('runLicenseChecks.container'));
                 $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks').checked = false;
                 BS.Util.hide($('licenseViolationRecipients.container'));
@@ -277,6 +292,10 @@ display:inline-block;
     </tr>
 
     <jsp:include page="../common/envVarsEdit.jsp">
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
+    </jsp:include>
+l
+    <jsp:include page="../common/XrayScanEdit.jsp">
         <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
     </jsp:include>
 

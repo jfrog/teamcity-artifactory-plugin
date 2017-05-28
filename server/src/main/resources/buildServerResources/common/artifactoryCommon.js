@@ -174,6 +174,19 @@ BS.artifactory = {
         BS.MultilineProperties.updateVisible();
     },
 
+    toggleXrayScanVisibility: function () {
+        var shouldRunXrayScan = $('org.jfrog.artifactory.selectedDeployableServer.xray.scan').checked;
+        if (shouldRunXrayScan) {
+            BS.Util.show($('xray.failBuild.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.xray.failBuild').checked = true;
+        }
+        else {
+            BS.Util.hide($('xray.failBuild.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.xray.failBuild').checked = false;
+        }
+        BS.MultilineProperties.updateVisible();
+    },
+
     toggleBlackDuckVisibility: function () {
         var shouldRunChecks = $('org.jfrog.artifactory.selectedDeployableServer.blackduck.runChecks').checked;
         if (shouldRunChecks) {

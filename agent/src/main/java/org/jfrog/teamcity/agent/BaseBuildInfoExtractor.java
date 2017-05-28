@@ -416,7 +416,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
      * the needed properties.
      *
      * @param deployDetailsList the deployDetails to set in the module
-     * @param moduleBuilder the moduleBuilder that contains the build information
+     * @param moduleBuilder     the moduleBuilder that contains the build information
      * @return updated deployDetails List
      */
     private List<DeployDetailsArtifact> updatePropsAndModuleArtifacts(List<DeployDetailsArtifact> deployDetailsList, ModuleBuilder moduleBuilder) {
@@ -425,9 +425,12 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
 
         for (DeployDetailsArtifact deployDetailsArtifact : deployDetailsList) {
             // Adds the artifact to the module list
-            StringUtils.substringAfterLast(deployDetailsArtifact.getDeployDetails().getArtifactPath(), "/");
-            ArtifactBuilder artifactBuilder =
-                    new ArtifactBuilder(StringUtils.substringAfterLast(deployDetailsArtifact.getDeployDetails().getArtifactPath(), "/"))
+            String artifactName = StringUtils.substringAfterLast(deployDetailsArtifact.getDeployDetails().getArtifactPath(), "/");
+            if (StringUtils.isEmpty(artifactName)) {
+                artifactName = deployDetailsArtifact.getDeployDetails().getArtifactPath();
+            }
+
+            ArtifactBuilder artifactBuilder = new ArtifactBuilder(artifactName)
                     .md5(deployDetailsArtifact.getDeployDetails().getMd5())
                     .sha1(deployDetailsArtifact.getDeployDetails().getSha1());
             moduleArtifactList.add(artifactBuilder.build());

@@ -59,6 +59,8 @@ BS.local = {
             $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked = false;
             $('org.jfrog.artifactory.selectedDeployableServer.envVarsIncludePatterns').value = '';
             $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
+            $('org.jfrog.artifactory.selectedDeployableServer.xray.scan').checked = false;
+            $('org.jfrog.artifactory.selectedDeployableServer.xray.failBuild').checked = false;
             $('org.jfrog.artifactory.selectedDeployableServer.useM2CompatiblePatterns').checked = true;
             $('org.jfrog.artifactory.selectedDeployableServer.ivyPattern').value = '';
             $('org.jfrog.artifactory.selectedDeployableServer.artifactPattern').value = '';
@@ -85,6 +87,8 @@ BS.local = {
             BS.Util.hide($('includeEnvVars.container'));
             BS.Util.hide($('envVarsIncludePatterns.container'));
             BS.Util.hide($('envVarsExcludePatterns.container'));
+            BS.Util.hide($('xray.scan.container'));
+            BS.Util.hide($('xray.failBuild.container'));
             BS.Util.hide($('useM2CompatiblePatterns.container'));
             BS.Util.hide($('ivyPattern.container'));
             BS.Util.hide($('artifactPattern.container'));
@@ -166,6 +170,12 @@ BS.local = {
                 if (includeEnvVarsEnabled) {
                     BS.Util.show($('envVarsIncludePatterns.container'));
                     BS.Util.show($('envVarsExcludePatterns.container'));
+                }
+
+                BS.Util.show($('xray.scan.container'));
+                var shouldRunXrayScan = $('org.jfrog.artifactory.selectedDeployableServer.xray.scan').checked;
+                if (shouldRunXrayScan) {
+                    BS.Util.show($('xray.failBuild.container'));
                 }
             }
 
@@ -256,6 +266,7 @@ BS.local = {
     togglePublishBuildInfoSelection: function () {
         if (BS.artifactory.isPublishBuildInfoSelected()) {
             BS.Util.show($('includeEnvVars.container'));
+            BS.Util.show($('xray.scan.container'));
             BS.Util.show($('runLicenseChecks.container'));
             BS.Util.show($('blackduck.runChecks.container'));
         } else {
@@ -265,6 +276,10 @@ BS.local = {
             $('org.jfrog.artifactory.selectedDeployableServer.envVarsIncludePatterns').value = '';
             BS.Util.hide($('envVarsExcludePatterns.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
+            BS.Util.hide($('xray.scan.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.xray.scan').checked = false;
+            BS.Util.hide($('xray.failBuild.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.xray.failBuild').checked = false;
             BS.Util.hide($('runLicenseChecks.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks').checked = false;
             BS.Util.hide($('licenseViolationRecipients.container'));
@@ -406,6 +421,10 @@ Use the Artifactory-Ivy integration to collect build info data and deploy artifa
     </tr>
 
     <jsp:include page="../common/envVarsEdit.jsp">
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
+    </jsp:include>
+
+    <jsp:include page="../common/XrayScanEdit.jsp">
         <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
     </jsp:include>
 
