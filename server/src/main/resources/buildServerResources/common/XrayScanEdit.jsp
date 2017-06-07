@@ -40,7 +40,7 @@
                                 onclick="BS.artifactory.toggleXrayScanVisibility()"/>
             <span class="smallNote">
                 Check if you wish to scan the build for vulnerabilities (Requires Artifactory Pro with Jfrog Xray).<br/>
-            </span>l
+            </span>
     </td>
 </tr>
 
