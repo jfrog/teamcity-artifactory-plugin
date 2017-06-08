@@ -33,7 +33,7 @@
     /css/forms.css
 </bs:linkCSS>
 
-<jsp:useBean id="buildId" scope="request" type="java.lang.Long"/>
+<jsp:useBean id="artBuildId" scope="request" type="java.lang.Long"/>
 <c:url var="logoUrl" value="${teamcityPluginResourcesPath}images/artifactory-release.png"/>
 
 <c:url var="controllerUrl" value="/artifactory/promotion/promotionFragment.html"/>
@@ -42,7 +42,7 @@
     BS.local = {
         loadTargetRepos : function() {
             BS.ajaxRequest('${controllerUrl}', {
-                parameters: 'buildId=${buildId}&loadTargetRepos=true',
+                parameters: 'buildId=${artBuildId}&loadTargetRepos=true',
                 onComplete: function(response, options) {
                     var repoSelect = $('promotionRepository');
                     var xmlDoc = response.responseXML;
@@ -90,7 +90,7 @@
             this.formElement().comment.value = '';
             this.formElement().includeDependencies.checked = false;
             this.formElement().useCopy.checked = false;
-            this.formElement().buildId.value = ${buildId};
+            this.formElement().buildId.value = ${artBuildId};
             BS.local.loadTargetRepos();
             this.enable();
             this.showCentered();

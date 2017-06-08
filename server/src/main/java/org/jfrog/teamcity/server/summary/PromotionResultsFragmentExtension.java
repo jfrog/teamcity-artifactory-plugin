@@ -56,7 +56,7 @@ public class PromotionResultsFragmentExtension extends SimplePageExtension {
     @Override
     public void fillModel(@NotNull Map<String, Object> model, @NotNull HttpServletRequest request) {
         SBuild build = getBuild(request);
-        model.put("buildId", build.getBuildId());
+        model.put("artBuildId", build.getBuildId());
     }
 
     @Override
