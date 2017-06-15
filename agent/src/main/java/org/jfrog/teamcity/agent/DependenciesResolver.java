@@ -7,12 +7,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.extractor.clientConfiguration.util.*;
-import org.jfrog.build.extractor.clientConfiguration.util.spec.*;
+import org.jfrog.build.extractor.clientConfiguration.util.AntPatternsDependenciesHelper;
+import org.jfrog.build.extractor.clientConfiguration.util.BuildDependenciesHelper;
+import org.jfrog.build.extractor.clientConfiguration.util.DependenciesDownloader;
+import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -70,10 +72,8 @@ public class DependenciesResolver {
         if (StringUtils.isBlank(this.downloadSpec) || StringUtils.isBlank(serverUrl)) {
             return Lists.newArrayList();
         }
-        DependenciesDownloaderHelper helper = new DependenciesDownloaderHelper(dependenciesDownloader, log);
         SpecsHelper specsHelper = new SpecsHelper(log);
-        Spec downloadSpec = specsHelper.getDownloadUploadSpec(this.downloadSpec);
-        return helper.downloadDependencies(serverUrl, downloadSpec);
+        return specsHelper.downloadArtifactsBySpec(this.downloadSpec, dependenciesDownloader.getClient(), runnerContext.getWorkingDirectory().getAbsolutePath());
     }
 
     private boolean verifyParameters() {

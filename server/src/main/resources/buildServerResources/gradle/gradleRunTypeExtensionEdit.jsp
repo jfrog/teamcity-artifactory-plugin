@@ -329,6 +329,7 @@ BS.local = {
             BS.Util.show($('xray.scan.container'));
             BS.Util.show($('runLicenseChecks.container'));
             BS.Util.show($('blackduck.runChecks.container'));
+            BS.Util.show($('buildRetention.container'))
         } else {
             BS.Util.hide($('includeEnvVars.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked = false;
@@ -358,6 +359,9 @@ BS.local = {
             $('org.jfrog.artifactory.selectedDeployableServer.blackduck.autoCreateMissingComponentRequests').checked = false;
             BS.Util.hide($('blackduck.autoDiscardStaleComponentRequests.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.blackduck.autoDiscardStaleComponentRequests').checked = false;
+            BS.Util.hide($('buildRetention.container'))
+            $('org.jfrog.artifactory.selectedDeployableServer.buildRetention').checked = false;
+            BS.artifactory.hideBuildRetentionArgsVisibility()
         }
         BS.MultilineProperties.updateVisible();
     },
@@ -610,6 +614,10 @@ The TeamCity plugin automatically applies the Artifactory plugin (and, consequen
     </tr>
 
     <jsp:include page="../common/envVarsEdit.jsp">
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
+    </jsp:include>
+
+    <jsp:include page="../common/buildRetentionEdit.jsp">
         <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
     </jsp:include>
 

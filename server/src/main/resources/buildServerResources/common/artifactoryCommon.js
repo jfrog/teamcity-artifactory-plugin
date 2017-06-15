@@ -230,6 +230,38 @@ BS.artifactory = {
         BS.MultilineProperties.updateVisible();
     },
 
+    toggleBuildRetentionArgsVisibility: function () {
+        var shouldDisplayRetentionArgs = $('org.jfrog.artifactory.selectedDeployableServer.buildRetention').checked;
+        if (shouldDisplayRetentionArgs) {
+            BS.artifactory.showBuildRetentionArgsVisibility()
+        }
+        else {
+            BS.artifactory.hideBuildRetentionArgsVisibility()
+        }
+        BS.MultilineProperties.updateVisible();
+    },
+
+    hideBuildRetentionArgsVisibility: function () {
+        BS.Util.hide($('buildRetentionMaxDays.container'));
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionMaxDays').value = '';
+        BS.Util.hide($('buildRetentionNumberOfBuilds.container'));
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionNumberOfBuilds').value = '';
+        BS.Util.hide($('buildRetentionBuildsToKeep.container'));
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionBuildsToKeep').value = '';
+        BS.Util.hide($('buildRetentionDeleteArtifacts.container'));
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionDeleteArtifacts').checked = false;
+        BS.Util.hide($('buildRetentionAsync.container'));
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionAsync').checked = false;
+    },
+
+    showBuildRetentionArgsVisibility : function() {
+        BS.Util.show($('buildRetentionMaxDays.container'));
+        BS.Util.show($('buildRetentionNumberOfBuilds.container'));
+        BS.Util.show($('buildRetentionBuildsToKeep.container'));
+        BS.Util.show($('buildRetentionDeleteArtifacts.container'));
+        BS.Util.show($('buildRetentionAsync.container'));
+    },
+
     isDeployArtifactsSelected: function () {
         return $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked;
     },

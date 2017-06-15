@@ -49,6 +49,12 @@ public class RunnerParameterKeys {
     public final static String XRAY_SCAN_BUILD = XRAY_SCAN_PREFIX + "scan";
     public final static String XRAY_FAIL_BUILD_ON_SCAN = XRAY_SCAN_PREFIX + "failBuild";
     public static final String INCLUDE_ENV_VARS = PREFIX + "includeEnvVars";
+    public static final String DISCARD_OLD_BUILDS = PREFIX + "buildRetention";
+    public static final String DISCARD_OLD_BUILDS_COUNT = PREFIX + "buildRetentionNumberOfBuilds";
+    public static final String DISCARD_OLD_BUILDS_MAX_DAYS = PREFIX + "buildRetentionMaxDays";
+    public static final String DISCARD_OLD_BUILDS_BUILDS_TO_KEEP = PREFIX + "buildRetentionBuildsToKeep";
+    public static final String DISCARD_OLD_BUILDS_DELETE_ARTIFACTS = PREFIX + "buildRetentionDeleteArtifacts";
+    public static final String DISCARD_OLD_BUILDS_ASYNC = PREFIX + "buildRetentionAsync";
     public static final String ENV_VARS_INCLUDE_PATTERNS = PREFIX + "envVarsIncludePatterns";
     public static final String ENV_VARS_EXCLUDE_PATTERNS = PREFIX + "envVarsExcludePatterns";
     public final static String PUBLISH_MAVEN_DESCRIPTORS = PREFIX + "publishMavenDescriptors";

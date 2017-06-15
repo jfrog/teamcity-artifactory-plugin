@@ -83,9 +83,7 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
 
         try {
             Element rootElement = FileUtil.parseDocument(mavenBuildInfoFile);
-
             setBuildAgent(builder, rootElement);
-
             addModules(builder, rootElement);
         } catch (JDOMException e) {
             throw new InfoCollectionException("Error while parsing Maven build info report.", e);

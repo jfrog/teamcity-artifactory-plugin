@@ -203,6 +203,6 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
-        client.shutdown();
+        client.close();
     }
 }

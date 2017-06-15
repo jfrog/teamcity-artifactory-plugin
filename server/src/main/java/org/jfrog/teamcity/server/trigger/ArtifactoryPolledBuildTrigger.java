@@ -160,7 +160,7 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
                 }
             }
         } finally {
-            client.shutdown();
+            client.close();
         }
 
         if (foundChange) {

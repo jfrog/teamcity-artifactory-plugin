@@ -43,6 +43,7 @@ import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
 import org.jfrog.teamcity.agent.api.Gavc;
+import org.jfrog.teamcity.agent.util.BuildRetentionFactory;
 import org.jfrog.teamcity.agent.util.RepositoryHelper;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
@@ -104,13 +105,12 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
         genericModuleBuilder.id(runnerParams.get(BUILD_NAME) + " :: " + runnerContext.getBuild().getBuildNumber());
 
         //Add a generic module to hold generically published artifacts
-        if (!artifactsToPublish.isEmpty()) {
+        if ((artifactsToPublish != null) && !artifactsToPublish.isEmpty()) {
             deployableArtifacts.addAll(getPublishableArtifacts(genericModuleBuilder));
         }
 
-        if (BooleanUtils.toBoolean(runnerContext.getRunnerParameters().get(RunnerParameterKeys.USE_SPECS))
-                && !deployableArtifacts.isEmpty()) {
-            deployableArtifacts = updatePropsAndModuleArtifacts(deployableArtifacts, genericModuleBuilder);
+        if (BooleanUtils.toBoolean(runnerContext.getRunnerParameters().get(RunnerParameterKeys.USE_SPECS))) {
+            updatePropsAndModuleArtifacts(genericModuleBuilder);
         }
 
         if ((publishedDependencies != null) && !publishedDependencies.isEmpty()) {
@@ -196,7 +196,15 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
         if (Boolean.valueOf(runnerParams.get(RunnerParameterKeys.INCLUDE_ENV_VARS))) {
             addBuildInfoProperties(builder);
         }
+        if (Boolean.valueOf(runnerParams.get(RunnerParameterKeys.DISCARD_OLD_BUILDS))) {
+            addBuildRetention(builder);
+        }
         return builder;
+    }
+
+    private void addBuildRetention(BuildInfoBuilder builder) {
+        BuildRetention buildRetention = BuildRetentionFactory.createBuildRetention(runnerParams, logger);
+        builder.buildRetention(buildRetention);
     }
 
     private void addBuildInfoProperties(BuildInfoBuilder builder) {
@@ -419,35 +427,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
      * @param moduleBuilder     the moduleBuilder that contains the build information
      * @return updated deployDetails List
      */
-    private List<DeployDetailsArtifact> updatePropsAndModuleArtifacts(List<DeployDetailsArtifact> deployDetailsList, ModuleBuilder moduleBuilder) {
-        List<DeployDetailsArtifact> resultList = Lists.newArrayList();
-        List<Artifact> moduleArtifactList = Lists.newArrayList();
+    void updatePropsAndModuleArtifacts(ModuleBuilder moduleBuilder) {
 
-        for (DeployDetailsArtifact deployDetailsArtifact : deployDetailsList) {
-            // Adds the artifact to the module list
-            String artifactName = StringUtils.substringAfterLast(deployDetailsArtifact.getDeployDetails().getArtifactPath(), "/");
-            if (StringUtils.isEmpty(artifactName)) {
-                artifactName = deployDetailsArtifact.getDeployDetails().getArtifactPath();
-            }
-
-            ArtifactBuilder artifactBuilder = new ArtifactBuilder(artifactName)
-                    .md5(deployDetailsArtifact.getDeployDetails().getMd5())
-                    .sha1(deployDetailsArtifact.getDeployDetails().getSha1());
-            moduleArtifactList.add(artifactBuilder.build());
-            // Generates the module with the new props
-            DeployDetails.Builder detailsBuilder = new DeployDetails.Builder().
-                    artifactPath(deployDetailsArtifact.getDeployDetails().getArtifactPath()).
-                    file(deployDetailsArtifact.getDeployDetails().getFile()).
-                    md5(deployDetailsArtifact.getDeployDetails().getMd5()).
-                    sha1(deployDetailsArtifact.getDeployDetails().getSha1()).
-                    targetRepository(deployDetailsArtifact.getDeployDetails().getTargetRepository()).
-                    addProperties(deployDetailsArtifact.getDeployDetails().getProperties()).
-                    addProperties(matrixParams);
-            resultList.add(new DeployDetailsArtifact(detailsBuilder.build()));
-        }
-        if (!moduleArtifactList.isEmpty()) {
-            moduleBuilder.artifacts(moduleArtifactList);
-        }
-        return resultList;
     }
 }

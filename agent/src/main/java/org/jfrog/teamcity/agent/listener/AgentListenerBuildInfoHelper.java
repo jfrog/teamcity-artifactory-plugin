@@ -28,6 +28,7 @@ import jetbrains.buildServer.util.ArchiveUtil;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Build;
+import org.jfrog.build.api.BuildRetention;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.client.DeployDetailsArtifact;
@@ -41,6 +42,7 @@ import org.jfrog.teamcity.agent.GenericBuildInfoExtractor;
 import org.jfrog.teamcity.agent.LoggingArtifactsBuilderAdapter;
 import org.jfrog.teamcity.agent.MavenBuildInfoExtractor;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
+import org.jfrog.teamcity.agent.util.BuildRetentionFactory;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunTypeUtils;
@@ -145,12 +147,10 @@ public class AgentListenerBuildInfoHelper {
         AgentRunningBuild build = runner.getBuild();
         BuildProgressLogger logger = build.getBuildLogger();
 
-        ExtractedBuildInfo extractedBuildInfo = extractBuildInfo(runner, dependencies);
-        extractedBuildInfo.getBuildInfo().setBuildDependencies(buildDependencies);
-
         String selectedServerUrl = runnerParams.get(RunnerParameterKeys.URL);
-
         ArtifactoryBuildInfoClient infoClient = getBuildInfoClient(selectedServerUrl, runnerParams, logger);
+        ExtractedBuildInfo extractedBuildInfo = extractBuildInfo(runner, dependencies, selectedServerUrl, runnerParams, logger);
+        extractedBuildInfo.getBuildInfo().setBuildDependencies(buildDependencies);
 
         try {
             List<DeployDetailsArtifact> deployableArtifacts = extractedBuildInfo.getDeployableArtifacts();
@@ -180,21 +180,20 @@ public class AgentListenerBuildInfoHelper {
             }
 
             String publishBuildInfoValue = runnerParams.get(RunnerParameterKeys.PUBLISH_BUILD_INFO);
+            BuildRetention retention = BuildRetentionFactory.createBuildRetention(runnerParams, logger);
+            String isAsyncBuildRetention = runnerParams.get(RunnerParameterKeys.DISCARD_OLD_BUILDS_ASYNC);
             if (Boolean.parseBoolean(publishBuildInfoValue)) {
                 publishBuildInfoToTeamCityServer(build, extractedBuildInfo.getBuildInfo());
-                sendBuildInfo(build, extractedBuildInfo.getBuildInfo(), infoClient);
+                sendBuildAndBuildRetention(build, extractedBuildInfo.getBuildInfo(), retention, Boolean.parseBoolean(isAsyncBuildRetention), infoClient);
             }
         } finally {
-            infoClient.shutdown();
+            infoClient.close();
         }
     }
 
-    private ExtractedBuildInfo extractBuildInfo(BuildRunnerContext runnerContext,
-            List<Dependency> dependencies) {
-
+    private ExtractedBuildInfo extractBuildInfo(BuildRunnerContext runnerContext, List<Dependency> dependencies, String selectedServerUrl, Map<String, String> runnerParams, BuildProgressLogger logger) {
         AgentRunningBuild build = runnerContext.getBuild();
         Multimap<File, String> publishableArtifacts = getPublishableArtifacts(runnerContext);
-
         if (RunTypeUtils.isMavenRunType(runnerContext.getRunType())) {
             File mavenBuildInfoFile = new File(build.getBuildTempDirectory(), MAVEN_BUILD_INFO_XML);
 
@@ -208,10 +207,13 @@ public class AgentListenerBuildInfoHelper {
             BuildInfoExtractor<File, ExtractedBuildInfo> buildInfoExtractor = new MavenBuildInfoExtractor(
                     runnerContext, publishableArtifacts, dependencies);
             return buildInfoExtractor.extract(mavenBuildInfoFile);
-        } else {
-            BuildInfoExtractor<Object, ExtractedBuildInfo> buildInfoExtractor = new GenericBuildInfoExtractor(
-                    runnerContext, publishableArtifacts, dependencies);
+        }
+        ArtifactoryBuildInfoClient infoClient = getBuildInfoClient(selectedServerUrl, runnerParams, logger);
+        BuildInfoExtractor<Object, ExtractedBuildInfo> buildInfoExtractor = new GenericBuildInfoExtractor(runnerContext, publishableArtifacts, dependencies, infoClient);
+        try {
             return buildInfoExtractor.extract(null);
+        } finally {
+            infoClient.close();
         }
     }
 
@@ -253,11 +255,11 @@ public class AgentListenerBuildInfoHelper {
         }
     }
 
-    private void sendBuildInfo(AgentRunningBuild build, Build buildInfo, ArtifactoryBuildInfoClient infoClient)
+    private void sendBuildAndBuildRetention(AgentRunningBuild build, Build buildInfo, BuildRetention retention, boolean isAsyncRetention, ArtifactoryBuildInfoClient infoClient)
             throws Exception {
         try {
             build.getBuildLogger().progressMessage("Deploying build info ...");
-            infoClient.sendBuildInfo(buildInfo);
+            org.jfrog.build.extractor.retention.Utils.sendBuildAndBuildRetention(infoClient, buildInfo, retention, isAsyncRetention);
             build.getBuildLogger().progressFinished();
         } catch (Exception e) {
             throw new Exception("Error deploying Artifactory build-info.", e);

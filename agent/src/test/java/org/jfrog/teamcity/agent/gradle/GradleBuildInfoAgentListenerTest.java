@@ -5,13 +5,9 @@ import com.google.common.io.Files;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.agent.artifacts.ArtifactsWatcher;
 import jetbrains.buildServer.agent.impl.BuildRunnerContextImpl;
-import jetbrains.buildServer.agent.impl.parameters.ValueResolverProvider;
-import jetbrains.buildServer.parameters.ParameterBasedValueResolver;
-import jetbrains.buildServer.parameters.ProcessingResult;
 import jetbrains.buildServer.parameters.ValueResolver;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.easymock.EasyMock;
-import org.jetbrains.annotations.NotNull;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunTypeUtils;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
@@ -21,7 +17,6 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Noam Y. Tenne
@@ -188,7 +183,7 @@ public class GradleBuildInfoAgentListenerTest {
         EasyMock.expect(buildAgentConfiguration.getAgentPluginsDirectory()).andReturn(Files.createTempDir());
 
         EasyMock.expect(agentRunningBuild.getAgentConfiguration()).andReturn(buildAgentConfiguration);
-        EasyMock.expect(runner.getBuild()).andReturn(agentRunningBuild).times(2);
+        EasyMock.expect(runner.getBuild()).andReturn(agentRunningBuild).times(3);
 
         watcher.addNewArtifactsPath(EasyMock.isA(String.class));
         EasyMock.expectLastCall();
