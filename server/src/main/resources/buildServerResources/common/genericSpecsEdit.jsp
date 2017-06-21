@@ -23,12 +23,30 @@
 
 <c:set var="shouldDisplay" value="${param.shouldDisplay}" scope="request"/>
 
-<tr class="noBorder" id="downloadSpecsEdit.container"
-    style="${shouldDisplay ? '' : 'display: none;'}">
+<tr class="noBorder" id="downloadSpecSourceSelector.container">
     <th>
-    <label for="org.jfrog.artifactory.selectedDeployableServer.downloadSpec">
-        Download spec:
-    </label>
+        <label for="org.jfrog.artifactory.selectedDeployableServer.downloadSpecSource">
+            Download spec source:
+        </label>
+    </th>
+    <td>
+        <props:selectProperty name="org.jfrog.artifactory.selectedDeployableServer.downloadSpecSource"
+                              onchange="BS.artifactory.onChangeSpecSource()">
+            <props:option value="Job configuration" selected="${selected}">
+                <c:out value="Job configuration"/>
+            </props:option>
+            <props:option value="File" selected="${selected}">
+                <c:out value="File"/>
+            </props:option>
+        </props:selectProperty>
+    </td>
+</tr>
+
+<tr class="noBorder" id="downloadSpecEdit.container">
+    <th>
+        <label for="org.jfrog.artifactory.selectedDeployableServer.downloadSpec">
+            Spec:
+        </label>
     </th>
     <td>
         <props:multilineProperty name="org.jfrog.artifactory.selectedDeployableServer.downloadSpec"
@@ -38,8 +56,43 @@
         </span>
     </td>
 </tr>
-<tr class="noBorder" id="uploadSpecsEdit.container"
-    style="${shouldDisplay ? '' : 'display: none;'}">
+
+<tr class="noBorder" id="downloadSpecFilePath.container">
+    <th>
+        <label for="org.jfrog.artifactory.selectedDeployableServer.downloadSpecFilePath">
+            Spec path:
+        </label>
+    </th>
+    <td>
+        <props:textProperty name="org.jfrog.artifactory.selectedDeployableServer.downloadSpecFilePath"
+                            className="longField"/>
+
+        <span class="smallNote">
+            To download files, you need to create a File Spec. For more information, read the Artifactory Plugin documentation.
+        </span>
+    </td>
+</tr>
+
+<tr class="noBorder" id="uploadSpecSourceSelector.container">
+    <th>
+        <label for="org.jfrog.artifactory.selectedDeployableServer.uploadSpecSource">
+            Upload spec source:
+        </label>
+    </th>
+    <td>
+        <props:selectProperty name="org.jfrog.artifactory.selectedDeployableServer.uploadSpecSource"
+                              onchange="BS.artifactory.onChangeSpecSource()">
+            <props:option value="Job configuration" selected="${selected}">
+                <c:out value="Job configuration"/>
+            </props:option>
+            <props:option value="File" selected="${selected}">
+                <c:out value="File"/>
+            </props:option>
+        </props:selectProperty>
+    </td>
+</tr>
+
+<tr class="noBorder" id="uploadSpecEdit.container">
     <th>
         <label for="org.jfrog.artifactory.selectedDeployableServer.uploadSpec">
             Upload spec:
@@ -48,22 +101,28 @@
     <td>
         <props:multilineProperty name="org.jfrog.artifactory.selectedDeployableServer.uploadSpec"
                                  linkTitle="" cols="90" rows="12" expanded="true"/>
-            <span class="smallNote">
+        <span class="smallNote">
                 To upload files, you need to create a File Spec. For more information, read the Artifactory Plugin documentation.
             </span>
     </td>
 </tr>
-<tr class="noBorder" id="hidden.container"
-    style="display: none;">
+
+<tr class="noBorder" id="uploadSpecFilePath.container">
     <th>
-        <label for="org.jfrog.artifactory.selectedDeployableServer.oldDownloadValue">
-            hidden label
+        <label for="org.jfrog.artifactory.selectedDeployableServer.uploadSpecFilePath">
+            Spec path:
         </label>
     </th>
     <td>
-        <props:multilineProperty name="org.jfrog.artifactory.selectedDeployableServer.oldDownloadValue"
-                                 linkTitle="hedden field" cols="90" rows="15" expanded="true"/>
-        <props:multilineProperty name="org.jfrog.artifactory.selectedDeployableServer.oldUploadValue"
-                                 linkTitle="hidden field" cols="90" rows="15" expanded="true"/>
+        <props:textProperty name="org.jfrog.artifactory.selectedDeployableServer.uploadSpecFilePath"
+                            className="longField"/>
+
+        <span class="smallNote">
+            To upload files, you need to create a File Spec. For more information, read the Artifactory Plugin documentation.
+        </span>
     </td>
 </tr>
+
+<script>
+    BS.artifactory.setUseSpecsForGenerics('${shouldDisplay}');
+</script>

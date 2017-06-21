@@ -270,9 +270,9 @@ public class AgentListenerBuildInfoHelper {
         BuildProgressLogger logger = runnerContext.getBuild().getBuildLogger();
 
         Multimap<File, String> map = HashMultimap.create();
-        String publishedArtifactPropVal = runnerContext.getRunnerParameters().get(
-                RunnerParameterKeys.PUBLISHED_ARTIFACTS);
-        if (StringUtils.isNotBlank(publishedArtifactPropVal)) {
+        String publishedArtifactPropVal = runnerContext.getRunnerParameters().get(RunnerParameterKeys.PUBLISHED_ARTIFACTS);
+        String useSpecs = runnerContext.getRunnerParameters().get(RunnerParameterKeys.USE_SPECS);
+        if (StringUtils.isNotBlank(publishedArtifactPropVal) && !BooleanUtils.toBoolean(useSpecs)) {
 
             //Add artifacts to publish
             logInfo(logger, "[" + Thread.currentThread().getId() + "] Adding artifact paths: " +

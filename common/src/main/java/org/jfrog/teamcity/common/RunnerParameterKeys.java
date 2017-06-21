@@ -4,8 +4,9 @@ package org.jfrog.teamcity.common;
  * @author Noam Y. Tenne
  */
 public class RunnerParameterKeys {
-    
-    private RunnerParameterKeys() {}
+
+    private RunnerParameterKeys() {
+    }
 
     public final static String PREFIX = ConstantValues.PLUGIN_PREFIX + "selectedDeployableServer.";
     public final static String BLACKDUCK_PREFIX = PREFIX + "blackduck.";
@@ -72,6 +73,10 @@ public class RunnerParameterKeys {
     public final static String ALTERNATIVE_GRADLE_TASKS = PREFIX + "alternativeGradleTasks";
     public final static String ALTERNATIVE_GRADLE_OPTIONS = PREFIX + "alternativeGradleOptions";
     public final static String USE_SPECS = PREFIX + "useSpecs";
+    public final static String DOWNLOAD_SPEC_SOURCE = PREFIX + "downloadSpecSource";
     public final static String DOWNLOAD_SPEC = PREFIX + "downloadSpec";
+    public final static String DOWNLOAD_SPEC_FILE_PATH = PREFIX + "downloadSpecFilePath";
+    public final static String UPLOAD_SPEC_SOURCE = PREFIX + "uploadSpecSource";
     public final static String UPLOAD_SPEC = PREFIX + "uploadSpec";
+    public final static String UPLOAD_SPEC_FILE_PATH = PREFIX + "uploadSpecFilePath";
 }

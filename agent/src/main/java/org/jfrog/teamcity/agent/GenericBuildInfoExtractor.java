@@ -19,6 +19,7 @@ package org.jfrog.teamcity.agent;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import jetbrains.buildServer.agent.BuildRunnerContext;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
@@ -28,19 +29,18 @@ import org.jfrog.build.api.BuildType;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.api.builder.ModuleBuilder;
-import org.jfrog.build.client.DeployDetails;
 import org.jfrog.build.client.DeployDetailsArtifact;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.Spec;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
+import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Noam Y. Tenne
@@ -65,15 +65,28 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
         if (!isUsesSpecs || !isSpecValid()) {
             return;
         }
-        Set<DeployDetails> deployDitailsSet;
         SpecsHelper specsHelper = new SpecsHelper(new TeamcityAgenBuildInfoLog(logger));
-        String uploadSpec = runnerContext.getRunnerParameters().get(RunnerParameterKeys.UPLOAD_SPEC);
+        String uploadSpec = getUploadSpec();
         try {
             deployedArtifacts = specsHelper.uploadArtifactsBySpec(uploadSpec, runnerContext.getWorkingDirectory(), matrixParams, infoClient);
         } catch (IOException e) {
             throw new Exception(
                     String.format("Could not collect artifacts details from the spec: %s", e.getMessage()), e);
         }
+    }
+
+    private String getUploadSpec() throws IOException {
+        String uploadSpecSource = runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC_SOURCE);
+        if (!uploadSpecSource.equals(ConstantValues.SPEC_FILE_SOURCE)) {
+            return runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC);
+        }
+
+        String uploadSpecFilePath = runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC_FILE_PATH);
+        if (StringUtils.isNotEmpty(uploadSpecFilePath)) {
+            File specFile = new File(runnerContext.getWorkingDirectory().getCanonicalPath(), uploadSpecFilePath);
+            return FileUtils.readFileToString(specFile);
+        }
+        return "";
     }
 
     @Override

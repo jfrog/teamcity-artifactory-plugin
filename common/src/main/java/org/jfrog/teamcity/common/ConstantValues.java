@@ -69,7 +69,10 @@ public class ConstantValues {
     public static final String GRADLE_PARAM_TASKS = "ui.gradleRunner.gradle.tasks.names";
     public static final String GRADLE_PARAM_OPTIONS = "ui.gradleRunner.additional.gradle.cmd.params";
 
+    public static final String SPEC_FILE_SOURCE = "File";
+
     public static String pluginVersion;
+
     //retrieve the plugin version
     public static String getPluginVersion() {
         return pluginVersion;

@@ -33,10 +33,7 @@
        && (propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo'] == true) ? true : false}"/>
 
 <c:set var="usesSpecsForUploadAndDownload"
-       value="${(propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.useSpecs'] != false)
-                && ((empty propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts'])
-                     && ((empty propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.buildDependencies'])
-                        || (propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.buildDependencies'] == disabledMessage))) ? true : false}"/>
+       value="${(propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.useSpecs'] != false)}"/>
 
 <input type="hidden" id="usesSpecs" value="${usesSpecsForUploadAndDownload}"/>
 
@@ -45,11 +42,11 @@
     BS.local = {
         onServerChange: function (foundExistingConfig) {
             var urlIdSelect = $('org.jfrog.artifactory.selectedDeployableServer.urlId'),
-                    publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
-                    deployReleaseText = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
-                    deployReleaseFlag = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'),
-                    selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value,
-                    targetTextDiv = document.getElementById('genericDeployReleaseText');
+                publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'),
+                deployReleaseText = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
+                deployReleaseFlag = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'),
+                selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value,
+                targetTextDiv = document.getElementById('genericDeployReleaseText');
 
             if (!selectedUrlId) {
                 $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked = false;
@@ -96,12 +93,12 @@
                 BS.Util.hide($('buildDependencies.container'));
                 BS.Util.hide($('blackduck.runChecks.container'));
                 BS.Util.hide($('uploadDownloadTypeSelector.container'));
-                BS.Util.hide($('uploadSpecsEdit.container'));
-                BS.Util.hide($('downloadSpecsEdit.container'));
+                BS.Util.hide($('uploadSpecEdit.container'));
+                BS.Util.hide($('downloadSpecEdit.container'));
+                BS.artifactory.hideSpecContainers();
             } else {
                 if (!foundExistingConfig) {
-                    $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked =
-                            false;
+                    $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked = false;
                     $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
                     $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
                     $('org.jfrog.artifactory.selectedDeployableServer.useSpecs.true').checked = true;
@@ -118,30 +115,14 @@
 
                 BS.local.loadTargetRepos(selectedUrlId);
                 BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
-                if ($("usesSpecs").value) {
-                    $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = ''; // publishedArtifacts should be already empty or contain disable message, this removes the disable message
-                    BS.Util.hide($('targetRepo.container'));
-                    BS.Util.hide($('publishedArtifacts.container'));
-                    BS.Util.hide($('buildDependencies.container'));
-                    BS.Util.show($('uploadSpecsEdit.container'));
-                    BS.Util.show($('downloadSpecsEdit.container'));
-                    $('org.jfrog.artifactory.selectedDeployableServer.useSpecs.true').checked = true;
-                } else {
-                    BS.Util.show($('targetRepo.container'));
-                    BS.Util.show($('publishedArtifacts.container'));
-                    BS.Util.show($('buildDependencies.container'));
-                    BS.Util.hide($('uploadSpecsEdit.container'));
-                    BS.Util.hide($('downloadSpecsEdit.container'));
-                    $('org.jfrog.artifactory.selectedDeployableServer.useSpecs.false').checked = true;
-                }
+                BS.artifactory.setUseSpecsForGenerics($("usesSpecs").value);
 
                 BS.artifactory.initTextAndSelect(deployReleaseFlag, targetTextDiv, publishRepoSelect);
                 BS.Util.show($('publishBuildInfo.container'));
                 var publishBuildInfo = BS.artifactory.isPublishBuildInfoSelected();
                 if (publishBuildInfo) {
                     BS.Util.show($('runLicenseChecks.container'));
-                    var shouldRunLicenseChecks = $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks')
-                            .checked;
+                    var shouldRunLicenseChecks = $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks').checked;
                     if (shouldRunLicenseChecks) {
                         BS.Util.show($('licenseViolationRecipients.container'));
                         BS.Util.show($('limitChecksToScopes.container'));
@@ -150,8 +131,7 @@
                     }
 
                     BS.Util.show($('blackduck.runChecks.container'));
-                    var shouldRunLicenseChecks = $('org.jfrog.artifactory.selectedDeployableServer.blackduck.runChecks')
-                            .checked;
+                    var shouldRunLicenseChecks = $('org.jfrog.artifactory.selectedDeployableServer.blackduck.runChecks').checked;
                     if (shouldRunLicenseChecks) {
                         BS.Util.show($('blackduck.appName.container'));
                         BS.Util.show($('blackduck.appVersion.container'));
@@ -163,8 +143,7 @@
                     }
 
                     BS.Util.show($('includeEnvVars.container'));
-                    var includeEnvVarsEnabled =
-                            $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked;
+                    var includeEnvVarsEnabled = $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked;
                     if (includeEnvVarsEnabled) {
                         BS.Util.show($('envVarsIncludePatterns.container'));
                         BS.Util.show($('envVarsExcludePatterns.container'));
@@ -243,8 +222,8 @@
 
                     var publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo');
                     BS.artifactory.populateRepoSelect(response, options, publishRepoSelect,
-                            '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.targetRepo']}',
-                            false);
+                        '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.targetRepo']}',
+                        false);
                 }
             });
         }
@@ -302,7 +281,7 @@ display:inline-block;
     <jsp:include page="../common/buildRetentionEdit.jsp">
         <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
     </jsp:include>
-l
+
     <jsp:include page="../common/XrayScanEdit.jsp">
         <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
     </jsp:include>
@@ -353,15 +332,15 @@ l
                 <script type="text/javascript">
                     jQuery(document).ready(function () {
                         var existingUrlId = '${propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}',
-                                genericDeployReleaseText = document.getElementById('genericDeployReleaseText');
+                            genericDeployReleaseText = document.getElementById('genericDeployReleaseText');
 
                         BS.local.loadTargetRepos(existingUrlId);
                         BS.artifactory.checkArtifactoryHasAddons(existingUrlId);
                         BS.artifactory.checkCompatibleVersion(existingUrlId);
                         BS.artifactory.initTextAndSelect(
-                                $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'),
-                                genericDeployReleaseText,
-                                $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'))
+                            $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'),
+                            genericDeployReleaseText,
+                            $('org.jfrog.artifactory.selectedDeployableServer.targetRepo'))
                     })
                 </script>
             </c:if>
