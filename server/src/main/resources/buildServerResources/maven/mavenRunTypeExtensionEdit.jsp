@@ -420,7 +420,7 @@ display:inline-block;
         <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
     </jsp:include>
 
-    <jsp:include page="../common/XrayScanEdit.jsp">
+    <jsp:include page="../common/xrayScanEdit.jsp">
         <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
     </jsp:include>
 

@@ -26,8 +26,7 @@
        && (propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.xray.scan'] == true) ? true : false}"/>
 
 <c:set var="shouldDisplayXrayScan" value="${param.shouldDisplay}" scope="request"/>
-<c:set var="shouldDisplayXrayFields"
-       value="${shouldDisplayXrayScan && foundXrayScanConfig}" scope="request"/>
+<c:set var="shouldDisplayXrayFields" value="${shouldDisplayXrayScan && foundXrayScanConfig}" scope="request"/>
 
 <tr class="noBorder" id="xray.scan.container" style="${shouldDisplayXrayScan ? '' : 'display: none;'}">
     <th>
