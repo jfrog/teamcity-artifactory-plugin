@@ -426,6 +426,5 @@ BS.artifactory = {
         }
 
         BS.MultilineProperties.updateVisible();
-
     }
 };

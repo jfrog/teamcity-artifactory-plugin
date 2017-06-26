@@ -67,6 +67,12 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').disabled = true;
                 $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '${disabledMessage}';
+                $('org.jfrog.artifactory.selectedDeployableServer.downloadSpec').value = '';
+                $('org.jfrog.artifactory.selectedDeployableServer.downloadSpecFilePath').value = '';
+                $('org.jfrog.artifactory.selectedDeployableServer.downloadSpecSource').selectedIndex = 0;
+                $('org.jfrog.artifactory.selectedDeployableServer.uploadSpec').value = '';
+                $('org.jfrog.artifactory.selectedDeployableServer.uploadSpecFilePath').value = '';
+                $('org.jfrog.artifactory.selectedDeployableServer.uploadSpecSource').selectedIndex = 0;
                 $('org.jfrog.artifactory.selectedDeployableServer.blackduck.runChecks').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.useSpecs.true').checked = true;
 
@@ -102,11 +108,8 @@
                     $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
                     $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
                     $('org.jfrog.artifactory.selectedDeployableServer.useSpecs.true').checked = true;
-                    BS.artifactory.setUseSpecsForGenerics('true');
-                } else {
-                    BS.artifactory.setUseSpecsForGenerics($("usesSpecs").value);
-                    BS.artifactory.setUseLegacyPatternsForGenerics(!$("usesSpecs").value);
                 }
+                BS.artifactory.setUseSpecsForGenerics('true');
 
                 BS.Util.show($('overrideDefaultDeployerCredentials.container'));
 
@@ -154,7 +157,7 @@
 
                     BS.Util.show($('buildRetention.container'));
                     var doBuildRetention =
-                            $('org.jfrog.artifactory.selectedDeployableServer.buildRetention').checked;
+                        $('org.jfrog.artifactory.selectedDeployableServer.buildRetention').checked;
                     if (doBuildRetention) {
                         BS.artifactory.showBuildRetentionArgsVisibility();
                     }
