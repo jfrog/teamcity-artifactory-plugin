@@ -233,25 +233,33 @@ BS.artifactory = {
     toggleBuildRetentionArgsVisibility: function () {
         var shouldDisplayRetentionArgs = $('org.jfrog.artifactory.selectedDeployableServer.buildRetention').checked;
         if (shouldDisplayRetentionArgs) {
-            BS.artifactory.showBuildRetentionArgsVisibility()
+            BS.artifactory.showBuildRetentionArgsVisibility();
         }
         else {
-            BS.artifactory.hideBuildRetentionArgsVisibility()
+            BS.artifactory.hideBuildRetentionArgsVisibility();
         }
         BS.MultilineProperties.updateVisible();
     },
 
+    hideBuildRetentionContainer: function() {
+        BS.Util.hide($('buildRetention.container'));
+        BS.artifactory.hideBuildRetentionArgsVisibility();
+    },
+
+    resetBuildRetentionArgs: function() {
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionMaxDays').value = '';
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionNumberOfBuilds').value = '';
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionBuildsToKeep').value = '';
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionDeleteArtifacts').checked = false;
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionAsync').checked = false;
+    },
+
     hideBuildRetentionArgsVisibility: function () {
         BS.Util.hide($('buildRetentionMaxDays.container'));
-        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionMaxDays').value = '';
         BS.Util.hide($('buildRetentionNumberOfBuilds.container'));
-        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionNumberOfBuilds').value = '';
         BS.Util.hide($('buildRetentionBuildsToKeep.container'));
-        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionBuildsToKeep').value = '';
         BS.Util.hide($('buildRetentionDeleteArtifacts.container'));
-        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionDeleteArtifacts').checked = false;
         BS.Util.hide($('buildRetentionAsync.container'));
-        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionAsync').checked = false;
     },
 
     showBuildRetentionArgsVisibility: function () {

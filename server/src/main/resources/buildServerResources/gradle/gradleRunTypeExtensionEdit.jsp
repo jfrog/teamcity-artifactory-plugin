@@ -130,6 +130,7 @@ BS.local = {
             BS.Util.hide($('alternativeGradleTasks.container'));
             BS.Util.hide($('alternativeGradleOptions.container'));
             BS.Util.hide($('blackduck.runChecks.container'));
+            BS.artifactory.hideBuildRetentionContainer();
         } else {
 
             if (!foundExistingConfig) {
@@ -192,6 +193,13 @@ BS.local = {
                 if (includeEnvVarsEnabled) {
                     BS.Util.show($('envVarsIncludePatterns.container'));
                     BS.Util.show($('envVarsExcludePatterns.container'));
+                }
+
+                BS.Util.show($('buildRetention.container'));
+                var doBuildRetention =
+                        $('org.jfrog.artifactory.selectedDeployableServer.buildRetention').checked;
+                if (doBuildRetention) {
+                    BS.artifactory.showBuildRetentionArgsVisibility();
                 }
 
                 BS.Util.show($('xray.scan.container'));
@@ -359,9 +367,9 @@ BS.local = {
             $('org.jfrog.artifactory.selectedDeployableServer.blackduck.autoCreateMissingComponentRequests').checked = false;
             BS.Util.hide($('blackduck.autoDiscardStaleComponentRequests.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.blackduck.autoDiscardStaleComponentRequests').checked = false;
-            BS.Util.hide($('buildRetention.container'))
             $('org.jfrog.artifactory.selectedDeployableServer.buildRetention').checked = false;
-            BS.artifactory.hideBuildRetentionArgsVisibility()
+            BS.artifactory.hideBuildRetentionContainer();
+            BS.artifactory.resetBuildRetentionArgs();
         }
         BS.MultilineProperties.updateVisible();
     },
