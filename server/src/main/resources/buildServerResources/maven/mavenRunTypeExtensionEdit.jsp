@@ -109,6 +109,7 @@
                 BS.Util.hide($('alternativeGradleOptions.container'));
                 BS.Util.hide($('blackduck.runChecks.container'));
                 BS.artifactory.hideBuildRetentionContainer();
+                BS.artifactory.resetBuildRetentionArgs();
             } else {
 
                 if (!foundExistingConfig) {
@@ -225,9 +226,7 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.blackduck.autoCreateMissingComponentRequests').checked = false;
                 BS.Util.hide($('blackduck.autoDiscardStaleComponentRequests.container'));
                 $('org.jfrog.artifactory.selectedDeployableServer.blackduck.autoDiscardStaleComponentRequests').checked = false;
-                $('org.jfrog.artifactory.selectedDeployableServer.buildRetention').checked = false;
-                BS.artifactory.hideBuildRetentionContainer();
-                BS.artifactory.resetBuildRetentionArgs();
+                BS.artifactory.resetBuildRetentionContinerValues();
             }
             BS.MultilineProperties.updateVisible();
         },

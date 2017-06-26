@@ -130,7 +130,7 @@ BS.local = {
             BS.Util.hide($('alternativeGradleTasks.container'));
             BS.Util.hide($('alternativeGradleOptions.container'));
             BS.Util.hide($('blackduck.runChecks.container'));
-            BS.artifactory.hideBuildRetentionContainer();
+            BS.artifactory.resetBuildRetentionContinerValues();
         } else {
 
             if (!foundExistingConfig) {

@@ -95,7 +95,7 @@
                 BS.Util.hide($('uploadSpecEdit.container'));
                 BS.Util.hide($('downloadSpecEdit.container'));
                 BS.artifactory.hideSpecContainers();
-                BS.artifactory.hideBuildRetentionContainer();
+                BS.artifactory.resetBuildRetentionContinerValues();
             } else {
                 if (!foundExistingConfig) {
                     $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked = false;

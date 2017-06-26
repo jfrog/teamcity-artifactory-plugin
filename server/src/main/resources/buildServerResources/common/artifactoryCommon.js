@@ -246,6 +246,12 @@ BS.artifactory = {
         BS.artifactory.hideBuildRetentionArgsVisibility();
     },
 
+    resetBuildRetentionContinerValues: function() {
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetention').checked = false;
+        BS.artifactory.hideBuildRetentionContainer();
+        BS.artifactory.resetBuildRetentionArgs();
+    },
+
     resetBuildRetentionArgs: function() {
         $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionMaxDays').value = '';
         $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionNumberOfBuilds').value = '';

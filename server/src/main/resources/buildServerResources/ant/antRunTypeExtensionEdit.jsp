@@ -101,7 +101,7 @@ BS.local = {
             BS.Util.hide($('publishedArtifacts.container'));
             BS.Util.hide($('buildDependencies.container'));
             BS.Util.hide($('blackduck.runChecks.container'));
-            BS.artifactory.hideBuildRetentionContainer();
+            BS.artifactory.resetBuildRetentionContinerValues();
         } else {
 
             if (!foundExistingConfig) {
