@@ -77,7 +77,7 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
 
     private String getUploadSpec() throws IOException {
         String uploadSpecSource = runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC_SOURCE);
-        if (!uploadSpecSource.equals(ConstantValues.SPEC_FILE_SOURCE)) {
+        if (uploadSpecSource == null || !uploadSpecSource.equals(ConstantValues.SPEC_FILE_SOURCE)) {
             return runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC);
         }
 

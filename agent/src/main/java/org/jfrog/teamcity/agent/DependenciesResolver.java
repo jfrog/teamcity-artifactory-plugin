@@ -79,7 +79,7 @@ public class DependenciesResolver {
 
     private String getDownlaodSpec() throws IOException {
         String downloadSpecSource = runnerParams.get(RunnerParameterKeys.DOWNLOAD_SPEC_SOURCE);
-        if (!downloadSpecSource.equals(ConstantValues.SPEC_FILE_SOURCE)) {
+        if (downloadSpecSource == null || !downloadSpecSource.equals(ConstantValues.SPEC_FILE_SOURCE)) {
             return runnerParams.get(RunnerParameterKeys.DOWNLOAD_SPEC);
         }
 

@@ -33,7 +33,8 @@
        && (propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo'] == true) ? true : false}"/>
 
 <c:set var="usesSpecsForUploadAndDownload"
-       value="${(propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.useSpecs'] != false)}"/>
+       value="${(not empty propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.useSpecs'])
+       && (propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.useSpecs'] == true)}"/>
 
 <input type="hidden" id="usesSpecs" value="${usesSpecsForUploadAndDownload}"/>
 
@@ -67,8 +68,6 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').disabled = true;
                 $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '${disabledMessage}';
                 $('org.jfrog.artifactory.selectedDeployableServer.blackduck.runChecks').checked = false;
-                $('org.jfrog.artifactory.selectedDeployableServer.uploadSpec').value = '';
-                $('org.jfrog.artifactory.selectedDeployableServer.downloadSpec').value = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.useSpecs.true').checked = true;
 
                 BS.Util.hide($('targetRepo.container'));
@@ -102,6 +101,10 @@
                     $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
                     $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
                     $('org.jfrog.artifactory.selectedDeployableServer.useSpecs.true').checked = true;
+                    BS.artifactory.setUseSpecsForGenerics('true');
+                } else {
+                    BS.artifactory.setUseSpecsForGenerics($("usesSpecs").value);
+                    BS.artifactory.setUseLegacyPatternsForGenerics(!$("usesSpecs").value);
                 }
 
                 BS.Util.show($('overrideDefaultDeployerCredentials.container'));
@@ -115,7 +118,6 @@
 
                 BS.local.loadTargetRepos(selectedUrlId);
                 BS.artifactory.checkArtifactoryHasAddons(selectedUrlId);
-                BS.artifactory.setUseSpecsForGenerics($("usesSpecs").value);
 
                 BS.artifactory.initTextAndSelect(deployReleaseFlag, targetTextDiv, publishRepoSelect);
                 BS.Util.show($('publishBuildInfo.container'));

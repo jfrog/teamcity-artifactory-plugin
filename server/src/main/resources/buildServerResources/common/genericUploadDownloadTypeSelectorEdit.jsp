@@ -44,9 +44,9 @@
 
         <props:radioButtonProperty
                 name="org.jfrog.artifactory.selectedDeployableServer.useSpecs"
-                id="org.jfrog.artifactory.selectedDeployableServer.useSpecs.false"
                 value="false"
-                onclick="BS.artifactory.setUseSpecsForGenerics('false')"
+                id="org.jfrog.artifactory.selectedDeployableServer.useSpecs.false"
+                onclick="BS.artifactory.setUseLegacyPatternsForGenerics('true')"
                 checked="${usesSpecs == false}"
         />
         <label for="genericTypeOptionUseAntStyle">Legacy patterns (deprecated)</label>

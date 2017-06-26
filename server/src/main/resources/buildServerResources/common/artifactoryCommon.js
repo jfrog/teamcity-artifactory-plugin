@@ -352,7 +352,8 @@ BS.artifactory = {
     },
 
     onChangeSpecSource: function () {
-        if ($('org.jfrog.artifactory.selectedDeployableServer.downloadSpecSource').selectedIndex == 0) {
+        // By default use spec from job configuration
+        if ($('org.jfrog.artifactory.selectedDeployableServer.downloadSpecSource').selectedIndex != 1) {
             BS.Util.show($('downloadSpecEdit.container'));
             BS.Util.hide($('downloadSpecFilePath.container'));
         } else {
@@ -360,13 +361,15 @@ BS.artifactory = {
             BS.Util.show($('downloadSpecFilePath.container'));
         }
 
-        if ($('org.jfrog.artifactory.selectedDeployableServer.uploadSpecSource').selectedIndex == 0) {
+        // By default use spec from job configuration
+        if ($('org.jfrog.artifactory.selectedDeployableServer.uploadSpecSource').selectedIndex != 1) {
             BS.Util.show($('uploadSpecEdit.container'));
             BS.Util.hide($('uploadSpecFilePath.container'));
         } else {
             BS.Util.hide($('uploadSpecEdit.container'));
             BS.Util.show($('uploadSpecFilePath.container'));
         }
+        BS.MultilineProperties.updateVisible();
     },
 
     hideSpecContainers: function () {
@@ -390,12 +393,25 @@ BS.artifactory = {
 
             BS.artifactory.onChangeSpecSource();
         } else {
+            BS.artifactory.hideSpecContainers();
+        }
+        BS.MultilineProperties.updateVisible();
+    },
+
+    setUseLegacyPatternsForGenerics: function (useLegacyPatterns) {
+        if (useLegacyPatterns == 'true') {
             BS.Util.show($('targetRepo.container'));
             BS.Util.show($('buildDependencies.container'));
             BS.Util.show($('publishedArtifacts.container'));
 
             BS.artifactory.hideSpecContainers();
+        } else {
+            BS.Util.hide($('targetRepo.container'));
+            BS.Util.hide($('buildDependencies.container'));
+            BS.Util.hide($('publishedArtifacts.container'));
         }
+
         BS.MultilineProperties.updateVisible();
+
     }
 };
