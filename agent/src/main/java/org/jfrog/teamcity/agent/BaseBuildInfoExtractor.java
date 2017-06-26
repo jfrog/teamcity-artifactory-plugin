@@ -43,7 +43,6 @@ import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
 import org.jfrog.teamcity.agent.api.Gavc;
-import org.jfrog.teamcity.agent.util.BuildRetentionFactory;
 import org.jfrog.teamcity.agent.util.RepositoryHelper;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
@@ -196,15 +195,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
         if (Boolean.valueOf(runnerParams.get(RunnerParameterKeys.INCLUDE_ENV_VARS))) {
             addBuildInfoProperties(builder);
         }
-        if (Boolean.valueOf(runnerParams.get(RunnerParameterKeys.DISCARD_OLD_BUILDS))) {
-            addBuildRetention(builder);
-        }
         return builder;
-    }
-
-    private void addBuildRetention(BuildInfoBuilder builder) {
-        BuildRetention buildRetention = BuildRetentionFactory.createBuildRetention(runnerParams, logger);
-        builder.buildRetention(buildRetention);
     }
 
     private void addBuildInfoProperties(BuildInfoBuilder builder) {
