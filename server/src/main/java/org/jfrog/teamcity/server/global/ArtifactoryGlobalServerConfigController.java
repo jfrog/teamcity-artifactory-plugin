@@ -161,7 +161,7 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
         } catch (IllegalArgumentException iae) {
             handleConnectionException(errors, url, iae);
         } finally {
-            client.shutdown();
+            client.close();
         }
         return errors;
     }

@@ -4,11 +4,13 @@ package org.jfrog.teamcity.common;
  * @author Noam Y. Tenne
  */
 public class RunnerParameterKeys {
-    
-    private RunnerParameterKeys() {}
+
+    private RunnerParameterKeys() {
+    }
 
     public final static String PREFIX = ConstantValues.PLUGIN_PREFIX + "selectedDeployableServer.";
     public final static String BLACKDUCK_PREFIX = PREFIX + "blackduck.";
+    public final static String XRAY_SCAN_PREFIX = PREFIX + "xray.";
 
     public final static String IVY_INTEGRATION = PREFIX + "activateIvyIntegration";
     public final static String GRADLE_INTEGRATION = PREFIX + "activateGradleIntegration";
@@ -45,7 +47,15 @@ public class RunnerParameterKeys {
     public final static String DISABLE_AUTO_LICENSE_DISCOVERY = PREFIX + "disableAutoLicenseDiscovery";
     public final static String PROJECT_USES_ARTIFACTORY_GRADLE_PLUGIN = PREFIX + "projectUsesArtifactoryGradlePlugin";
     public final static String PUBLISH_BUILD_INFO = PREFIX + "publishBuildInfo";
+    public final static String XRAY_SCAN_BUILD = XRAY_SCAN_PREFIX + "scan";
+    public final static String XRAY_FAIL_BUILD_ON_SCAN = XRAY_SCAN_PREFIX + "failBuild";
     public static final String INCLUDE_ENV_VARS = PREFIX + "includeEnvVars";
+    public static final String DISCARD_OLD_BUILDS = PREFIX + "buildRetention";
+    public static final String DISCARD_OLD_BUILDS_COUNT = PREFIX + "buildRetentionNumberOfBuilds";
+    public static final String DISCARD_OLD_BUILDS_MAX_DAYS = PREFIX + "buildRetentionMaxDays";
+    public static final String DISCARD_OLD_BUILDS_BUILDS_TO_KEEP = PREFIX + "buildRetentionBuildsToKeep";
+    public static final String DISCARD_OLD_BUILDS_DELETE_ARTIFACTS = PREFIX + "buildRetentionDeleteArtifacts";
+    public static final String DISCARD_OLD_BUILDS_ASYNC = PREFIX + "buildRetentionAsync";
     public static final String ENV_VARS_INCLUDE_PATTERNS = PREFIX + "envVarsIncludePatterns";
     public static final String ENV_VARS_EXCLUDE_PATTERNS = PREFIX + "envVarsExcludePatterns";
     public final static String PUBLISH_MAVEN_DESCRIPTORS = PREFIX + "publishMavenDescriptors";
@@ -63,6 +73,10 @@ public class RunnerParameterKeys {
     public final static String ALTERNATIVE_GRADLE_TASKS = PREFIX + "alternativeGradleTasks";
     public final static String ALTERNATIVE_GRADLE_OPTIONS = PREFIX + "alternativeGradleOptions";
     public final static String USE_SPECS = PREFIX + "useSpecs";
+    public final static String DOWNLOAD_SPEC_SOURCE = PREFIX + "downloadSpecSource";
     public final static String DOWNLOAD_SPEC = PREFIX + "downloadSpec";
+    public final static String DOWNLOAD_SPEC_FILE_PATH = PREFIX + "downloadSpecFilePath";
+    public final static String UPLOAD_SPEC_SOURCE = PREFIX + "uploadSpecSource";
     public final static String UPLOAD_SPEC = PREFIX + "uploadSpec";
+    public final static String UPLOAD_SPEC_FILE_PATH = PREFIX + "uploadSpecFilePath";
 }

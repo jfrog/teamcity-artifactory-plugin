@@ -3,11 +3,7 @@ package org.jfrog.teamcity.agent.ivy;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import jetbrains.buildServer.ExtensionHolder;
-import jetbrains.buildServer.agent.AgentRunningBuild;
-import jetbrains.buildServer.agent.BuildAgentConfiguration;
-import jetbrains.buildServer.agent.BuildParametersMap;
-import jetbrains.buildServer.agent.BuildProgressLogger;
-import jetbrains.buildServer.agent.BuildRunnerContext;
+import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.agent.impl.BuildRunnerContextImpl;
 import jetbrains.buildServer.parameters.ValueResolver;
 import jetbrains.buildServer.util.EventDispatcher;
@@ -141,7 +137,9 @@ public class IvyBuildInfoAgentListenerTest {
         EasyMock.expect(buildAgentConfiguration.getAgentPluginsDirectory()).andReturn(tempPluginsDir);
         EasyMock.expect(agentRunningBuild.getAgentConfiguration()).andReturn(buildAgentConfiguration);
 
-        EasyMock.expect(runner.getBuild()).andReturn(agentRunningBuild);
+        EasyMock.expect(runner.getBuild()).andReturn(agentRunningBuild).times(2);
+        EasyMock.expect(agentRunningBuild.getBuildLogger())
+                .andReturn(EasyMock.createMock(BuildProgressLogger.class)).anyTimes();
         runner.addSystemProperty(EasyMock.eq("teamcity.ant.classpath"),
                 EasyMock.startsWith(tempPluginsDir.getCanonicalPath()));
         EasyMock.expectLastCall();

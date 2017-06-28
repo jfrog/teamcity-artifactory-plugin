@@ -25,30 +25,30 @@
 <c:set var="existingUrlId" value="${param.existingUrlId}" scope="request"/>
 <c:set var="usesSpecs" value="${param.usesSpecs}" scope="request"/>
 
-    <tr class="noBorder" id="uploadDownloadTypeSelector.container"
-        style="${shouldDisplay ? '' : 'display: none;'}">
-        <th>
-            <label for="org.jfrog.artifactory.selectedDeployableServer.useSpecs">
-                Download and upload by:
-            </label>
-        </th>
-        <td>
-            <props:radioButtonProperty
-                   name="org.jfrog.artifactory.selectedDeployableServer.useSpecs"
-                   value="true"
-                   id="org.jfrog.artifactory.selectedDeployableServer.useSpecs.true"
-                   onclick="BS.artifactory.setUseSpecsForGenerics('true')"
-                   checked="${usesSpecs == true}"
-            />
-            <label for="org.jfrog.artifactory.selectedDeployableServer.useSpecs" style="margin-right: 50pt">Specs</label>
+<tr class="noBorder" id="uploadDownloadTypeSelector.container"
+    style="${shouldDisplay ? '' : 'display: none;'}">
+    <th>
+        <label for="org.jfrog.artifactory.selectedDeployableServer.useSpecs">
+            Download and upload by:
+        </label>
+    </th>
+    <td>
+        <props:radioButtonProperty
+                name="org.jfrog.artifactory.selectedDeployableServer.useSpecs"
+                value="true"
+                id="org.jfrog.artifactory.selectedDeployableServer.useSpecs.true"
+                onclick="BS.artifactory.setUseSpecsForGenerics('true')"
+                checked="${usesSpecs == true}"
+        />
+        <label for="org.jfrog.artifactory.selectedDeployableServer.useSpecs" style="margin-right: 50pt">Specs</label>
 
-            <props:radioButtonProperty
-                   name="org.jfrog.artifactory.selectedDeployableServer.useSpecs"
-                   id="org.jfrog.artifactory.selectedDeployableServer.useSpecs.false"
-                   value="false"
-                   onclick="BS.artifactory.setUseSpecsForGenerics('false')"
-                   checked="${usesSpecs == false}"
-            />
-            <label for="genericTypeOptionUseAntStyle">Legacy patterns (deprecated)</label>
-        </td>
-    </tr>
+        <props:radioButtonProperty
+                name="org.jfrog.artifactory.selectedDeployableServer.useSpecs"
+                value="false"
+                id="org.jfrog.artifactory.selectedDeployableServer.useSpecs.false"
+                onclick="BS.artifactory.setUseLegacyPatternsForGenerics('true')"
+                checked="${usesSpecs == false}"
+        />
+        <label for="genericTypeOptionUseAntStyle">Legacy patterns (deprecated)</label>
+    </td>
+</tr>

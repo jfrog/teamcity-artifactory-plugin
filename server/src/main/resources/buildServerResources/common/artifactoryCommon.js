@@ -174,6 +174,19 @@ BS.artifactory = {
         BS.MultilineProperties.updateVisible();
     },
 
+    toggleXrayScanVisibility: function () {
+        var shouldRunXrayScan = $('org.jfrog.artifactory.selectedDeployableServer.xray.scan').checked;
+        if (shouldRunXrayScan) {
+            BS.Util.show($('xray.failBuild.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.xray.failBuild').checked = true;
+        }
+        else {
+            BS.Util.hide($('xray.failBuild.container'));
+            $('org.jfrog.artifactory.selectedDeployableServer.xray.failBuild').checked = false;
+        }
+        BS.MultilineProperties.updateVisible();
+    },
+
     toggleBlackDuckVisibility: function () {
         var shouldRunChecks = $('org.jfrog.artifactory.selectedDeployableServer.blackduck.runChecks').checked;
         if (shouldRunChecks) {
@@ -215,6 +228,52 @@ BS.artifactory = {
             BS.Util.hide($('envVarsExcludePatterns.container'));
         }
         BS.MultilineProperties.updateVisible();
+    },
+
+    toggleBuildRetentionArgsVisibility: function () {
+        var shouldDisplayRetentionArgs = $('org.jfrog.artifactory.selectedDeployableServer.buildRetention').checked;
+        if (shouldDisplayRetentionArgs) {
+            BS.artifactory.showBuildRetentionArgsVisibility();
+        }
+        else {
+            BS.artifactory.hideBuildRetentionArgsVisibility();
+        }
+        BS.MultilineProperties.updateVisible();
+    },
+
+    hideBuildRetentionContainer: function() {
+        BS.Util.hide($('buildRetention.container'));
+        BS.artifactory.hideBuildRetentionArgsVisibility();
+    },
+
+    resetBuildRetentionContinerValues: function() {
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetention').checked = false;
+        BS.artifactory.hideBuildRetentionContainer();
+        BS.artifactory.resetBuildRetentionArgs();
+    },
+
+    resetBuildRetentionArgs: function() {
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionMaxDays').value = '';
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionNumberOfBuilds').value = '';
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionBuildsToKeep').value = '';
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionDeleteArtifacts').checked = false;
+        $('org.jfrog.artifactory.selectedDeployableServer.buildRetentionAsync').checked = false;
+    },
+
+    hideBuildRetentionArgsVisibility: function () {
+        BS.Util.hide($('buildRetentionMaxDays.container'));
+        BS.Util.hide($('buildRetentionNumberOfBuilds.container'));
+        BS.Util.hide($('buildRetentionBuildsToKeep.container'));
+        BS.Util.hide($('buildRetentionDeleteArtifacts.container'));
+        BS.Util.hide($('buildRetentionAsync.container'));
+    },
+
+    showBuildRetentionArgsVisibility: function () {
+        BS.Util.show($('buildRetentionMaxDays.container'));
+        BS.Util.show($('buildRetentionNumberOfBuilds.container'));
+        BS.Util.show($('buildRetentionBuildsToKeep.container'));
+        BS.Util.show($('buildRetentionDeleteArtifacts.container'));
+        BS.Util.show($('buildRetentionAsync.container'));
     },
 
     isDeployArtifactsSelected: function () {
@@ -304,43 +363,68 @@ BS.artifactory = {
             BS.Util.show(select);
             textbox.style.display = 'none';
         }
-
     },
 
-    setUseSpecsForGenerics: function (selectedValue) {
-        if (selectedValue == "true") {
-            BS.Util.show($('uploadSpecsEdit.container'));
-            BS.Util.show($('downloadSpecsEdit.container'));
-            BS.Util.hide($('targetRepo.container'));
-            BS.Util.hide($('publishedArtifacts.container'));
-            BS.Util.hide($('buildDependencies.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.downloadSpec').value =
-                $('org.jfrog.artifactory.selectedDeployableServer.oldDownloadValue').value;
-            $('org.jfrog.artifactory.selectedDeployableServer.uploadSpec').value =
-                $('org.jfrog.artifactory.selectedDeployableServer.oldUploadValue').value;
-            $('org.jfrog.artifactory.selectedDeployableServer.oldDownloadValue').value =
-                $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value;
-            $('org.jfrog.artifactory.selectedDeployableServer.oldUploadValue').value =
-                $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value;
-            $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '';
-            $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
+    onChangeSpecSource: function () {
+        // By default use spec from job configuration
+        if ($('org.jfrog.artifactory.selectedDeployableServer.downloadSpecSource').selectedIndex != 1) {
+            BS.Util.show($('downloadSpecEdit.container'));
+            BS.Util.hide($('downloadSpecFilePath.container'));
         } else {
-            BS.Util.show($('targetRepo.container'));
-            BS.Util.show($('publishedArtifacts.container'));
-            BS.Util.show($('buildDependencies.container'));
-            BS.Util.hide($('downloadSpecsEdit.container'));
-            BS.Util.hide($('uploadSpecsEdit.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value =
-                $('org.jfrog.artifactory.selectedDeployableServer.oldDownloadValue').value;
-            $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value =
-                $('org.jfrog.artifactory.selectedDeployableServer.oldUploadValue').value;
-            $('org.jfrog.artifactory.selectedDeployableServer.oldDownloadValue').value =
-                $('org.jfrog.artifactory.selectedDeployableServer.downloadSpec').value;
-            $('org.jfrog.artifactory.selectedDeployableServer.oldUploadValue').value =
-                $('org.jfrog.artifactory.selectedDeployableServer.uploadSpec').value;
-            $('org.jfrog.artifactory.selectedDeployableServer.downloadSpec').value = '';
-            $('org.jfrog.artifactory.selectedDeployableServer.uploadSpec').value = '';
+            BS.Util.hide($('downloadSpecEdit.container'));
+            BS.Util.show($('downloadSpecFilePath.container'));
+        }
+
+        // By default use spec from job configuration
+        if ($('org.jfrog.artifactory.selectedDeployableServer.uploadSpecSource').selectedIndex != 1) {
+            BS.Util.show($('uploadSpecEdit.container'));
+            BS.Util.hide($('uploadSpecFilePath.container'));
+        } else {
+            BS.Util.hide($('uploadSpecEdit.container'));
+            BS.Util.show($('uploadSpecFilePath.container'));
         }
         BS.MultilineProperties.updateVisible();
-    } 
+    },
+
+    hideSpecContainers: function () {
+        BS.Util.hide($('downloadSpecSourceSelector.container'));
+        BS.Util.hide($('uploadSpecSourceSelector.container'));
+        BS.Util.hide($('downloadSpecEdit.container'));
+        BS.Util.hide($('downloadSpecFilePath.container'));
+        BS.Util.hide($('uploadSpecEdit.container'));
+        BS.Util.hide($('uploadSpecFilePath.container'));
+    },
+
+    // Show and hide spec, legacy pattern containers for generic jobs
+    setUseSpecsForGenerics: function (useSpecs) {
+        if (useSpecs == 'true') {
+            BS.Util.hide($('targetRepo.container'));
+            BS.Util.hide($('buildDependencies.container'));
+            BS.Util.hide($('publishedArtifacts.container'));
+
+            BS.Util.show($('downloadSpecSourceSelector.container'));
+            BS.Util.show($('uploadSpecSourceSelector.container'));
+
+            BS.artifactory.onChangeSpecSource();
+        } else {
+            BS.artifactory.hideSpecContainers();
+        }
+        BS.MultilineProperties.updateVisible();
+    },
+
+    setUseLegacyPatternsForGenerics: function (useLegacyPatterns) {
+        if (useLegacyPatterns == 'true') {
+            BS.Util.show($('targetRepo.container'));
+            BS.Util.show($('buildDependencies.container'));
+            BS.Util.show($('publishedArtifacts.container'));
+
+            BS.artifactory.hideSpecContainers();
+        } else {
+            BS.Util.hide($('targetRepo.container'));
+            BS.Util.hide($('buildDependencies.container'));
+            BS.Util.hide($('publishedArtifacts.container'));
+        }
+
+        BS.MultilineProperties.updateVisible();
+    }
 };

@@ -57,6 +57,8 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.envVarsIncludePatterns').value = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
+                $('org.jfrog.artifactory.selectedDeployableServer.xray.scan').checked = false;
+                $('org.jfrog.artifactory.selectedDeployableServer.xray.failBuild').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.licenseViolationRecipients').value = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.limitChecksToScopes').value = '';
@@ -67,7 +69,6 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.gitReleaseBranchNamePrefix').value = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.alternativeMavenGoals').value = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.alternativeMavenOptions').value = '';
-                $('org.jfrog.artifactory.selectedDeployableServer.defaultModuleVersionConfiguration').innerHTML = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.releaseProperties').value = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.nextIntegrationProperties').value = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.alternativeGradleTasks').value = '';
@@ -88,6 +89,8 @@
                 BS.Util.hide($('includeEnvVars.container'));
                 BS.Util.hide($('envVarsIncludePatterns.container'));
                 BS.Util.hide($('envVarsExcludePatterns.container'));
+                BS.Util.hide($('xray.scan.container'));
+                BS.Util.hide($('xray.failBuild.container'));
                 BS.Util.hide($('runLicenseChecks.container'));
                 BS.Util.hide($('licenseViolationRecipients.container'));
                 BS.Util.hide($('limitChecksToScopes.container'));
@@ -104,6 +107,11 @@
                 BS.Util.hide($('alternativeGradleTasks.container'));
                 BS.Util.hide($('alternativeGradleOptions.container'));
                 BS.Util.hide($('blackduck.runChecks.container'));
+                BS.Util.hide($('overrideDefaultDeployerCredentials.container'));
+                BS.Util.hide($('deployArtifacts.container'));
+                BS.Util.hide($('deployIncludePatterns.container'));
+                BS.Util.hide($('deployExcludePatterns.container'));
+                BS.artifactory.resetBuildRetentionContinerValues();
             } else {
 
                 if (!foundExistingConfig) {
@@ -113,7 +121,7 @@
                     $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked =
                             false;
                 }
-
+                BS.Util.show($('overrideDefaultDeployerCredentials.container'));
                 BS.local.loadTargetRepos(selectedUrlId, true, true);
                 BS.artifactory.checkCompatibleVersion(selectedUrlId);
                 BS.Util.show($('targetRepo.container'));
@@ -131,6 +139,19 @@
                     if (includeEnvVarsEnabled) {
                         BS.Util.show($('envVarsIncludePatterns.container'));
                         BS.Util.show($('envVarsExcludePatterns.container'));
+                    }
+
+                    BS.Util.show($('buildRetention.container'));
+                    var doBuildRetention =
+                            $('org.jfrog.artifactory.selectedDeployableServer.buildRetention').checked;
+                    if (doBuildRetention) {
+                        BS.artifactory.showBuildRetentionArgsVisibility();
+                    }
+
+                    BS.Util.show($('xray.scan.container'));
+                    var shouldRunXrayScan = $('org.jfrog.artifactory.selectedDeployableServer.xray.scan').checked;
+                    if (shouldRunXrayScan) {
+                        BS.Util.show($('xray.failBuild.container'));
                     }
 
                     BS.Util.show($('runLicenseChecks.container'));
@@ -167,15 +188,25 @@
                     BS.Util.show($('alternativeMavenOptions.container'));
                     BS.Util.show($('defaultModuleVersionConfiguration.container'));
                 }
+
+                BS.Util.show($('deployArtifacts.container'));
+                $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = true;
+                if (BS.artifactory.isDeployArtifactsSelected()) {
+                    BS.Util.show($('deployIncludePatterns.container'));
+                    BS.Util.show($('deployExcludePatterns.container'));
+                }
             }
+
             BS.MultilineProperties.updateVisible();
         },
 
         togglePublishBuildInfoSelection: function () {
             if (BS.artifactory.isPublishBuildInfoSelected()) {
                 BS.Util.show($('includeEnvVars.container'));
+                BS.Util.show($('xray.scan.container'));
                 BS.Util.show($('runLicenseChecks.container'));
                 BS.Util.show($('blackduck.runChecks.container'));
+                BS.Util.show($('buildRetention.container'));
             } else {
                 BS.Util.hide($('includeEnvVars.container'));
                 $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked = false;
@@ -183,6 +214,10 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.envVarsIncludePatterns').value = '';
                 BS.Util.hide($('envVarsExcludePatterns.container'));
                 $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
+                BS.Util.hide($('xray.scan.container'));
+                $('org.jfrog.artifactory.selectedDeployableServer.xray.scan').checked = false;
+                BS.Util.hide($('xray.failBuild.container'));
+                $('org.jfrog.artifactory.selectedDeployableServer.xray.failBuild').checked = false;
                 BS.Util.hide($('runLicenseChecks.container'));
                 $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks').checked = false;
                 BS.Util.hide($('licenseViolationRecipients.container'));
@@ -201,6 +236,7 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.blackduck.autoCreateMissingComponentRequests').checked = false;
                 BS.Util.hide($('blackduck.autoDiscardStaleComponentRequests.container'));
                 $('org.jfrog.artifactory.selectedDeployableServer.blackduck.autoDiscardStaleComponentRequests').checked = false;
+                BS.artifactory.resetBuildRetentionContinerValues();
             }
             BS.MultilineProperties.updateVisible();
         },
@@ -394,6 +430,14 @@ display:inline-block;
     </tr>
 
     <jsp:include page="../common/envVarsEdit.jsp">
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
+    </jsp:include>
+
+    <jsp:include page="../common/buildRetentionEdit.jsp">
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
+    </jsp:include>
+
+    <jsp:include page="../common/xrayScanEdit.jsp">
         <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
     </jsp:include>
 

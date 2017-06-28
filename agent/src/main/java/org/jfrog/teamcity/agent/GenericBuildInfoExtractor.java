@@ -19,35 +19,41 @@ package org.jfrog.teamcity.agent;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import jetbrains.buildServer.agent.BuildRunnerContext;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.BuildAgent;
 import org.jfrog.build.api.BuildType;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
-import org.jfrog.build.client.DeployDetails;
+import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.client.DeployDetailsArtifact;
+import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.Spec;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
+import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Noam Y. Tenne
  */
 public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
 
-    List<DeployDetailsArtifact> deployDetailsArtifacts;
+    List<Artifact> deployedArtifacts = new ArrayList<Artifact>();
+    ArtifactoryBuildInfoClient infoClient = null;
 
     public GenericBuildInfoExtractor(BuildRunnerContext runnerContext, Multimap<File, String> artifactsToPublish,
-            List<Dependency> publishedDependencies) {
+                                     List<Dependency> publishedDependencies, ArtifactoryBuildInfoClient infoClient) {
         super(runnerContext, artifactsToPublish, publishedDependencies);
+        this.infoClient = infoClient;
     }
 
     @Override
@@ -59,29 +65,33 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
         if (!isUsesSpecs || !isSpecValid()) {
             return;
         }
-        deployDetailsArtifacts = Lists.newArrayList();
-        Set<DeployDetails> deployDitailsSet;
         SpecsHelper specsHelper = new SpecsHelper(new TeamcityAgenBuildInfoLog(logger));
-        Spec uploadSpec;
+        String uploadSpec = getUploadSpec();
         try {
-            uploadSpec = specsHelper.getDownloadUploadSpec(runnerContext.getRunnerParameters().get(RunnerParameterKeys.UPLOAD_SPEC));
-            if (!isValidUploadFile(uploadSpec)) {
-                return;
-            }
-            deployDitailsSet = specsHelper.getDeployDetails(uploadSpec, runnerContext.getWorkingDirectory());
+            deployedArtifacts = specsHelper.uploadArtifactsBySpec(uploadSpec, runnerContext.getWorkingDirectory(), matrixParams, infoClient);
         } catch (IOException e) {
             throw new Exception(
                     String.format("Could not collect artifacts details from the spec: %s", e.getMessage()), e);
         }
-        for (DeployDetails deployDetails : deployDitailsSet) {
-            deployDetailsArtifacts.add(new DeployDetailsArtifact(deployDetails));
+    }
+
+    private String getUploadSpec() throws IOException {
+        String uploadSpecSource = runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC_SOURCE);
+        if (uploadSpecSource == null || !uploadSpecSource.equals(ConstantValues.SPEC_FILE_SOURCE)) {
+            return runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC);
         }
 
+        String uploadSpecFilePath = runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC_FILE_PATH);
+        if (StringUtils.isNotEmpty(uploadSpecFilePath)) {
+            File specFile = new File(runnerContext.getWorkingDirectory().getCanonicalPath(), uploadSpecFilePath);
+            return FileUtils.readFileToString(specFile);
+        }
+        return "";
     }
 
     @Override
     protected List<DeployDetailsArtifact> getDeployableArtifacts() {
-        return deployDetailsArtifacts;
+        return null;
     }
 
     private boolean isValidUploadFile(Spec uploadSpec) {
@@ -91,5 +101,25 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
     private boolean isSpecValid() {
         return StringUtils.isNotBlank(
                 runnerContext.getRunnerParameters().get(RunnerParameterKeys.UPLOAD_SPEC));
+    }
+
+    /**
+     * This method is used when using specs (not the legacy pattern).
+     * This method goes over the provided DeployDetailsArtifact list and adds it to the provided moduleBuilder with
+     * the needed properties.
+     *
+     * @param deployDetailsList the deployDetails to set in the module
+     * @param moduleBuilder     the moduleBuilder that contains the build information
+     * @return updated deployDetails List
+     */
+    @Override
+    void updatePropsAndModuleArtifacts(ModuleBuilder moduleBuilder) {
+        List<Artifact> moduleArtifactList = Lists.newArrayList();
+        for (Artifact artifact : deployedArtifacts) {
+            moduleArtifactList.add(artifact);
+        }
+        if (!moduleArtifactList.isEmpty()) {
+            moduleBuilder.artifacts(moduleArtifactList);
+        }
     }
 }

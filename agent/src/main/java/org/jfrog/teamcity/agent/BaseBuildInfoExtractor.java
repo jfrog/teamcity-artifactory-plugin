@@ -104,13 +104,12 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
         genericModuleBuilder.id(runnerParams.get(BUILD_NAME) + " :: " + runnerContext.getBuild().getBuildNumber());
 
         //Add a generic module to hold generically published artifacts
-        if (!artifactsToPublish.isEmpty()) {
+        if ((artifactsToPublish != null) && !artifactsToPublish.isEmpty()) {
             deployableArtifacts.addAll(getPublishableArtifacts(genericModuleBuilder));
         }
 
-        if (BooleanUtils.toBoolean(runnerContext.getRunnerParameters().get(RunnerParameterKeys.USE_SPECS))
-                && !deployableArtifacts.isEmpty()) {
-            deployableArtifacts = updatePropsAndModuleArtifacts(deployableArtifacts, genericModuleBuilder);
+        if (BooleanUtils.toBoolean(runnerContext.getRunnerParameters().get(RunnerParameterKeys.USE_SPECS))) {
+            updatePropsAndModuleArtifacts(genericModuleBuilder);
         }
 
         if ((publishedDependencies != null) && !publishedDependencies.isEmpty()) {
@@ -416,35 +415,10 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
      * the needed properties.
      *
      * @param deployDetailsList the deployDetails to set in the module
-     * @param moduleBuilder the moduleBuilder that contains the build information
+     * @param moduleBuilder     the moduleBuilder that contains the build information
      * @return updated deployDetails List
      */
-    private List<DeployDetailsArtifact> updatePropsAndModuleArtifacts(List<DeployDetailsArtifact> deployDetailsList, ModuleBuilder moduleBuilder) {
-        List<DeployDetailsArtifact> resultList = Lists.newArrayList();
-        List<Artifact> moduleArtifactList = Lists.newArrayList();
+    void updatePropsAndModuleArtifacts(ModuleBuilder moduleBuilder) {
 
-        for (DeployDetailsArtifact deployDetailsArtifact : deployDetailsList) {
-            // Adds the artifact to the module list
-            StringUtils.substringAfterLast(deployDetailsArtifact.getDeployDetails().getArtifactPath(), "/");
-            ArtifactBuilder artifactBuilder =
-                    new ArtifactBuilder(StringUtils.substringAfterLast(deployDetailsArtifact.getDeployDetails().getArtifactPath(), "/"))
-                    .md5(deployDetailsArtifact.getDeployDetails().getMd5())
-                    .sha1(deployDetailsArtifact.getDeployDetails().getSha1());
-            moduleArtifactList.add(artifactBuilder.build());
-            // Generates the module with the new props
-            DeployDetails.Builder detailsBuilder = new DeployDetails.Builder().
-                    artifactPath(deployDetailsArtifact.getDeployDetails().getArtifactPath()).
-                    file(deployDetailsArtifact.getDeployDetails().getFile()).
-                    md5(deployDetailsArtifact.getDeployDetails().getMd5()).
-                    sha1(deployDetailsArtifact.getDeployDetails().getSha1()).
-                    targetRepository(deployDetailsArtifact.getDeployDetails().getTargetRepository()).
-                    addProperties(deployDetailsArtifact.getDeployDetails().getProperties()).
-                    addProperties(matrixParams);
-            resultList.add(new DeployDetailsArtifact(detailsBuilder.build()));
-        }
-        if (!moduleArtifactList.isEmpty()) {
-            moduleBuilder.artifacts(moduleArtifactList);
-        }
-        return resultList;
     }
 }

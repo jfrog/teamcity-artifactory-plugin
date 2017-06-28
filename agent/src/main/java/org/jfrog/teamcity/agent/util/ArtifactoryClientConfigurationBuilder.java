@@ -2,6 +2,7 @@ package org.jfrog.teamcity.agent.util;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
+import jetbrains.buildServer.agent.BuildProgressLogger;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.agent.BuildRunnerContextEx;
 import jetbrains.buildServer.agent.Constants;
@@ -10,7 +11,7 @@ import jetbrains.buildServer.parameters.ValueResolver;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.BlackDuckPropertiesFields;
 import org.jfrog.build.api.BuildInfoFields;
-import org.jfrog.build.api.util.NullLog;
+import org.jfrog.build.api.BuildRetention;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryClientConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.ClientProperties;
@@ -18,10 +19,7 @@ import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Builder class to create {@link ArtifactoryClientConfiguration} from a map of runner parameters. That includes all
@@ -41,7 +39,8 @@ public abstract class ArtifactoryClientConfigurationBuilder {
      * @param runnerContext@return The populated property object from TeamCity values.X
      */
     public static ArtifactoryClientConfiguration create(BuildRunnerContext runnerContext) {
-        ArtifactoryClientConfiguration clientConf = new ArtifactoryClientConfiguration(new NullLog());
+        BuildProgressLogger buildLogger = runnerContext.getBuild().getBuildLogger();
+        ArtifactoryClientConfiguration clientConf = new ArtifactoryClientConfiguration(new TeamcityAgenBuildInfoLog(buildLogger));
         Map<String, String> runnerParameters = runnerContext.getRunnerParameters();
         String buildName = runnerParameters.get(ConstantValues.BUILD_NAME);
         clientConf.info.setBuildName(buildName);
@@ -114,6 +113,21 @@ public abstract class ArtifactoryClientConfigurationBuilder {
             clientConf.info.blackDuckProperties.setAutoDiscardStaleComponentRequests(Boolean.valueOf(runnerParameters.
                     get(RunnerParameterKeys.BLACKDUCK_PREFIX + BlackDuckPropertiesFields.
                             AutoDiscardStaleComponentRequests)));
+        }
+
+        Boolean doBuildRetention = Boolean.valueOf(runnerParameters.get(RunnerParameterKeys.DISCARD_OLD_BUILDS));
+        if (doBuildRetention) {
+            BuildRetention buildRetention = BuildRetentionFactory.createBuildRetention(runnerParameters, buildLogger);
+            if (buildRetention.getCount() > -1) {
+                clientConf.info.setBuildRetentionCount(buildRetention.getCount());
+            }
+            if (buildRetention.getMinimumBuildDate() != null) {
+                long days = daysBetween(buildRetention.getMinimumBuildDate(), new Date());
+                clientConf.info.setBuildRetentionMinimumDate(String.valueOf(days));
+            }
+            clientConf.info.setDeleteBuildArtifacts(buildRetention.isDeleteBuildArtifacts());
+            clientConf.info.setBuildNumbersNotToDelete(buildRetention.getBuildNumbersNotToBeDiscarded().toString());
+            clientConf.info.setAsyncBuildRetention(Boolean.valueOf(runnerParameters.get(RunnerParameterKeys.DISCARD_OLD_BUILDS)));
         }
 
         ValueResolver repositoryResolver = runnerContext.getParametersResolver();
@@ -288,5 +302,16 @@ public abstract class ArtifactoryClientConfigurationBuilder {
                 clientConf.getEnvVarsExcludePatterns());
         clientConf.info.addBuildVariables(allVars, patterns);
         clientConf.fillFromProperties(allVars, patterns);
+    }
+
+    // Naive implementation of the difference in days between two dates
+    private static long daysBetween(Date date1, Date date2) {
+        long diff;
+        if (date2.after(date1)) {
+            diff = date2.getTime() - date1.getTime();
+        } else {
+            diff = date1.getTime() - date2.getTime();
+        }
+        return diff / (24 * 60 * 60 * 1000);
     }
 }
