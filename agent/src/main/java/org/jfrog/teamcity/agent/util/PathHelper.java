@@ -18,10 +18,12 @@ package org.jfrog.teamcity.agent.util;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -29,8 +31,9 @@ import java.util.Map;
  * @author Noam Y. Tenne
  */
 public abstract class PathHelper {
-    
-    private PathHelper() {}
+
+    private PathHelper() {
+    }
 
     public static Map<String, String> getPublishedArtifactsPatternPairs(String publishedArtifactsPropertyValue) {
         Map<String, String> patternPairMap = Maps.newHashMap();
@@ -170,5 +173,20 @@ public abstract class PathHelper {
             }
         }
         return artifactPathBuilder.toString();
+    }
+
+    private static boolean isAbsolutePath(String path) {
+        final String DRIVE_PATTERN = "[A-Za-z]:[\\\\/].*";
+        return path.startsWith("/") || path.matches(DRIVE_PATTERN);
+    }
+
+    public static String getSpecFromFile(String workspace, String path) throws IOException {
+        File specFile;
+        if (PathHelper.isAbsolutePath(path)) {
+            specFile = new File(path);
+        } else {
+            specFile = new File(workspace, path);
+        }
+        return FileUtils.readFileToString(specFile);
     }
 }

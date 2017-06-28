@@ -2,7 +2,6 @@ package org.jfrog.teamcity.agent;
 
 import com.google.common.collect.Lists;
 import jetbrains.buildServer.agent.BuildRunnerContext;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.Dependency;
@@ -12,11 +11,11 @@ import org.jfrog.build.extractor.clientConfiguration.util.AntPatternsDependencie
 import org.jfrog.build.extractor.clientConfiguration.util.BuildDependenciesHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.DependenciesDownloader;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
+import org.jfrog.teamcity.agent.util.PathHelper;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +68,7 @@ public class DependenciesResolver {
      */
     public List<Dependency> retrieveDependenciesBySpec() throws IOException, InterruptedException {
         SpecsHelper specsHelper = new SpecsHelper(log);
-        String downloadSpec = getDownlaodSpec();
+        String downloadSpec = getDownloadSpec();
         if (StringUtils.isBlank(downloadSpec) || StringUtils.isBlank(serverUrl)) {
             return Lists.newArrayList();
         }
@@ -77,7 +76,7 @@ public class DependenciesResolver {
         return specsHelper.downloadArtifactsBySpec(downloadSpec, dependenciesDownloader.getClient(), runnerContext.getWorkingDirectory().getAbsolutePath());
     }
 
-    private String getDownlaodSpec() throws IOException {
+    private String getDownloadSpec() throws IOException {
         String downloadSpecSource = runnerParams.get(RunnerParameterKeys.DOWNLOAD_SPEC_SOURCE);
         if (downloadSpecSource == null || !downloadSpecSource.equals(ConstantValues.SPEC_FILE_SOURCE)) {
             return runnerParams.get(RunnerParameterKeys.DOWNLOAD_SPEC);
@@ -85,8 +84,7 @@ public class DependenciesResolver {
 
         String downloadSpecFilePath = runnerParams.get(RunnerParameterKeys.DOWNLOAD_SPEC_FILE_PATH);
         if (StringUtils.isNotEmpty(downloadSpecFilePath)) {
-            File specFile = new File(runnerContext.getWorkingDirectory().getCanonicalPath(), downloadSpecFilePath);
-            return FileUtils.readFileToString(specFile);
+            return PathHelper.getSpecFromFile(runnerContext.getWorkingDirectory().getCanonicalPath(), downloadSpecFilePath);
         }
         return "";
     }
