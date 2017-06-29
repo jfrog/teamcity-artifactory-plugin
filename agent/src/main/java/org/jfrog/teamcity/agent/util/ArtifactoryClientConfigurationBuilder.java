@@ -20,6 +20,7 @@ import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Builder class to create {@link ArtifactoryClientConfiguration} from a map of runner parameters. That includes all
@@ -93,6 +94,16 @@ public abstract class ArtifactoryClientConfigurationBuilder {
                     Boolean.valueOf(runnerParameters.get(RunnerParameterKeys.DISABLE_AUTO_LICENSE_DISCOVERY)));
         }
 
+        addBlackDuckConfIfNeeded(clientConf, runnerParameters);
+        addBuildRetentionIfNeeded(buildLogger, clientConf, runnerParameters);
+        ValueResolver repositoryResolver = runnerContext.getParametersResolver();
+        addClientProperties(runnerParameters, repositoryResolver, clientConf);
+        addMatrixParamProperties(runnerContext, clientConf);
+        addEnvVars(runnerContext, clientConf);
+        return clientConf;
+    }
+
+    private static void addBlackDuckConfIfNeeded(ArtifactoryClientConfiguration clientConf, Map<String, String> runnerParameters) {
         boolean blackDuckRunChecks =
                 Boolean.parseBoolean(runnerParameters.get(RunnerParameterKeys.BLACKDUCK_PREFIX + BlackDuckPropertiesFields.RUN_CHECKS));
         if (blackDuckRunChecks) {
@@ -114,7 +125,9 @@ public abstract class ArtifactoryClientConfigurationBuilder {
                     get(RunnerParameterKeys.BLACKDUCK_PREFIX + BlackDuckPropertiesFields.
                             AutoDiscardStaleComponentRequests)));
         }
+    }
 
+    private static void addBuildRetentionIfNeeded(BuildProgressLogger buildLogger, ArtifactoryClientConfiguration clientConf, Map<String, String> runnerParameters) {
         Boolean doBuildRetention = Boolean.valueOf(runnerParameters.get(RunnerParameterKeys.DISCARD_OLD_BUILDS));
         if (doBuildRetention) {
             BuildRetention buildRetention = BuildRetentionFactory.createBuildRetention(runnerParameters, buildLogger);
@@ -126,15 +139,18 @@ public abstract class ArtifactoryClientConfigurationBuilder {
                 clientConf.info.setBuildRetentionMinimumDate(String.valueOf(days));
             }
             clientConf.info.setDeleteBuildArtifacts(buildRetention.isDeleteBuildArtifacts());
-            clientConf.info.setBuildNumbersNotToDelete(buildRetention.getBuildNumbersNotToBeDiscarded().toString());
+            clientConf.info.setBuildNumbersNotToDelete(getBuildNumbersNotToBeDeletedAsString(buildRetention));
             clientConf.info.setAsyncBuildRetention(Boolean.valueOf(runnerParameters.get(RunnerParameterKeys.DISCARD_OLD_BUILDS)));
         }
+    }
 
-        ValueResolver repositoryResolver = runnerContext.getParametersResolver();
-        addClientProperties(runnerParameters, repositoryResolver, clientConf);
-        addMatrixParamProperties(runnerContext, clientConf);
-        addEnvVars(runnerContext, clientConf);
-        return clientConf;
+    private static String getBuildNumbersNotToBeDeletedAsString(BuildRetention buildRetention) {
+        StringBuilder builder = new StringBuilder();
+        List<String> notToBeDeleted = buildRetention.getBuildNumbersNotToBeDiscarded();
+        for (String notToDelete : notToBeDeleted) {
+            builder.append(notToDelete).append(",");
+        }
+        return builder.toString();
     }
 
     private static void addParentProperties(Map<String, String> runParameters,
@@ -210,7 +226,6 @@ public abstract class ArtifactoryClientConfigurationBuilder {
                 clientConf.publisher.setIvyArtifactPattern(artifactPattern);
             }
         }
-
 
         String publishBuildInfoValue = runParameters.get(RunnerParameterKeys.PUBLISH_BUILD_INFO);
         boolean isPublishBuildInfo = Boolean.valueOf(publishBuildInfoValue);
@@ -304,14 +319,8 @@ public abstract class ArtifactoryClientConfigurationBuilder {
         clientConf.fillFromProperties(allVars, patterns);
     }
 
-    // Naive implementation of the difference in days between two dates
     private static long daysBetween(Date date1, Date date2) {
-        long diff;
-        if (date2.after(date1)) {
-            diff = date2.getTime() - date1.getTime();
-        } else {
-            diff = date1.getTime() - date2.getTime();
-        }
-        return diff / (24 * 60 * 60 * 1000);
+        long diff = date1.getTime() - date2.getTime();
+        return Math.abs(TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS));
     }
 }

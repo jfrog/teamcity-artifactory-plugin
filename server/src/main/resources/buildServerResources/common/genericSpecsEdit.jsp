@@ -95,7 +95,7 @@
 <tr class="noBorder" id="uploadSpecEdit.container">
     <th>
         <label for="org.jfrog.artifactory.selectedDeployableServer.uploadSpec">
-            Upload spec:
+            Spec:
         </label>
     </th>
     <td>

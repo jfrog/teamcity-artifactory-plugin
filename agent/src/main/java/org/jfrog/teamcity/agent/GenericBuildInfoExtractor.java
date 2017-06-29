@@ -19,7 +19,6 @@ package org.jfrog.teamcity.agent;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import jetbrains.buildServer.agent.BuildRunnerContext;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
@@ -33,6 +32,7 @@ import org.jfrog.build.client.DeployDetailsArtifact;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.Spec;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
+import org.jfrog.teamcity.agent.util.PathHelper;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
@@ -83,8 +83,7 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
 
         String uploadSpecFilePath = runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC_FILE_PATH);
         if (StringUtils.isNotEmpty(uploadSpecFilePath)) {
-            File specFile = new File(runnerContext.getWorkingDirectory().getCanonicalPath(), uploadSpecFilePath);
-            return FileUtils.readFileToString(specFile);
+            return PathHelper.getSpecFromFile(runnerContext.getWorkingDirectory().getCanonicalPath(), uploadSpecFilePath);
         }
         return "";
     }
