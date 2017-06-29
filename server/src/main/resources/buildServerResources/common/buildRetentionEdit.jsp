@@ -97,7 +97,7 @@
     style="${shouldDisplayBuildRetentionArgs ? '' : 'display: none;'}">
     <th>
         <label for="org.jfrog.artifactory.selectedDeployableServer.buildRetentionDeleteArtifacts">
-            Delete Artifact:
+            Delete Artifacts:
         </label>
     </th>
     <td>

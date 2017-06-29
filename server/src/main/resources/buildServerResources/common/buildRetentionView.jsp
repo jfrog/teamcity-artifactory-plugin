@@ -42,7 +42,7 @@
                 emptyValue="not specified"/>
         </div>
         <div class="nestedParameter">
-            Delete Artifact: <props:displayValue
+            Delete Artifacts: <props:displayValue
                 name="org.jfrog.artifactory.selectedDeployableServer.buildRetentionDeleteArtifacts"
                 emptyValue="false"/>
         </div>
