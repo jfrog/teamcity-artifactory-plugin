@@ -128,7 +128,7 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
 
             addTriggeringInfo(build, runnerContext);
 
-            addProxyInfo(runnerContext);
+            addProxyInfo(build.getAgentName(), runnerContext);
 
             String runType = runnerContext.getRunType().getType();
 
@@ -193,8 +193,8 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
         }
     }
 
-    private void addProxyInfo(SRunnerContext runnerContext) {
-        ProxyInfo proxyInfo = ProxyInfo.getInfo();
+    private void addProxyInfo(String agentName, SRunnerContext runnerContext) {
+        ProxyInfo proxyInfo = ProxyInfo.getInfo(agentName);
         if (proxyInfo != null) {
             runnerContext.addRunnerParameter(PROXY_HOST, proxyInfo.getHost());
             runnerContext.addRunnerParameter(PROXY_PORT, Integer.toString(proxyInfo.getPort()));

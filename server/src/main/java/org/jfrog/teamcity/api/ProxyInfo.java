@@ -38,18 +38,35 @@ public class ProxyInfo {
     }
 
     public static ProxyInfo getInfo() {
-        String host = TeamCityProperties.getProperty(ARTIFACTORY_PROXY_HOST_PROPERTY);
-        if (StringUtils.isBlank(host)) {
+        return getInfo(null);
+    }
+
+    public static ProxyInfo getInfo(String agentName) {
+        String proxyHost = getProxyParam(ARTIFACTORY_PROXY_HOST_PROPERTY, agentName);
+        if (StringUtils.isBlank(proxyHost)) {
             return null;
         }
         ProxyInfo proxyInfo = new ProxyInfo();
-        proxyInfo.setHost(host);
-        proxyInfo.setPort(TeamCityProperties.getInteger(ARTIFACTORY_PROXY_PORT_PROPERTY));
+        proxyInfo.setHost(proxyHost);
+        proxyInfo.setPort(Integer.parseInt(getProxyParam(ARTIFACTORY_PROXY_PORT_PROPERTY, agentName)));
 
-        proxyInfo.setUsername(TeamCityProperties.getProperty(ARTIFACTORY_PROXY_USERNAME_PROPERTY));
-        proxyInfo.setPassword(TeamCityProperties.getProperty(ARTIFACTORY_PROXY_PASSWORD_PROPERTY));
+        proxyInfo.setUsername(getProxyParam(ARTIFACTORY_PROXY_USERNAME_PROPERTY, agentName));
+        proxyInfo.setPassword(getProxyParam(ARTIFACTORY_PROXY_PASSWORD_PROPERTY, agentName));
 
         return proxyInfo;
+    }
+
+    private static String getProxyParam(String param, String agentName) {
+        String agentSuffix;
+        String returnParam = null;
+        if (StringUtils.isNotBlank(agentName)) {
+            agentSuffix = "." + agentName;
+            returnParam = TeamCityProperties.getProperty(param + agentSuffix);
+        }
+        if (StringUtils.isBlank(returnParam)) {
+            returnParam = TeamCityProperties.getProperty(param);
+        }
+        return returnParam;
     }
 
     public String getHost() {
