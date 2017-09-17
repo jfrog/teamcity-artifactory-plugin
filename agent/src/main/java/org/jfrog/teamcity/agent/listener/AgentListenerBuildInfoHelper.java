@@ -93,12 +93,14 @@ public class AgentListenerBuildInfoHelper {
 
     private void retrieveDependenciesFromSpec(BuildRunnerContext runner, List<Dependency> publishedDependencies,
             BuildProgressLogger logger) {
+        DependenciesResolver dependenciesResolver = new DependenciesResolver(runner);
         try {
-            DependenciesResolver dependenciesResolver = new DependenciesResolver(runner);
             publishedDependencies.addAll(dependenciesResolver.retrieveDependenciesBySpec());
         } catch (Exception e) {
             String errorMessage = "Error occurred while resolving dependencies from the spec: " + e.getMessage();
             throwExceptionAndLogError(e, errorMessage, logger);
+        } finally {
+            dependenciesResolver.close();
         }
     }
 
@@ -119,6 +121,8 @@ public class AgentListenerBuildInfoHelper {
         } catch (Exception e) {
             String errorMessage = "Error occurred while resolving published or build dependencies: " + e.getMessage();
             throwExceptionAndLogError(e, errorMessage, logger);
+        } finally {
+            dependenciesResolver.close();
         }
     }
 

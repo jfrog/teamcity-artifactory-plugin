@@ -18,6 +18,7 @@ import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ import static org.jfrog.teamcity.common.ConstantValues.PROXY_PORT;
  *
  * @author Shay Yaakov
  */
-public class DependenciesResolver {
+public class DependenciesResolver implements Closeable {
 
     private BuildRunnerContext runnerContext;
     private Log log;
@@ -42,11 +43,11 @@ public class DependenciesResolver {
 
     public DependenciesResolver(@NotNull BuildRunnerContext runnerContext) {
         this.runnerContext = runnerContext;
-        log = new TeamcityAgenBuildInfoLog(runnerContext.getBuild().getBuildLogger());
+        this.log = new TeamcityAgenBuildInfoLog(runnerContext.getBuild().getBuildLogger());
         this.runnerParams = runnerContext.getRunnerParameters();
         this.serverUrl = runnerParams.get(RunnerParameterKeys.URL);
-        selectedPublishedDependencies = runnerParams.get(RunnerParameterKeys.BUILD_DEPENDENCIES);
-        dependenciesDownloader = createDependenciesDownloader();
+        this.selectedPublishedDependencies = runnerParams.get(RunnerParameterKeys.BUILD_DEPENDENCIES);
+        this.dependenciesDownloader = createDependenciesDownloader();
     }
 
     public List<Dependency> retrievePublishedDependencies() throws IOException, InterruptedException {
@@ -127,24 +128,33 @@ public class DependenciesResolver {
      * @return Artifactory HTTP client.
      */
     private ArtifactoryDependenciesClient newArtifactoryClient() {
-        ArtifactoryDependenciesClient cl = new ArtifactoryDependenciesClient(serverUrl,
+        ArtifactoryDependenciesClient client = new ArtifactoryDependenciesClient(serverUrl,
             runnerParams.get(RunnerParameterKeys.RESOLVER_USERNAME),
             runnerParams.get(RunnerParameterKeys.RESOLVER_PASSWORD),
             log);
 
-        cl.setConnectionTimeout(Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
+        client.setConnectionTimeout(Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
 
         if (runnerParams.containsKey(PROXY_HOST)) {
             if (org.apache.commons.lang.StringUtils.isNotBlank(runnerParams.get(PROXY_USERNAME))) {
-                cl.setProxyConfiguration(runnerParams.get(PROXY_HOST),
+                client.setProxyConfiguration(runnerParams.get(PROXY_HOST),
                         Integer.parseInt(runnerParams.get(PROXY_PORT)), runnerParams.get(PROXY_USERNAME),
                         runnerParams.get(PROXY_PASSWORD));
             } else {
-                cl.setProxyConfiguration(runnerParams.get(PROXY_HOST),
+                client.setProxyConfiguration(runnerParams.get(PROXY_HOST),
                         Integer.parseInt(runnerParams.get(PROXY_PORT)));
             }
         }
 
-        return cl;
+        return client;
+    }
+
+    public void close() {
+        if (dependenciesDownloader != null) {
+            ArtifactoryDependenciesClient client = dependenciesDownloader.getClient();
+            if (client != null) {
+                client.close();
+            }
+        }
     }
 }
