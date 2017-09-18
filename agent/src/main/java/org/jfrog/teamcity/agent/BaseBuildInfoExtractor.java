@@ -271,7 +271,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
             mapToReturn = calculatedChecksumCache.get(artifactPath);
         } else {
             File artifactFile = new File(artifactPath);
-            if (artifactFile.exists()) {
+            if (artifactFile.isFile()) {
                 try {
                     Map<String, String> checksums =
                             FileChecksumCalculator.calculateChecksums(artifactFile, "sha1", "md5");
