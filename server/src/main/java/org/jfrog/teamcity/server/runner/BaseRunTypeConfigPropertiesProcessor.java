@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.extractor.clientConfiguration.util.PublishedItemsHelper;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
@@ -55,7 +56,8 @@ public class BaseRunTypeConfigPropertiesProcessor implements PropertiesProcessor
         }
 
         String targetRepo = properties.get(RunnerParameterKeys.TARGET_REPO);
-        if (StringUtils.isBlank(targetRepo)) {
+        boolean useSpecs = BooleanUtils.toBoolean(properties.get(RunnerParameterKeys.USE_SPECS));
+        if (StringUtils.isBlank(targetRepo) && !useSpecs) {
             invalidProperties.add(new InvalidProperty(RunnerParameterKeys.TARGET_REPO,
                     "Please select a target repository. If the repository list is empty, make sure the specified " +
                             "Artifactory server URL is valid."));
