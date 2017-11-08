@@ -33,7 +33,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <plugin.version>${project.version}</plugin.version>
         <teamcity.version>7.1.0</teamcity.version>
-        <build.info.version>2.9.1</build.info.version>
+        <build.info.version>2.9.x-SNAPSHOT</build.info.version>
         <build.info.maven3.version>2.9.1</build.info.maven3.version>
         <build.info.gradle.version>4.5.4</build.info.gradle.version>
         <build.info.ivy.version>2.9.1</build.info.ivy.version>
