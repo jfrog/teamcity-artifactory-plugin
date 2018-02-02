@@ -16,10 +16,8 @@
 
 package org.jfrog.teamcity.agent;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import jetbrains.buildServer.agent.BuildRunnerContext;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Artifact;
@@ -30,7 +28,6 @@ import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.client.DeployDetailsArtifact;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
-import org.jfrog.build.extractor.clientConfiguration.util.spec.Spec;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
 import org.jfrog.teamcity.agent.util.PathHelper;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
@@ -47,8 +44,8 @@ import java.util.List;
  */
 public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
 
-    List<Artifact> deployedArtifacts = new ArrayList<Artifact>();
-    ArtifactoryBuildInfoClient infoClient = null;
+    final private List<Artifact> deployedArtifacts = new ArrayList<Artifact>();
+    final private ArtifactoryBuildInfoClient infoClient;
 
     public GenericBuildInfoExtractor(BuildRunnerContext runnerContext, Multimap<File, String> artifactsToPublish,
                                      List<Dependency> publishedDependencies, ArtifactoryBuildInfoClient infoClient) {
@@ -68,7 +65,7 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
         SpecsHelper specsHelper = new SpecsHelper(new TeamcityAgenBuildInfoLog(logger));
         String uploadSpec = getUploadSpec();
         try {
-            deployedArtifacts = specsHelper.uploadArtifactsBySpec(uploadSpec, runnerContext.getWorkingDirectory(), matrixParams, infoClient);
+            deployedArtifacts.addAll(specsHelper.uploadArtifactsBySpec(uploadSpec, runnerContext.getWorkingDirectory(), matrixParams, infoClient));
         } catch (IOException e) {
             throw new Exception(
                     String.format("Could not collect artifacts details from the spec: %s", e.getMessage()), e);
@@ -77,14 +74,16 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
 
     private String getUploadSpec() throws IOException {
         String uploadSpecSource = runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC_SOURCE);
+        String uploadSpecFilePath = runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC_FILE_PATH);
+
+        if (StringUtils.isNotEmpty(uploadSpecFilePath) && uploadSpecSource.equals(ConstantValues.SPEC_FILE_SOURCE)) {
+            return PathHelper.getSpecFromFile(runnerContext.getWorkingDirectory().getCanonicalPath(), uploadSpecFilePath);
+        }
+
         if (uploadSpecSource == null || !uploadSpecSource.equals(ConstantValues.SPEC_FILE_SOURCE)) {
             return runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC);
         }
 
-        String uploadSpecFilePath = runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC_FILE_PATH);
-        if (StringUtils.isNotEmpty(uploadSpecFilePath)) {
-            return PathHelper.getSpecFromFile(runnerContext.getWorkingDirectory().getCanonicalPath(), uploadSpecFilePath);
-        }
         return "";
     }
 
@@ -93,32 +92,23 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
         return null;
     }
 
-    private boolean isValidUploadFile(Spec uploadSpec) {
-        return uploadSpec != null && !ArrayUtils.isEmpty(uploadSpec.getFiles());
+    private boolean isSpecValid() {
+        String uploadSpecSource = runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC_SOURCE);
+        return StringUtils.isNotBlank(
+                runnerContext.getRunnerParameters().get(RunnerParameterKeys.UPLOAD_SPEC))
+                || (uploadSpecSource != null && uploadSpecSource.equals(ConstantValues.SPEC_FILE_SOURCE) && StringUtils.isNotEmpty(runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC_FILE_PATH)));
     }
 
-    private boolean isSpecValid() {
-        return StringUtils.isNotBlank(
-                runnerContext.getRunnerParameters().get(RunnerParameterKeys.UPLOAD_SPEC));
-    }
 
     /**
      * This method is used when using specs (not the legacy pattern).
      * This method goes over the provided DeployDetailsArtifact list and adds it to the provided moduleBuilder with
      * the needed properties.
      *
-     * @param deployDetailsList the deployDetails to set in the module
      * @param moduleBuilder     the moduleBuilder that contains the build information
-     * @return updated deployDetails List
      */
     @Override
     void updatePropsAndModuleArtifacts(ModuleBuilder moduleBuilder) {
-        List<Artifact> moduleArtifactList = Lists.newArrayList();
-        for (Artifact artifact : deployedArtifacts) {
-            moduleArtifactList.add(artifact);
-        }
-        if (!moduleArtifactList.isEmpty()) {
-            moduleBuilder.artifacts(moduleArtifactList);
-        }
+        moduleBuilder.artifacts(deployedArtifacts);
     }
 }
