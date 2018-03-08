@@ -18,10 +18,12 @@ import java.util.List;
 public class GitCmd {
 
     private final File workingDirectory;
+    private GitEnvironment gitEnvironment;
     private final String gitExe;
 
-    public GitCmd(File workingDirectory, String gitExe) {
+    public GitCmd(File workingDirectory, GitEnvironment gitEnvironment, String gitExe) {
         this.workingDirectory = workingDirectory;
+        this.gitEnvironment = gitEnvironment;
         this.gitExe = gitExe;
     }
 
@@ -40,6 +42,7 @@ public class GitCmd {
         try {
             ProcessBuilder pb = new ProcessBuilder(cmd.toArray(new String[cmd.size()])).redirectErrorStream(true)
                     .directory(workingDirectory);
+            gitEnvironment.apply(pb.environment());
             Process process = pb.start();
             StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream());
             StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream());
