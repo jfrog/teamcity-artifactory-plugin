@@ -417,6 +417,9 @@
 
     <profiles>
         <profile>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <id>oss</id>
             <repositories>
                 <repository>
