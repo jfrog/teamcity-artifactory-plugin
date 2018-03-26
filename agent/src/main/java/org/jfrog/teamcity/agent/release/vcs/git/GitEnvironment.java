@@ -5,13 +5,13 @@ import jetbrains.buildServer.agent.BuildRunnerContext;
 import java.util.Map;
 
 public class GitEnvironment {
-    private BuildRunnerContext runner;
+    private Map<String, String> runnerEnv;
 
     public GitEnvironment(BuildRunnerContext runner) {
-        this.runner = runner;
+        this.runnerEnv = runner.getBuildParameters().getEnvironmentVariables();
     }
 
     public void apply(Map<String, String> environment) {
-        environment.putAll(runner.getBuildParameters().getEnvironmentVariables());
+        environment.putAll(runnerEnv);
     }
 }
