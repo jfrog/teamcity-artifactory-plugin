@@ -40,7 +40,7 @@ public class GitManager extends AbstractScmManager {
         super(runner);
         checkoutDirectory = runner.getBuild().getCheckoutDirectory();
         //TODO: [by YS] pass all the required parameters - credentials etc.
-        git = new GitCmd(checkoutDirectory, gitPath);
+        git = new GitCmd(checkoutDirectory, new GitEnvironment(runner), gitPath);
     }
 
     /**

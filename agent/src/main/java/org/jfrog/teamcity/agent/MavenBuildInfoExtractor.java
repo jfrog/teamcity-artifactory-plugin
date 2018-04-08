@@ -36,6 +36,7 @@ import org.jfrog.build.client.DeployDetailsArtifact;
 import org.jfrog.teamcity.agent.api.Gavc;
 import org.jfrog.teamcity.agent.listener.AgentListenerBuildInfoHelper;
 import org.jfrog.teamcity.agent.release.ReleaseParameters;
+import org.jfrog.teamcity.agent.util.AgentUtils;
 import org.jfrog.teamcity.agent.util.InfoCollectionException;
 import org.jfrog.teamcity.agent.util.RepositoryHelper;
 import org.jfrog.teamcity.common.ReleaseManagementParameterKeys;
@@ -91,8 +92,8 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
             throw new InfoCollectionException("Error while parsing Maven build info report.", e);
         }
 
-        ReleaseParameters releaseParams = new ReleaseParameters(runnerContext.getBuild());
-        if (releaseParams.isReleaseBuild()) {
+        if (AgentUtils.isReleaseManagementEnabled(runnerContext)) {
+            ReleaseParameters releaseParams = new ReleaseParameters(runnerContext.getBuild());
             builder.addStatus(new PromotionStatusBuilder(Promotion.STAGED)
                     .timestampDate(new Date(Long.parseLong(runnerParams.get(BUILD_STARTED))))
                     .comment(releaseParams.getStagingComment())

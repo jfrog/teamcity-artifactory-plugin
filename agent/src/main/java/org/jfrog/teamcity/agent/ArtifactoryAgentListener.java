@@ -29,14 +29,14 @@ import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.teamcity.agent.listener.AgentListenerBuildInfoHelper;
 import org.jfrog.teamcity.agent.listener.AgentListenerReleaseHelper;
 import org.jfrog.teamcity.agent.listener.AgentListenerXrayScanHelper;
-import org.jfrog.teamcity.agent.release.ReleaseParameters;
+import org.jfrog.teamcity.agent.util.AgentUtils;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.jfrog.teamcity.common.ConstantValues.PROP_SKIP_LOG_MESSAGE;
 import static org.jfrog.teamcity.common.ConstantValues.ARTIFACTORY_PLUGIN_VERSION;
+import static org.jfrog.teamcity.common.ConstantValues.PROP_SKIP_LOG_MESSAGE;
 
 public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
 
@@ -119,8 +119,7 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
         } catch (Throwable t) {
             logException(runner, t);
         } finally {
-            ReleaseParameters releaseParams = new ReleaseParameters(runner.getBuild());
-            if (releaseParams.isReleaseBuild()) {
+            if (AgentUtils.isReleaseManagementEnabled(runner)) {
                 BuildInterruptReason buildInterruptReason =
                         runner.getBuild().getInterruptReason();
                 boolean buildSuccessful = !buildStatus.isFailed() && (buildInterruptReason == null);

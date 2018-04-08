@@ -183,7 +183,7 @@ public class GradleBuildInfoAgentListenerTest {
         EasyMock.expect(buildAgentConfiguration.getAgentPluginsDirectory()).andReturn(Files.createTempDir());
 
         EasyMock.expect(agentRunningBuild.getAgentConfiguration()).andReturn(buildAgentConfiguration);
-        EasyMock.expect(runner.getBuild()).andReturn(agentRunningBuild).times(3);
+        EasyMock.expect(runner.getBuild()).andReturn(agentRunningBuild).times(4);
 
         watcher.addNewArtifactsPath(EasyMock.isA(String.class));
         EasyMock.expectLastCall();

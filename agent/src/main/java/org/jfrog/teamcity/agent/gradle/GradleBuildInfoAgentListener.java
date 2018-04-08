@@ -11,8 +11,9 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.BuildInfoConfigProperties;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryClientConfiguration;
-import org.jfrog.gradle.plugin.artifactory.task.BuildInfoBaseTask;
+import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask;
 import org.jfrog.teamcity.agent.release.ReleaseParameters;
+import org.jfrog.teamcity.agent.util.AgentUtils;
 import org.jfrog.teamcity.agent.util.ArtifactoryClientConfigurationBuilder;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunTypeUtils;
@@ -101,8 +102,8 @@ public class GradleBuildInfoAgentListener extends AgentLifeCycleAdapter {
         ArtifactoryClientConfiguration clientConf = ArtifactoryClientConfigurationBuilder.create(runnerContext);
         try {
 
-            ReleaseParameters releaseParams = new ReleaseParameters(build);
-            if (releaseParams.isReleaseBuild()) {
+            if (AgentUtils.isReleaseManagementEnabled(runnerContext)) {
+                ReleaseParameters releaseParams = new ReleaseParameters(build);
                 clientConf.info.setReleaseEnabled(true);
                 String comment = releaseParams.getStagingComment();
                 if (StringUtils.isNotBlank(comment)) {
@@ -128,7 +129,7 @@ public class GradleBuildInfoAgentListener extends AgentLifeCycleAdapter {
             if (StringUtils.isNotBlank(existingTasks)) {
                 taskBuilder.append(existingTasks).append(" ");
             }
-            taskBuilder.append(BuildInfoBaseTask.BUILD_INFO_TASK_NAME);
+            taskBuilder.append(ArtifactoryTask.ARTIFACTORY_PUBLISH_TASK_NAME);
             runnerContext.addRunnerParameter("ui.gradleRunner.gradle.tasks.names", taskBuilder.toString());
             File tempPropFile = File.createTempFile("buildInfo", "properties");
             clientConf.setPropertiesFile(tempPropFile.getCanonicalPath());

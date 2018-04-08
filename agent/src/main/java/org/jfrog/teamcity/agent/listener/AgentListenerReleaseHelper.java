@@ -30,6 +30,7 @@ import org.jfrog.build.extractor.release.PropertiesTransformer;
 import org.jfrog.teamcity.agent.release.ReleaseParameters;
 import org.jfrog.teamcity.agent.release.vcs.AbstractVcsCoordinator;
 import org.jfrog.teamcity.agent.release.vcs.VcsCoordinator;
+import org.jfrog.teamcity.agent.util.AgentUtils;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunTypeUtils;
 
@@ -51,8 +52,8 @@ public class AgentListenerReleaseHelper {
         AgentRunningBuild build = runner.getBuild();
         BuildProgressLogger logger = build.getBuildLogger();
 
-        ReleaseParameters releaseParams = new ReleaseParameters(build);
-        if (releaseParams.isReleaseBuild()) {
+        if (AgentUtils.isReleaseManagementEnabled(runner)) {
+            ReleaseParameters releaseParams = new ReleaseParameters(build);
             logger.progressStarted("[RELEASE] Release build triggered");
             vcsCoordinator = AbstractVcsCoordinator.createVcsCoordinator(runner);
             vcsCoordinator.prepare();
@@ -72,14 +73,14 @@ public class AgentListenerReleaseHelper {
 
     public void runnerFinished(BuildRunnerContext runner, BuildFinishedStatus buildStatus) throws Exception {
         AgentRunningBuild build = runner.getBuild();
-        ReleaseParameters releaseParams = new ReleaseParameters(build);
         // fire successful build event build to release management
-        if (!releaseParams.isReleaseBuild() || buildStatus.isFailed()) {
+        if (!AgentUtils.isReleaseManagementEnabled(runner) || buildStatus.isFailed()) {
             return;
         }
 
         vcsCoordinator.afterSuccessfulReleaseVersionBuild();
 
+        ReleaseParameters releaseParams = new ReleaseParameters(build);
         if (!releaseParams.isNoVersionChange()) {
             vcsCoordinator.beforeDevelopmentVersionChange();
             // change poms versions to next development version
