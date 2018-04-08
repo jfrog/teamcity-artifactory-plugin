@@ -58,24 +58,27 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
         }
 
         SFinishedBuild lastFinishedBuild = buildType.getLastChangesFinished();
-        return (lastFinishedBuild != null) && (getFirstReleaseManagementEnabledRunner(buildType) != null);
+        return (lastFinishedBuild != null) && (!getReleaseManagementRunners(buildType).isEmpty());
     }
 
     @Override
     public void fillModel(@NotNull Map<String, Object> model, @NotNull HttpServletRequest request,
                           @NotNull SBuildType buildType, @Nullable SUser user) {
         String buildTypeId = buildType.getBuildTypeId();
-        SBuildRunnerDescriptor buildRunner = getFirstReleaseManagementEnabledRunner(buildType);
-        if (buildRunner == null) {
-            setIncludeUrl("releaseManagementErrorTab.jsp");
-            model.put("errorMessage", "Unable to find a runner configured with release management.");
+        List<SBuildRunnerDescriptor> buildRunner = getReleaseManagementRunners(buildType);
+        if (buildRunner.isEmpty()) {
+            putErr(model, "Unable to find a runner configured with release management.");
+            return;
+        }
+        if (buildRunner.size() > 1) {
+            putErr(model, "Only one build step is allowed for release management.");
             return;
         }
 
         // fill default values to the model
         ReleaseManagementConfigModel managementConfig = getReleaseManagementConfigModel();
 
-        Map<String, String> parameters = buildRunner.getParameters();
+        Map<String, String> parameters = buildRunner.get(0).getParameters();
         if (parameters.containsKey(RunnerParameterKeys.GIT_RELEASE_BRANCH_NAME_PREFIX)) {
             managementConfig.setGitReleaseBranchNamePrefix(
                     parameters.get(RunnerParameterKeys.GIT_RELEASE_BRANCH_NAME_PREFIX));
@@ -163,13 +166,19 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
         return false;
     }
 
-    private SBuildRunnerDescriptor getFirstReleaseManagementEnabledRunner(SBuildType buildType) {
+    private List<SBuildRunnerDescriptor> getReleaseManagementRunners(SBuildType buildType) {
+        List<SBuildRunnerDescriptor> releaseManagementRunners = Lists.newArrayList();
         for (SBuildRunnerDescriptor buildRunner : buildType.getBuildRunners()) {
             Map<String, String> runnerParameters = buildRunner.getParameters();
             if (Boolean.valueOf(runnerParameters.get(RunnerParameterKeys.ENABLE_RELEASE_MANAGEMENT))) {
-                return buildRunner;
+                releaseManagementRunners.add(buildRunner);
             }
         }
-        return null;
+        return releaseManagementRunners;
+    }
+
+    private void putErr(@NotNull Map<String, Object> model, String msg) {
+        setIncludeUrl("releaseManagementErrorTab.jsp");
+        model.put("errorMessage", msg);
     }
 }

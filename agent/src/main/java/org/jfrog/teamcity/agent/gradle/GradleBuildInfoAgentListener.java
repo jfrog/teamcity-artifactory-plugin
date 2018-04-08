@@ -13,6 +13,7 @@ import org.jfrog.build.api.BuildInfoConfigProperties;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryClientConfiguration;
 import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask;
 import org.jfrog.teamcity.agent.release.ReleaseParameters;
+import org.jfrog.teamcity.agent.util.AgentUtils;
 import org.jfrog.teamcity.agent.util.ArtifactoryClientConfigurationBuilder;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunTypeUtils;
@@ -101,8 +102,8 @@ public class GradleBuildInfoAgentListener extends AgentLifeCycleAdapter {
         ArtifactoryClientConfiguration clientConf = ArtifactoryClientConfigurationBuilder.create(runnerContext);
         try {
 
-            ReleaseParameters releaseParams = new ReleaseParameters(build);
-            if (releaseParams.isReleaseBuild()) {
+            if (AgentUtils.isReleaseManagementEnabled(runnerContext)) {
+                ReleaseParameters releaseParams = new ReleaseParameters(build);
                 clientConf.info.setReleaseEnabled(true);
                 String comment = releaseParams.getStagingComment();
                 if (StringUtils.isNotBlank(comment)) {
