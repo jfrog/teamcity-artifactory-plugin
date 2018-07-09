@@ -20,7 +20,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.BuildAgent;
@@ -38,6 +37,7 @@ import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,12 +61,9 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
             throws Exception {
         builder.type(BuildType.GENERIC);
         builder.buildAgent(new BuildAgent(runnerContext.getRunType()));
-        boolean isUsesSpecs = BooleanUtils.toBoolean(runnerContext.getRunnerParameters().get(RunnerParameterKeys.USE_SPECS));
-        if (!isUsesSpecs || !isSpecValid()) {
-            return;
-        }
         SpecsHelper specsHelper = new SpecsHelper(new TeamcityAgenBuildInfoLog(logger));
         String uploadSpec = getUploadSpec();
+
         try {
             deployedArtifacts = specsHelper.uploadArtifactsBySpec(uploadSpec, runnerContext.getWorkingDirectory(), matrixParams, infoClient);
         } catch (IOException e) {
@@ -78,14 +75,20 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
     private String getUploadSpec() throws IOException {
         String uploadSpecSource = runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC_SOURCE);
         if (uploadSpecSource == null || !uploadSpecSource.equals(ConstantValues.SPEC_FILE_SOURCE)) {
-            return runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC);
+            String spec = runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC);
+            if (StringUtils.isEmpty(spec)) {
+                throw new IOException("Upload Spec content cannot be empty");
+            }
+            return spec;
         }
 
         String uploadSpecFilePath = runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC_FILE_PATH);
-        if (StringUtils.isNotEmpty(uploadSpecFilePath)) {
-            return PathHelper.getSpecFromFile(runnerContext.getWorkingDirectory().getCanonicalPath(), uploadSpecFilePath);
+        String workspace = runnerContext.getWorkingDirectory().getCanonicalPath();
+        String specPath = workspace + File.separator + uploadSpecFilePath;
+        if (!new File(specPath).isFile()) {
+            throw new FileNotFoundException("Could not find Upload Spec file at: " + specPath);
         }
-        return "";
+        return PathHelper.getSpecFromFile(workspace, uploadSpecFilePath);
     }
 
     @Override

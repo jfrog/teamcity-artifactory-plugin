@@ -154,6 +154,14 @@ public class AgentListenerBuildInfoHelper {
         String selectedServerUrl = runnerParams.get(RunnerParameterKeys.URL);
         ArtifactoryBuildInfoClient infoClient = getBuildInfoClient(selectedServerUrl, runnerParams, logger);
         ExtractedBuildInfo extractedBuildInfo = extractBuildInfo(runner, dependencies, selectedServerUrl, runnerParams, logger);
+
+        if (extractedBuildInfo == null) {
+            String m = "Could not generate build-info.";
+            Loggers.AGENT.warn(m);
+            build.getBuildLogger().warning(m);
+            return;
+        }
+
         extractedBuildInfo.getBuildInfo().setBuildDependencies(buildDependencies);
 
         try {

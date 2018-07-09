@@ -19,6 +19,8 @@ import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.io.Closeable;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -75,25 +77,25 @@ public class DependenciesResolver implements Closeable {
      */
     public List<Dependency> retrieveDependenciesBySpec() throws IOException, InterruptedException {
         SpecsHelper specsHelper = new SpecsHelper(log);
-        String downloadSpec = getDownloadSpec();
-        if (StringUtils.isBlank(downloadSpec) || StringUtils.isBlank(serverUrl)) {
-            return Lists.newArrayList();
-        }
-
-        return specsHelper.downloadArtifactsBySpec(downloadSpec, dependenciesDownloader.getClient(), runnerContext.getWorkingDirectory().getAbsolutePath());
+        return specsHelper.downloadArtifactsBySpec(getDownloadSpec(), dependenciesDownloader.getClient(), runnerContext.getWorkingDirectory().getAbsolutePath());
     }
 
     private String getDownloadSpec() throws IOException {
         String downloadSpecSource = runnerParams.get(RunnerParameterKeys.DOWNLOAD_SPEC_SOURCE);
         if (downloadSpecSource == null || !downloadSpecSource.equals(ConstantValues.SPEC_FILE_SOURCE)) {
-            return runnerParams.get(RunnerParameterKeys.DOWNLOAD_SPEC);
+            String spec = runnerParams.get(RunnerParameterKeys.DOWNLOAD_SPEC);
+            if (StringUtils.isEmpty(spec)) {
+                throw new IOException("Download Spec content cannot be empty");
+            }
+            return spec;
         }
-
         String downloadSpecFilePath = runnerParams.get(RunnerParameterKeys.DOWNLOAD_SPEC_FILE_PATH);
-        if (StringUtils.isNotEmpty(downloadSpecFilePath)) {
-            return PathHelper.getSpecFromFile(runnerContext.getWorkingDirectory().getCanonicalPath(), downloadSpecFilePath);
+        String workspace = runnerContext.getWorkingDirectory().getCanonicalPath();
+        String specPath = workspace + File.separator + downloadSpecFilePath;
+        if (!new File(specPath).isFile()) {
+            throw new FileNotFoundException("Could not find Download Spec file at: " + specPath);
         }
-        return "";
+        return PathHelper.getSpecFromFile(workspace, downloadSpecFilePath);
     }
 
     private boolean verifyParameters() {
