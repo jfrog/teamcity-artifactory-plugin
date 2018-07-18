@@ -15,10 +15,9 @@
   ~ limitations under the License.
   --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0          http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.jfrog.teamcity</groupId>
     <artifactId>teamcity-artifactory-plugin-assembly</artifactId>
     <packaging>pom</packaging>
-    <version>2.6.x-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <name>TeamCity Artifactory Plugin Assembly</name>
 
     <licenses>
@@ -32,7 +31,7 @@
     <parent>
         <groupId>org.jfrog.teamcity</groupId>
         <artifactId>teamcity-artifactory-plugin</artifactId>
-        <version>2.6.x-SNAPSHOT</version>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
     <dependencies>
@@ -50,32 +49,43 @@
         </dependency>
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>package</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-assembly-plugin</artifactId>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <id>make-agent-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
                         <configuration>
+                            <finalName>teamcity-artifactory-plugin-agent-${project.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
-                            <finalName>teamcity-artifactory-plugin-${project.version}</finalName>
                             <descriptors>
-                                <descriptor>src/assemble/assembly.xml</descriptor>
+                                <descriptor>plugin-agent-assembly.xml</descriptor>
                             </descriptors>
                         </configuration>
-                        <executions>
-                            <execution>
-                                <id>make-assembly</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+                    </execution>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>teamcity-artifactory-plugin-${project.version}</finalName>
+                            <outputDirectory>${project.parent.build.directory}</outputDirectory>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>plugin-assembly.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
