@@ -111,7 +111,7 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
             runnerContext.addRunnerParameter(RunnerParameterKeys.TIMEOUT, Integer.toString(serverConfig.getTimeout()));
 
             //TODO: [by yl] See how we can get a nicer build name...
-            runnerContext.addRunnerParameter(BUILD_NAME, build.getFullName());
+            runnerContext.addRunnerParameter(BUILD_NAME, build.getBuildTypeExternalId());
 
             runnerContext.addRunnerParameter(BUILD_NUMBER, build.getBuildNumber());
 
@@ -183,7 +183,7 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
         if (StringUtils.isNotBlank(triggeredByBuildTypeId)) {
             SBuildType triggeredByBuildType = projectManager.findBuildTypeById(triggeredByBuildTypeId);
             if (triggeredByBuildType != null) {
-                runnerContext.addRunnerParameter(PROP_PARENT_NAME, triggeredByBuildType.getFullName());
+                runnerContext.addRunnerParameter(PROP_PARENT_NAME, triggeredByBuildType.getExternalId());
             }
         }
 

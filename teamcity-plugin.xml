@@ -16,7 +16,7 @@
   -->
 
 <teamcity-plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                 xsi:noNamespaceSchemaLocation="urn:shemas-jetbrains-com:teamcity-plugin-v1-xml">
+                 xsi:noNamespaceSchemaLocation="urn:schemas-jetbrains-com:teamcity-plugin-v1-xml">
     <info>
         <name>artifactory</name>
         <display-name>Artifactory</display-name>
