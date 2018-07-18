@@ -32,7 +32,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <plugin.version>${project.version}</plugin.version>
-        <teamcity.version>2018.1</teamcity.version>
+        <teamcity.version>2017.1</teamcity.version>
         <build.info.version>2.10.1</build.info.version>
         <build.info.maven3.version>2.10.1</build.info.maven3.version>
         <build.info.gradle.version>4.7.1</build.info.gradle.version>
