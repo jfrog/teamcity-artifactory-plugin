@@ -83,12 +83,12 @@ public class ArtifactoryResultsFragmentExtension extends SimplePageExtension {
             String buildUrl = customDataStorage.getValue(Long.toString(build.getBuildId()) + "#" +
                     buildRunnerDescriptor.getId());
             if (StringUtils.isNotBlank(buildUrl)) {
-                return buildUrl + build.getFullName() + "/" + build.getBuildNumber();
+                return buildUrl + build.getBuildTypeExternalId() + "/" + build.getBuildNumber();
             } else {
                 //Maintain backward compatibility for when there were no multi-runners and results were mapped per build
                 buildUrl = customDataStorage.getValue(Long.toString(build.getBuildId()));
                 if (StringUtils.isNotBlank(buildUrl)) {
-                    return buildUrl + build.getFullName() + "/" + build.getBuildNumber();
+                    return buildUrl + build.getBuildTypeExternalId() + "/" + build.getBuildNumber();
                 }
             }
         }

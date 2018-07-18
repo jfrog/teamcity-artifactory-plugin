@@ -155,7 +155,7 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
 
             Loggers.SERVER.info("Performing dry run promotion (no changes are made during dry run) ...");
 
-            HttpResponse dryResponse = client.stageBuild(build.getFullName(), build.getBuildNumber(),
+            HttpResponse dryResponse = client.stageBuild(build.getBuildTypeExternalId(), build.getBuildNumber(),
                     promotionBuilder.build());
 
             if (!checkSuccess(dryResponse, true)) {
@@ -165,7 +165,7 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
             }
 
             Loggers.SERVER.info("Dry run finished successfully.\nPerforming promotion ...");
-            HttpResponse wetResponse = client.stageBuild(build.getFullName(), build.getBuildNumber(),
+            HttpResponse wetResponse = client.stageBuild(build.getBuildTypeExternalId(), build.getBuildNumber(),
                     promotionBuilder.dryRun(false).build());
 
             if (!checkSuccess(wetResponse, false)) {
