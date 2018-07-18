@@ -22,6 +22,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -77,19 +78,22 @@ public class DependenciesResolver implements Closeable {
      */
     public List<Dependency> retrieveDependenciesBySpec() throws IOException, InterruptedException {
         SpecsHelper specsHelper = new SpecsHelper(log);
-        return specsHelper.downloadArtifactsBySpec(getDownloadSpec(), dependenciesDownloader.getClient(), runnerContext.getWorkingDirectory().getAbsolutePath());
+        String spec = getDownloadSpec();
+        if (StringUtils.isNotEmpty(spec)) {
+            return specsHelper.downloadArtifactsBySpec(spec, dependenciesDownloader.getClient(), runnerContext.getWorkingDirectory().getAbsolutePath());
+        }
+        return Collections.emptyList();
     }
 
     private String getDownloadSpec() throws IOException {
         String downloadSpecSource = runnerParams.get(RunnerParameterKeys.DOWNLOAD_SPEC_SOURCE);
         if (downloadSpecSource == null || !downloadSpecSource.equals(ConstantValues.SPEC_FILE_SOURCE)) {
-            String spec = runnerParams.get(RunnerParameterKeys.DOWNLOAD_SPEC);
-            if (StringUtils.isEmpty(spec)) {
-                throw new IOException("Download Spec content cannot be empty");
-            }
-            return spec;
+            return runnerParams.get(RunnerParameterKeys.DOWNLOAD_SPEC);
         }
         String downloadSpecFilePath = runnerParams.get(RunnerParameterKeys.DOWNLOAD_SPEC_FILE_PATH);
+        if (StringUtils.isEmpty(downloadSpecFilePath)) {
+            return downloadSpecFilePath;
+        }
         String workspace = runnerContext.getWorkingDirectory().getCanonicalPath();
         String specPath = workspace + File.separator + downloadSpecFilePath;
         if (!new File(specPath).isFile()) {

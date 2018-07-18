@@ -63,6 +63,9 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
         builder.buildAgent(new BuildAgent(runnerContext.getRunType()));
         SpecsHelper specsHelper = new SpecsHelper(new TeamcityAgenBuildInfoLog(logger));
         String uploadSpec = getUploadSpec();
+        if (StringUtils.isEmpty(uploadSpec)) {
+            return;
+        }
 
         try {
             deployedArtifacts = specsHelper.uploadArtifactsBySpec(uploadSpec, runnerContext.getWorkingDirectory(), matrixParams, infoClient);
@@ -75,14 +78,13 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
     private String getUploadSpec() throws IOException {
         String uploadSpecSource = runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC_SOURCE);
         if (uploadSpecSource == null || !uploadSpecSource.equals(ConstantValues.SPEC_FILE_SOURCE)) {
-            String spec = runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC);
-            if (StringUtils.isEmpty(spec)) {
-                throw new IOException("Upload Spec content cannot be empty");
-            }
-            return spec;
+            return runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC);
         }
 
         String uploadSpecFilePath = runnerParams.get(RunnerParameterKeys.UPLOAD_SPEC_FILE_PATH);
+        if (StringUtils.isEmpty(uploadSpecFilePath)) {
+            return uploadSpecFilePath;
+        }
         String workspace = runnerContext.getWorkingDirectory().getCanonicalPath();
         String specPath = workspace + File.separator + uploadSpecFilePath;
         if (!new File(specPath).isFile()) {
