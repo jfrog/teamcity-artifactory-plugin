@@ -34,7 +34,7 @@
                             className="longField"/>
 
         <span class="smallNote">
-            Modify the default build name set by TeamCity.
+            The build name in Artifactory. Alphanumeric, Dash and Underscore character are supported.
         </span>
     </td>
 </tr>
