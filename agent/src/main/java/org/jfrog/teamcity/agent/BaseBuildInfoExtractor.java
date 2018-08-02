@@ -20,10 +20,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import jetbrains.buildServer.agent.BuildProgressLogger;
-import jetbrains.buildServer.agent.BuildRunnerContext;
-import jetbrains.buildServer.agent.BuildRunnerContextEx;
-import jetbrains.buildServer.agent.Constants;
+import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.agent.impl.BuildRunnerContextImpl;
 import jetbrains.buildServer.log.Loggers;
 import org.apache.commons.io.FilenameUtils;
@@ -101,7 +98,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
         }
 
         ModuleBuilder genericModuleBuilder = new ModuleBuilder();
-        genericModuleBuilder.id(runnerParams.get(BUILD_NAME) + " :: " + runnerContext.getBuild().getBuildNumber());
+        genericModuleBuilder.id(runnerParams.get(BUILD_NAME) + " :: " + runnerParams.get(BUILD_NUMBER));
 
         //Add a generic module to hold generically published artifacts
         if ((artifactsToPublish != null) && !artifactsToPublish.isEmpty()) {
@@ -177,7 +174,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
         // Gets the plugin version and sets into the build info
         String pluginVersion = runnerContext.getRunnerParameters().get(ARTIFACTORY_PLUGIN_VERSION);
         BuildInfoBuilder builder = new BuildInfoBuilder(runnerParams.get(BUILD_NAME)).
-                number(runnerContext.getBuild().getBuildNumber()).
+                number(runnerParams.get(BUILD_NUMBER)).
                 artifactoryPluginVersion(pluginVersion).
                 startedDate(buildStarted).
                 durationMillis(buildDuration).
@@ -316,7 +313,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
             params.put(key, filteredMatrixParams.getProperty(key));
         }
         params.put("build.name", runnerParams.get(BUILD_NAME));
-        params.put("build.number", runnerContext.getBuild().getBuildNumber());
+        params.put("build.number", runnerParams.get(BUILD_NUMBER));
         params.put("build.timestamp", runnerParams.get(PROP_BUILD_TIMESTAMP));
 
         if (StringUtils.isNotBlank(runnerParams.get(PROP_PARENT_NAME))) {
@@ -414,7 +411,6 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
      * This method goes over the provided DeployDetailsArtifact list and adds it to the provided moduleBuilder with
      * the needed properties.
      *
-     * @param deployDetailsList the deployDetails to set in the module
      * @param moduleBuilder     the moduleBuilder that contains the build information
      * @return updated deployDetails List
      */

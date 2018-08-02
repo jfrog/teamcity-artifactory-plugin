@@ -16,16 +16,34 @@
   ~ limitations under the License.
   --%>
 
-<jsp:useBean id="artifactoryBuildUrl" scope="request" type="java.lang.String"/>
+<jsp:useBean id="artifactoryBuildUrls" scope="request" type="java.util.Map<java.lang.String, java.lang.String>"/>
 <c:url var="logoUrl" value="${teamcityPluginResourcesPath}images/artifactory-icon.png"/>
 
 <table border="0">
-    <tr>
-        <td>
-            <img width="48px" height="48px" src="${logoUrl}"/>
-        </td>
-        <td>
-            <a href="${artifactoryBuildUrl}" target="_blank">Artifactory Build Info</a>
-        </td>
-    </tr>
+    <br/>
+    <c:choose>
+        <c:when test="${artifactoryBuildUrls.size() > 1}">
+            <c:forEach items="${artifactoryBuildUrls}" var="artifactoryBuildUrl">
+                <tr>
+                    <td>
+                        <img width="48px" height="48px" src="${logoUrl}"/>
+                    </td>
+                    <td>
+                        <a href="${artifactoryBuildUrl.key}" target="_blank">Artifactory Build Info - ${artifactoryBuildUrl.value}</a>
+                    </td>
+                </tr>
+            </c:forEach>
+        </c:when>
+        <c:otherwise>
+            <tr>
+                <td>
+                    <img width="48px" height="48px" src="${logoUrl}"/>
+                </td>
+                <td>
+                    <a href="${artifactoryBuildUrls.keySet().toArray()[0]}" target="_blank">Artifactory Build Info</a>
+                </td>
+            </tr>
+        </c:otherwise>
+    </c:choose>
+
 </table>

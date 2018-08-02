@@ -29,6 +29,7 @@ import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.CustomDataStorageKeys;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -48,7 +49,7 @@ public class ArtifactoryResultsFragmentExtension extends SimplePageExtension {
     @Override
     public void fillModel(@NotNull final Map model, @NotNull final HttpServletRequest request) {
         SBuild build = getBuild(request);
-        model.put("artifactoryBuildUrl", getBuildUrl(build));
+        model.put("artifactoryBuildUrls", getBuildInfoUrls(build));
     }
 
     @Override
@@ -58,7 +59,7 @@ public class ArtifactoryResultsFragmentExtension extends SimplePageExtension {
             return false;
         }
         Status buildStatus = build.getBuildStatus();
-        return buildStatus.isSuccessful() && !buildStatus.isFailed() && StringUtils.isNotBlank(getBuildUrl(build));
+        return buildStatus.isSuccessful() && !buildStatus.isFailed() && !getBuildInfoUrls(build).isEmpty();
     }
 
     @Nullable
@@ -66,7 +67,7 @@ public class ArtifactoryResultsFragmentExtension extends SimplePageExtension {
         return BuildDataExtensionUtil.retrieveBuild(request, server);
     }
 
-    private String getBuildUrl(SBuild build) {
+    private Map<String, String> getBuildInfoUrls(SBuild build) {
         if (build == null) {
             return null;
         }
@@ -79,19 +80,32 @@ public class ArtifactoryResultsFragmentExtension extends SimplePageExtension {
 
         CustomDataStorage customDataStorage = buildType.getCustomDataStorage(CustomDataStorageKeys.RUN_HISTORY);
 
+        Map<String, String> buildInfoUrls = new HashMap<String, String>();
         for (SBuildRunnerDescriptor buildRunnerDescriptor : buildType.getBuildRunners()) {
-            String buildUrl = customDataStorage.getValue(Long.toString(build.getBuildId()) + "#" +
+            String buildUrl = customDataStorage.getValue(build.getBuildTypeExternalId() + "#" +
+                    Long.toString(build.getBuildId()) + "#" +
                     buildRunnerDescriptor.getId());
             if (StringUtils.isNotBlank(buildUrl)) {
-                return buildUrl + build.getBuildTypeExternalId() + "/" + build.getBuildNumber();
+                buildInfoUrls.put(buildUrl, buildRunnerDescriptor.getName());
+            } else if (StringUtils.isNotBlank(
+                    customDataStorage.getValue(
+                            Long.toString(build.getBuildId()) + "#" + buildRunnerDescriptor.getId()))) {
+                buildUrl = customDataStorage.getValue(
+                        Long.toString(build.getBuildId()) + "#" + buildRunnerDescriptor.getId());
+                buildInfoUrls.put(
+                        buildUrl + build.getBuildTypeExternalId() + "/" + build.getBuildNumber(),
+                        buildRunnerDescriptor.getName());
+                break; // Old implementation supports only single buildInfo url
             } else {
                 //Maintain backward compatibility for when there were no multi-runners and results were mapped per build
                 buildUrl = customDataStorage.getValue(Long.toString(build.getBuildId()));
                 if (StringUtils.isNotBlank(buildUrl)) {
-                    return buildUrl + build.getBuildTypeExternalId() + "/" + build.getBuildNumber();
+                    buildInfoUrls.put(buildUrl + build.getBuildTypeExternalId() + "/" + build.getBuildNumber(),
+                            buildRunnerDescriptor.getName());
                 }
+                break; // Old implementation supports only single buildInfo url
             }
         }
-        return null;
+        return buildInfoUrls;
     }
 }

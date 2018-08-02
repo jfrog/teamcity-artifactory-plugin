@@ -57,6 +57,7 @@ public class RunnerParameterKeys {
     public static final String DISCARD_OLD_BUILDS_DELETE_ARTIFACTS = PREFIX + "buildRetentionDeleteArtifacts";
     public static final String DISCARD_OLD_BUILDS_ASYNC = PREFIX + "buildRetentionAsync";
     public static final String ENV_VARS_INCLUDE_PATTERNS = PREFIX + "envVarsIncludePatterns";
+    public static final String COSTUME_BUILD_NAME = PREFIX + "customBuildName";
     public static final String ENV_VARS_EXCLUDE_PATTERNS = PREFIX + "envVarsExcludePatterns";
     public final static String PUBLISH_MAVEN_DESCRIPTORS = PREFIX + "publishMavenDescriptors";
     public final static String PUBLISH_IVY_DESCRIPTORS = PREFIX + "publishIvyDescriptors";

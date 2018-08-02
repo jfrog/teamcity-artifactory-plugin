@@ -432,6 +432,10 @@ Use the Artifactory-Ivy integration to collect build info data and deploy artifa
         </td>
     </tr>
 
+    <jsp:include page="../common/buildNameEdit.jsp">
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
+    </jsp:include>
+
     <jsp:include page="../common/envVarsEdit.jsp">
         <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
     </jsp:include>

@@ -112,7 +112,6 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
      * This method goes over the provided DeployDetailsArtifact list and adds it to the provided moduleBuilder with
      * the needed properties.
      *
-     * @param deployDetailsList the deployDetails to set in the module
      * @param moduleBuilder     the moduleBuilder that contains the build information
      * @return updated deployDetails List
      */

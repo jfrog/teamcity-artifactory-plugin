@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import static org.jfrog.teamcity.common.ConstantValues.BUILD_NAME;
+import static org.jfrog.teamcity.common.ConstantValues.BUILD_NUMBER;
 
 /**
  * Created by romang on 5/25/17.
@@ -43,7 +44,7 @@ public class AgentListenerXrayScanHelper {
         }
 
         String buildName = runnerParams.get(BUILD_NAME);
-        String buildNumber = runner.getBuild().getBuildNumber();
+        String buildNumber = runnerParams.get(BUILD_NUMBER);
 
         logger.message("Initiating Xray scan...");
         ArtifactoryXrayClient xrayClient = new ArtifactoryXrayClient(runnerParams.get(RunnerParameterKeys.URL),

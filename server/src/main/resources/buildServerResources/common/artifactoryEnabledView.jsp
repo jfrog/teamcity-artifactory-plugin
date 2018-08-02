@@ -19,7 +19,7 @@
 <c:set var="artifactoryEnabled" value="${param.artifactoryEnabled}" scope="request"/>
 
 <div class="parameter">
-    Deploy artifacts to Artifactory:
+    Artifactory Integration:
     <c:choose>
         <c:when test="${artifactoryEnabled}">
             <strong>

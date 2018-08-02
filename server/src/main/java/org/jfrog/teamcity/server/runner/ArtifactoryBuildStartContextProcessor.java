@@ -37,6 +37,7 @@ import org.jfrog.teamcity.common.ReleaseManagementParameterKeys;
 import org.jfrog.teamcity.common.RunTypeUtils;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
+import org.jfrog.teamcity.server.util.ServerUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -110,8 +111,7 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
 
             runnerContext.addRunnerParameter(RunnerParameterKeys.TIMEOUT, Integer.toString(serverConfig.getTimeout()));
 
-            //TODO: [by yl] See how we can get a nicer build name...
-            runnerContext.addRunnerParameter(BUILD_NAME, build.getBuildTypeExternalId());
+            runnerContext.addRunnerParameter(BUILD_NAME, ServerUtil.getArtifactoryBuildName(build, runParameters));
 
             runnerContext.addRunnerParameter(BUILD_NUMBER, build.getBuildNumber());
 
@@ -138,14 +138,21 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
              */
             SBuildType buildType = build.getBuildType();
             if (buildType != null && shouldStoreBuildInRunHistory(runParameters)) {
-                String runnerCustomStorageId = Long.toString(build.getBuildId()) + "#" + runnerContext.getId();
+                String customStorageId = build.getBuildTypeExternalId() + "#" +
+                        Long.toString(build.getBuildId()) + "#" +
+                        runnerContext.getId();
                 StringBuilder artifactoryUrlBuilder = new StringBuilder().append(serverConfigUrl);
                 if (!serverConfigUrl.endsWith("/")) {
                     artifactoryUrlBuilder.append("/");
                 }
-                String artifactoryUrl = artifactoryUrlBuilder.append("webapp/builds/").toString();
+                String artifactoryUrl = artifactoryUrlBuilder
+                        .append("webapp/builds/")
+                        .append(runnerContext.getParameters().get(BUILD_NAME))
+                        .append("/")
+                        .append(runnerContext.getParameters().get(BUILD_NUMBER))
+                        .toString();
                 CustomDataStorage runHistory = buildType.getCustomDataStorage(CustomDataStorageKeys.RUN_HISTORY);
-                runHistory.putValue(runnerCustomStorageId, artifactoryUrl);
+                runHistory.putValue(customStorageId, artifactoryUrl);
             }
 
             if (RunTypeUtils.isMavenRunType(runType)) {

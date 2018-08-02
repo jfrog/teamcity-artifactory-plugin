@@ -290,7 +290,7 @@ display:inline-block;
 </style>
 <![endif]-->
 
-<l:settingsGroup title="Deploy Artifacts To Artifactory">
+<l:settingsGroup title="Artifactory Integration">
     <jsp:include page="../common/serversEdit.jsp">
         <jsp:param name="shouldDisplay" value="${foundExistingConfig}"/>
     </jsp:include>
@@ -428,6 +428,10 @@ display:inline-block;
             </span>
         </td>
     </tr>
+
+    <jsp:include page="../common/buildNameEdit.jsp">
+        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
+    </jsp:include>
 
     <jsp:include page="../common/envVarsEdit.jsp">
         <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
