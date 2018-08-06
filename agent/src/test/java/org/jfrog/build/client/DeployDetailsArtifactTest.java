@@ -16,6 +16,7 @@
 
 package org.jfrog.build.client;
 
+import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -58,14 +59,15 @@ public class DeployDetailsArtifactTest {
     }
 
     public void testInitWithValidDeployDetails() {
-        DeployDetails deployDetails = new DeployDetails();
-
-        deployDetails.artifactPath = "moo";
-
-        File file = new File("/this/is/a/file");
-        deployDetails.file = file;
-
+        DeployDetails.Builder deployDetailsBuilder = new DeployDetails.Builder();
+        File file = new File(this.getClass().getClassLoader().getResource("foo/bar").getPath());
+        DeployDetails deployDetails = deployDetailsBuilder
+                .file(file)
+                .artifactPath("moo")
+                .targetRepository("required")
+                .build();
         DeployDetailsArtifact deployDetailsArtifact = new DeployDetailsArtifact(deployDetails);
+
         assertEquals(deployDetailsArtifact.getDeployDetails(), deployDetails,
                 "Wrapped deploy details object should be identical to the given one.");
 

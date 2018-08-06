@@ -31,7 +31,7 @@ import org.jfrog.build.api.BuildType;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.builder.*;
 import org.jfrog.build.api.release.Promotion;
-import org.jfrog.build.client.DeployDetails;
+import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.build.client.DeployDetailsArtifact;
 import org.jfrog.teamcity.agent.api.Gavc;
 import org.jfrog.teamcity.agent.listener.AgentListenerBuildInfoHelper;
