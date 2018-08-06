@@ -34,7 +34,7 @@
                             className="longField"/>
 
         <span class="smallNote">
-            The build name in Artifactory. Alphanumeric, Dash and Underscore character are supported.
+            The build name in Artifactory. Alphanumeric character in addition to dashes and underscores are supported.
         </span>
     </td>
 </tr>

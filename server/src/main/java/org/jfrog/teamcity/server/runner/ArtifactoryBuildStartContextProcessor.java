@@ -37,7 +37,7 @@ import org.jfrog.teamcity.common.ReleaseManagementParameterKeys;
 import org.jfrog.teamcity.common.RunTypeUtils;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
-import org.jfrog.teamcity.server.util.ServerUtil;
+import org.jfrog.teamcity.server.util.ServerUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -111,7 +111,7 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
 
             runnerContext.addRunnerParameter(RunnerParameterKeys.TIMEOUT, Integer.toString(serverConfig.getTimeout()));
 
-            runnerContext.addRunnerParameter(BUILD_NAME, ServerUtil.getArtifactoryBuildName(build, runParameters));
+            runnerContext.addRunnerParameter(BUILD_NAME, ServerUtils.getArtifactoryBuildName(build, runParameters));
 
             runnerContext.addRunnerParameter(BUILD_NUMBER, build.getBuildNumber());
 

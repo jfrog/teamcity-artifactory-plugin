@@ -36,6 +36,8 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.jdom.Element;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jfrog.build.api.builder.PromotionBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.teamcity.api.ProxyInfo;
@@ -45,7 +47,7 @@ import org.jfrog.teamcity.api.credentials.CredentialsHelper;
 import org.jfrog.teamcity.common.PromotionTargetStatusType;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
-import org.jfrog.teamcity.server.util.ServerUtil;
+import org.jfrog.teamcity.server.util.ServerUtils;
 import org.jfrog.teamcity.server.util.TeamcityServerBuildInfoLog;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -72,70 +74,36 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
     }
 
     @Override
-    protected ModelAndView doGet(HttpServletRequest request, HttpServletResponse response) {
+    protected ModelAndView doGet(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response) {
         return null;
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response, Element xmlResponse) {
-        SBuild build = BuildDataExtensionUtil.retrieveBuild(request, buildServer);
-
+    protected void doPost(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Element xmlResponse) {
         ActionErrors errors = new ActionErrors();
-
-        if (build == null) {
-            addError(errors, "errorDetails", "The selected build configuration could not be resolved: make sure " +
-                    "that the request sent to the promotion controller includes the 'buildId' parameter.", xmlResponse);
+        SBuild build = getSBuild(request, xmlResponse, errors);
+        if (build == null)
             return;
-        }
 
-        SBuildType type = build.getBuildType();
-        if (type == null) {
-            addError(errors, "errorDetails", "The type of the selected build configuration could not be resolved.",
-                    xmlResponse);
+        SBuildType type = getSBuildType(xmlResponse, errors, build);
+        if (type == null)
             return;
-        }
 
         Map<String, String> parameters = getBuildRunnerParameters(type);
-
-        String selectUrlIdParam = parameters.get(RunnerParameterKeys.URL_ID);
-        if (StringUtils.isBlank(selectUrlIdParam)) {
-            addError(errors, "errorDetails", "Unable to perform any promotion operations: could not find an " +
-                    "Artifactory server ID associated with the configuration of the selected build.", xmlResponse);
+        String selectUrlIdParam = getSelectedUrlId(xmlResponse, errors, parameters);
+        if (selectUrlIdParam == null)
             return;
-        }
 
         long selectedUrlId = Long.parseLong(selectUrlIdParam);
-        ServerConfigBean server = deployableServers.getServerConfigById(selectedUrlId);
-        if (server == null) {
-            addError(errors, "errorPromotion", "Unable to perform any promotion operations: could not find an " +
-                    "Artifactory server associated with the configuration ID of '" + selectedUrlId + "'.", xmlResponse);
+        ServerConfigBean server = getServerConfigBean(xmlResponse, errors, selectedUrlId);
+        if (server == null)
             return;
-        }
 
-        boolean overrideDeployerCredentials = false;
-        String username = "";
-        String password = "";
-        if (Boolean.valueOf(parameters.get(RunnerParameterKeys.OVERRIDE_DEFAULT_DEPLOYER))) {
-            overrideDeployerCredentials = true;
-            if (StringUtils.isNotBlank(parameters.get(RunnerParameterKeys.DEPLOYER_USERNAME))) {
-                username = parameters.get(RunnerParameterKeys.DEPLOYER_USERNAME);
-            }
-            if (StringUtils.isNotBlank(parameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD))) {
-                password = parameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD);
-            }
-        }
-        CredentialsBean preferredDeployer = CredentialsHelper.getPreferredDeployingCredentials(server,
-                overrideDeployerCredentials, username, password);
-
+        boolean overrideDeployerCredentials = Boolean.valueOf(parameters.get(RunnerParameterKeys.OVERRIDE_DEFAULT_DEPLOYER));
+        CredentialsBean preferredDeployer = getDeployerCredentialsBean(parameters, server, overrideDeployerCredentials);
         String loadTargetRepos = request.getParameter("loadTargetRepos");
         if (StringUtils.isNotBlank(loadTargetRepos) && Boolean.valueOf(loadTargetRepos)) {
-            Element deployableReposElement = new Element("deployableRepos");
-            List<String> deployableRepos = deployableServers.getServerDeployableRepos(selectedUrlId,
-                    overrideDeployerCredentials, preferredDeployer.getUsername(), preferredDeployer.getPassword());
-            for (String deployableRepo : deployableRepos) {
-                deployableReposElement.addContent(new Element("repoName").addContent(deployableRepo));
-            }
-            xmlResponse.addContent(deployableReposElement);
+            populateTargetRepos(xmlResponse, selectedUrlId, overrideDeployerCredentials, preferredDeployer);
             return;
         }
 
@@ -143,43 +111,7 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
         ArtifactoryBuildInfoClient client = null;
         try {
             client = getBuildInfoClient(server, preferredDeployer.getUsername(), preferredDeployer.getPassword());
-            // do a dry run first
-            PromotionBuilder promotionBuilder = new PromotionBuilder()
-                    .status(PromotionTargetStatusType.valueOf(request.getParameter("targetStatus")).
-                            getStatusDisplayName())
-                    .comment(request.getParameter("comment"))
-                    .ciUser(SessionUser.getUser(request).getUsername())
-                    .targetRepo(request.getParameter("promotionRepository"))
-                    .dependencies(Boolean.valueOf(request.getParameter("includeDependencies")))
-                    .copy(Boolean.valueOf(request.getParameter("useCopy")))
-                    .dryRun(true);
-
-            Loggers.SERVER.info("Performing dry run promotion (no changes are made during dry run) ...");
-
-            HttpResponse dryResponse = client.stageBuild(
-                    ServerUtil.getArtifactoryBuildName(build, parameters),
-                    build.getBuildNumber(),
-                    promotionBuilder.build());
-
-            if (!checkSuccess(dryResponse, true)) {
-                addError(errors, "errorPromotion", "Failed to execute the dry run promotion operation. Please " +
-                        "review the TeamCity server and Artifactory logs for further details.", xmlResponse);
-                return;
-            }
-
-            Loggers.SERVER.info("Dry run finished successfully.\nPerforming promotion ...");
-            HttpResponse wetResponse = client.stageBuild(
-                    ServerUtil.getArtifactoryBuildName(build, parameters),
-                    build.getBuildNumber(),
-                    promotionBuilder.dryRun(false).build());
-
-            if (!checkSuccess(wetResponse, false)) {
-                addError(errors, "errorPromotion", "Failed to execute the promotion. Please review the TeamCity " +
-                        "server and Artifactory logs for further details.", xmlResponse);
-                return;
-            }
-
-            Loggers.SERVER.info("Promotion completed successfully!");
+            performPromotionFlow(request, xmlResponse, errors, build, parameters, client);
         } catch (IOException e) {
             Loggers.SERVER.error("Failed to execute promotion: " + e.getMessage());
             Loggers.SERVER.error(e);
@@ -190,6 +122,133 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
                 client.close();
             }
         }
+    }
+
+    private boolean performPromotionFlow(@NotNull HttpServletRequest request, @NotNull Element xmlResponse,
+                                         ActionErrors errors, SBuild build, Map<String, String> parameters,
+                                         ArtifactoryBuildInfoClient client) throws IOException {
+        PromotionBuilder promotionBuilder = new PromotionBuilder()
+                .status(PromotionTargetStatusType.valueOf(request.getParameter("targetStatus")).
+                        getStatusDisplayName())
+                .comment(request.getParameter("comment"))
+                .ciUser(SessionUser.getUser(request).getUsername())
+                .targetRepo(request.getParameter("promotionRepository"))
+                .dependencies(Boolean.valueOf(request.getParameter("includeDependencies")))
+                .copy(Boolean.valueOf(request.getParameter("useCopy")))
+                .dryRun(true);
+
+        // do a dry run first
+        if (!performDryRunPromotion(xmlResponse, errors, build, parameters, client, promotionBuilder))
+            return true;
+
+        Loggers.SERVER.info("Dry run finished successfully.\nPerforming promotion ...");
+        performPromotion(xmlResponse, errors, build, parameters, client, promotionBuilder);
+        return false;
+    }
+
+    private void performPromotion(@NotNull Element xmlResponse, ActionErrors errors,
+                                  SBuild build, Map<String, String> parameters, ArtifactoryBuildInfoClient client,
+                                  PromotionBuilder promotionBuilder) throws IOException {
+        HttpResponse wetResponse = client.stageBuild(
+                ServerUtils.getArtifactoryBuildName(build, parameters),
+                build.getBuildNumber(),
+                promotionBuilder.dryRun(false).build());
+
+        if (!checkSuccess(wetResponse, false)) {
+            addError(errors, "errorPromotion", "Failed to execute the promotion. Please review the TeamCity " +
+                    "server and Artifactory logs for further details.", xmlResponse);
+            return;
+        }
+
+        Loggers.SERVER.info("Promotion completed successfully!");
+    }
+
+    private boolean performDryRunPromotion(@NotNull Element xmlResponse, ActionErrors errors, SBuild build,
+                                           Map<String, String> parameters, ArtifactoryBuildInfoClient client,
+                                           PromotionBuilder promotionBuilder) throws IOException {
+        Loggers.SERVER.info("Performing dry run promotion (no changes are made during dry run) ...");
+
+        HttpResponse dryResponse = client.stageBuild(
+                ServerUtils.getArtifactoryBuildName(build, parameters),
+                build.getBuildNumber(),
+                promotionBuilder.build());
+
+        if (!checkSuccess(dryResponse, true)) {
+            addError(errors, "errorPromotion", "Failed to execute the dry run promotion operation. Please " +
+                    "review the TeamCity server and Artifactory logs for further details.", xmlResponse);
+            return false;
+        }
+        return true;
+    }
+
+    private void populateTargetRepos(@NotNull Element xmlResponse, long selectedUrlId, boolean overrideDeployerCredentials, CredentialsBean preferredDeployer) {
+        Element deployableReposElement = new Element("deployableRepos");
+        List<String> deployableRepos = deployableServers.getServerDeployableRepos(selectedUrlId,
+                overrideDeployerCredentials, preferredDeployer.getUsername(), preferredDeployer.getPassword());
+        for (String deployableRepo : deployableRepos) {
+            deployableReposElement.addContent(new Element("repoName").addContent(deployableRepo));
+        }
+        xmlResponse.addContent(deployableReposElement);
+    }
+
+    @NotNull
+    private CredentialsBean getDeployerCredentialsBean(Map<String, String> parameters, ServerConfigBean server, boolean overrideDeployerCredentials) {
+        String username = "";
+        String password = "";
+        if (overrideDeployerCredentials) {
+            if (StringUtils.isNotBlank(parameters.get(RunnerParameterKeys.DEPLOYER_USERNAME))) {
+                username = parameters.get(RunnerParameterKeys.DEPLOYER_USERNAME);
+            }
+            if (StringUtils.isNotBlank(parameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD))) {
+                password = parameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD);
+            }
+        }
+        return CredentialsHelper.getPreferredDeployingCredentials(server,
+                overrideDeployerCredentials, username, password);
+    }
+
+    @Nullable
+    private ServerConfigBean getServerConfigBean(@NotNull Element xmlResponse, ActionErrors errors, long selectedUrlId) {
+        ServerConfigBean server = deployableServers.getServerConfigById(selectedUrlId);
+        if (server == null) {
+            addError(errors, "errorPromotion", "Unable to perform any promotion operations: could not find an " +
+                    "Artifactory server associated with the configuration ID of '" + selectedUrlId + "'.", xmlResponse);
+            return null;
+        }
+        return server;
+    }
+
+    @Nullable
+    private String getSelectedUrlId(@NotNull Element xmlResponse, ActionErrors errors, Map<String, String> parameters) {
+        String selectUrlIdParam = parameters.get(RunnerParameterKeys.URL_ID);
+        if (StringUtils.isBlank(selectUrlIdParam)) {
+            addError(errors, "errorDetails", "Unable to perform any promotion operations: could not find an " +
+                    "Artifactory server ID associated with the configuration of the selected build.", xmlResponse);
+            return null;
+        }
+        return selectUrlIdParam;
+    }
+
+    @Nullable
+    private SBuildType getSBuildType(@NotNull Element xmlResponse, ActionErrors errors, SBuild build) {
+        SBuildType type = build.getBuildType();
+        if (type == null) {
+            addError(errors, "errorDetails", "The type of the selected build configuration could not be resolved.",
+                    xmlResponse);
+            return null;
+        }
+        return type;
+    }
+
+    @Nullable
+    private SBuild getSBuild(@NotNull HttpServletRequest request, @NotNull Element xmlResponse, ActionErrors errors) {
+        SBuild build = BuildDataExtensionUtil.retrieveBuild(request, buildServer);
+        if (build == null) {
+            addError(errors, "errorDetails", "The selected build configuration could not be resolved: make sure " +
+                    "that the request sent to the promotion controller includes the 'buildId' parameter.", xmlResponse);
+            return null;
+        }
+        return build;
     }
 
     private Map<String, String> getBuildRunnerParameters(SBuildType buildType) {
