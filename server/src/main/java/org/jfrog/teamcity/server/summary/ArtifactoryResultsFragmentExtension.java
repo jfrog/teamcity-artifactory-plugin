@@ -92,12 +92,13 @@ public class ArtifactoryResultsFragmentExtension extends SimplePageExtension {
                 continue;
             }
 
+            // Old implementation supports only single buildInfo url
             String legacyBuildUrl = customDataStorage.getValue(Long.toString(build.getBuildId()) + "#" + buildRunnerDescriptor.getId());
             if (StringUtils.isNotBlank(legacyBuildUrl)) {
 
                 buildInfoUrls.put(legacyBuildUrl + build.getBuildTypeExternalId() + "/" + build.getBuildNumber(),
                         buildRunnerDescriptor.getName());
-                return buildInfoUrls; // Old implementation supports only single buildInfo url
+                return buildInfoUrls;
             }
         }
         return buildInfoUrls;

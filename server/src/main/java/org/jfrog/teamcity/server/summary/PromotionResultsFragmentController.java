@@ -86,18 +86,21 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
             return;
 
         SBuildType type = getSBuildType(xmlResponse, errors, build);
-        if (type == null)
+        if (type == null) {
             return;
+        }
 
         Map<String, String> parameters = getBuildRunnerParameters(type);
         String selectUrlIdParam = getSelectedUrlId(xmlResponse, errors, parameters);
-        if (selectUrlIdParam == null)
+        if (selectUrlIdParam == null) {
             return;
+        }
 
         long selectedUrlId = Long.parseLong(selectUrlIdParam);
         ServerConfigBean server = getServerConfigBean(xmlResponse, errors, selectedUrlId);
-        if (server == null)
+        if (server == null) {
             return;
+        }
 
         boolean overrideDeployerCredentials = Boolean.valueOf(parameters.get(RunnerParameterKeys.OVERRIDE_DEFAULT_DEPLOYER));
         CredentialsBean preferredDeployer = getDeployerCredentialsBean(parameters, server, overrideDeployerCredentials);
@@ -111,7 +114,7 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
         ArtifactoryBuildInfoClient client = null;
         try {
             client = getBuildInfoClient(server, preferredDeployer.getUsername(), preferredDeployer.getPassword());
-            performPromotionFlow(request, xmlResponse, errors, build, parameters, client);
+            promoteBuild(request, xmlResponse, errors, build, parameters, client);
         } catch (IOException e) {
             Loggers.SERVER.error("Failed to execute promotion: " + e.getMessage());
             Loggers.SERVER.error(e);
@@ -124,10 +127,9 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
         }
     }
 
-    private boolean performPromotionFlow(@NotNull HttpServletRequest request, @NotNull Element xmlResponse,
-                                         ActionErrors errors, SBuild build, Map<String, String> parameters,
-                                         ArtifactoryBuildInfoClient client) throws IOException {
-        PromotionBuilder promotionBuilder = new PromotionBuilder()
+    private void promoteBuild(@NotNull HttpServletRequest request, @NotNull Element xmlResponse, ActionErrors errors,
+                                 SBuild build, Map<String, String> parameters, ArtifactoryBuildInfoClient client) throws IOException {
+                PromotionBuilder promotionBuilder = new PromotionBuilder()
                 .status(PromotionTargetStatusType.valueOf(request.getParameter("targetStatus")).
                         getStatusDisplayName())
                 .comment(request.getParameter("comment"))
@@ -137,47 +139,40 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
                 .copy(Boolean.valueOf(request.getParameter("useCopy")))
                 .dryRun(true);
 
-        // do a dry run first
-        if (!performDryRunPromotion(xmlResponse, errors, build, parameters, client, promotionBuilder))
-            return true;
-
-        Loggers.SERVER.info("Dry run finished successfully.\nPerforming promotion ...");
-        performPromotion(xmlResponse, errors, build, parameters, client, promotionBuilder);
-        return false;
+        // Do a dry run first
+        if (!sendPromotionRequest(xmlResponse, errors, build, parameters, client, promotionBuilder, true)){
+            return;
+        }
+        sendPromotionRequest(xmlResponse, errors, build, parameters, client, promotionBuilder, false);
     }
 
-    private void performPromotion(@NotNull Element xmlResponse, ActionErrors errors,
-                                  SBuild build, Map<String, String> parameters, ArtifactoryBuildInfoClient client,
-                                  PromotionBuilder promotionBuilder) throws IOException {
+    private boolean sendPromotionRequest(@NotNull Element xmlResponse, ActionErrors errors, SBuild build,
+                                      Map<String, String> parameters, ArtifactoryBuildInfoClient client,
+                                      PromotionBuilder promotionBuilder, boolean dryRun) throws IOException {
+        if (dryRun) {
+            Loggers.SERVER.info("Performing dry run promotion (no changes are made during dry run)...");
+        }
         HttpResponse wetResponse = client.stageBuild(
                 ServerUtils.getArtifactoryBuildName(build, parameters),
                 build.getBuildNumber(),
-                promotionBuilder.dryRun(false).build());
+                promotionBuilder.dryRun(dryRun).build());
 
-        if (!checkSuccess(wetResponse, false)) {
-            addError(errors, "errorPromotion", "Failed to execute the promotion. Please review the TeamCity " +
-                    "server and Artifactory logs for further details.", xmlResponse);
-            return;
+        if (!checkSuccess(wetResponse, dryRun)) {
+            StringBuilder sb = new StringBuilder("Failed to execute the ");
+            if (dryRun) {
+                sb.append("dry run ");
+            }
+            sb.append("promotion operation. Please review the TeamCity server and Artifactory logs for further details.");
+            addError(errors, "errorPromotion", sb.toString(), xmlResponse);
+            return false;
+        }
+
+        if (dryRun) {
+            Loggers.SERVER.info("Dry run promotion completed successfully.\nPerforming promotion...");
+            return true;
         }
 
         Loggers.SERVER.info("Promotion completed successfully!");
-    }
-
-    private boolean performDryRunPromotion(@NotNull Element xmlResponse, ActionErrors errors, SBuild build,
-                                           Map<String, String> parameters, ArtifactoryBuildInfoClient client,
-                                           PromotionBuilder promotionBuilder) throws IOException {
-        Loggers.SERVER.info("Performing dry run promotion (no changes are made during dry run) ...");
-
-        HttpResponse dryResponse = client.stageBuild(
-                ServerUtils.getArtifactoryBuildName(build, parameters),
-                build.getBuildNumber(),
-                promotionBuilder.build());
-
-        if (!checkSuccess(dryResponse, true)) {
-            addError(errors, "errorPromotion", "Failed to execute the dry run promotion operation. Please " +
-                    "review the TeamCity server and Artifactory logs for further details.", xmlResponse);
-            return false;
-        }
         return true;
     }
 

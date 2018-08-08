@@ -68,7 +68,10 @@ public abstract class CredentialsHelper {
      * @return A CredentialsBean will contain the default provided username and password which will
      * be overridden by the provided CredentialsBean.
      */
-    public static CredentialsBean populateCredentials(CredentialsBean credentials, String username, String password) {
+    static CredentialsBean populateCredentials(CredentialsBean credentials, String username, String password) {
+        if (credentials == null || credentials.isEmpty()) {
+            return new CredentialsBean(username, password);
+        }
         if (StringUtils.isNotBlank(credentials.getUsername())) {
             username = credentials.getUsername();
         }
