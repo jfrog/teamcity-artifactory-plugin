@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import jetbrains.buildServer.controllers.ActionErrors;
 import jetbrains.buildServer.controllers.BaseFormXmlController;
 import jetbrains.buildServer.controllers.BuildDataExtensionUtil;
@@ -58,6 +59,7 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Noam Y. Tenne
@@ -148,26 +150,30 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
 
     private boolean sendPromotionRequest(@NotNull Element xmlResponse, ActionErrors errors, SBuild build,
                                       Map<String, String> parameters, ArtifactoryBuildInfoClient client,
-                                      PromotionBuilder promotionBuilder, boolean dryRun) throws IOException {
-        if (dryRun) {
+                                      PromotionBuilder promotionBuilder, boolean isDryRun) throws IOException {
+        if (isDryRun) {
             Loggers.SERVER.info("Performing dry run promotion (no changes are made during dry run)...");
         }
         HttpResponse wetResponse = client.stageBuild(
                 ServerUtils.getArtifactoryBuildName(build, parameters),
                 build.getBuildNumber(),
-                promotionBuilder.dryRun(dryRun).build());
+                promotionBuilder.dryRun(isDryRun).build());
 
-        if (!checkSuccess(wetResponse, dryRun)) {
+        Set<String> promotionErrors = checkSuccess(wetResponse, isDryRun);
+        if (promotionErrors.size() > 0) {
             StringBuilder sb = new StringBuilder("Failed to execute the ");
-            if (dryRun) {
+            if (isDryRun) {
                 sb.append("dry run ");
             }
-            sb.append("promotion operation. Please review the TeamCity server and Artifactory logs for further details.");
+            sb.append("promotion operation: </br>");
+            for (String promotionError : promotionErrors) {
+                sb.append(promotionError.replace("\n", "</br>")).append("</br>");
+            }
             addError(errors, "errorPromotion", sb.toString(), xmlResponse);
             return false;
         }
 
-        if (dryRun) {
+        if (isDryRun) {
             Loggers.SERVER.info("Dry run promotion completed successfully.\nPerforming promotion...");
             return true;
         }
@@ -281,19 +287,22 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
         return infoClient;
     }
 
-    private boolean checkSuccess(HttpResponse response, boolean dryRun) {
+    private Set<String> checkSuccess(HttpResponse response, boolean isDryRun) {
         StatusLine status = response.getStatusLine();
+        Set<String> errorsList = Sets.newHashSet();
         try {
             String content = entityToString(response);
             if (status.getStatusCode() != 200) {
-                if (dryRun) {
-                    Loggers.SERVER.error("Promotion failed during dry run (no change in Artifactory was done): "
-                            + status + "\n" + content);
+                String error;
+                if (isDryRun) {
+                    error = "Promotion failed during dry run (no change in Artifactory was done): " + status + "\n" + content;
+                    Loggers.SERVER.error(error);
                 } else {
-                    Loggers.SERVER.error("Promotion failed. View Artifactory logs for more details: " + status +
-                            "\n" + content);
+                    error = "Promotion failed. View Artifactory logs for more details: " + status + "\n" + content;
+                    Loggers.SERVER.error(error);
                 }
-                return false;
+                errorsList.add(error);
+                return errorsList;
             }
 
             JsonFactory factory = new JsonFactory();
@@ -315,17 +324,21 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
                         String message = messageNode.asText();
                         if (StringUtils.isNotBlank(level) && StringUtils.isNotBlank(message) &&
                                 !message.startsWith("No items were")) {
-                            Loggers.SERVER.error("Promotion failed. Received " + level + ": " + message);
+                            String error = "Promotion failed. Received " + level + ": " + message;
+                            Loggers.SERVER.error(error);
+                            errorsList.add(error);
                         }
                     }
                 }
             }
 
-            return true;
+            return errorsList;
         } catch (IOException e) {
-            Loggers.SERVER.error("Failed to parse promotion response: " + e.getMessage());
+            String error = "Failed to parse promotion response: " + e.getMessage();
+            Loggers.SERVER.error(error);
             Loggers.SERVER.error(e);
-            return false;
+            errorsList.add(error);
+            return errorsList;
         }
     }
 

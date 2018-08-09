@@ -30,7 +30,7 @@ public abstract class CredentialsHelper {
     public static CredentialsBean getPreferredResolvingCredentials(ServerConfigBean serverConfigBean,
                                                                    boolean overrideDeployerCredentials,
                                                                    String username, String password) {
-        if (overrideDeployerCredentials) {
+        if (overrideDeployerCredentials || serverConfigBean == null) {
             return new CredentialsBean(username, password);
         }
 
