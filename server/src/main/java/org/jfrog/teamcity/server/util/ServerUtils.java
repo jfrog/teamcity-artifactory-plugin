@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Created by Dima Nevelev on 19/07/2018.
  */
-public class ServerUtil {
+public class ServerUtils {
 
     public static String getArtifactoryBuildName(Build build, Map<String, String> runParameters) {
         String customBuildName = runParameters.get(RunnerParameterKeys.COSTUME_BUILD_NAME);

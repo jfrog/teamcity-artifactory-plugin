@@ -31,7 +31,7 @@ import org.jfrog.build.api.builder.ArtifactBuilder;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.api.util.FileChecksumCalculator;
-import org.jfrog.build.client.DeployDetails;
+import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.build.client.DeployDetailsArtifact;
 import org.jfrog.build.extractor.BuildInfoExtractor;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;

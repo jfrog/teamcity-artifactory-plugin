@@ -67,43 +67,38 @@ public class ArtifactoryResultsFragmentExtension extends SimplePageExtension {
         return BuildDataExtensionUtil.retrieveBuild(request, server);
     }
 
+    /**
+     * Returns a map of Artifactory buildInfo urls. The key is buildInfo url and the value is the name of the build step that created this build.
+     * @param build SBuild
+     * @return map of Artifactory buildInfo urls. The key is buildInfo url and the value is the name of the build step that created this build.
+     */
     private Map<String, String> getBuildInfoUrls(SBuild build) {
         if (build == null) {
             return null;
         }
 
         SBuildType buildType = build.getBuildType();
-
         if (buildType == null) {
             return null;
         }
 
         CustomDataStorage customDataStorage = buildType.getCustomDataStorage(CustomDataStorageKeys.RUN_HISTORY);
-
         Map<String, String> buildInfoUrls = new HashMap<String, String>();
         for (SBuildRunnerDescriptor buildRunnerDescriptor : buildType.getBuildRunners()) {
             String buildUrl = customDataStorage.getValue(build.getBuildTypeExternalId() + "#" +
-                    Long.toString(build.getBuildId()) + "#" +
-                    buildRunnerDescriptor.getId());
+                    Long.toString(build.getBuildId()) + "#" + buildRunnerDescriptor.getId());
             if (StringUtils.isNotBlank(buildUrl)) {
                 buildInfoUrls.put(buildUrl, buildRunnerDescriptor.getName());
-            } else if (StringUtils.isNotBlank(
-                    customDataStorage.getValue(
-                            Long.toString(build.getBuildId()) + "#" + buildRunnerDescriptor.getId()))) {
-                buildUrl = customDataStorage.getValue(
-                        Long.toString(build.getBuildId()) + "#" + buildRunnerDescriptor.getId());
-                buildInfoUrls.put(
-                        buildUrl + build.getBuildTypeExternalId() + "/" + build.getBuildNumber(),
+                continue;
+            }
+
+            // Old implementation supports only single buildInfo url
+            String legacyBuildUrl = customDataStorage.getValue(Long.toString(build.getBuildId()) + "#" + buildRunnerDescriptor.getId());
+            if (StringUtils.isNotBlank(legacyBuildUrl)) {
+
+                buildInfoUrls.put(legacyBuildUrl + build.getBuildTypeExternalId() + "/" + build.getBuildNumber(),
                         buildRunnerDescriptor.getName());
-                break; // Old implementation supports only single buildInfo url
-            } else {
-                //Maintain backward compatibility for when there were no multi-runners and results were mapped per build
-                buildUrl = customDataStorage.getValue(Long.toString(build.getBuildId()));
-                if (StringUtils.isNotBlank(buildUrl)) {
-                    buildInfoUrls.put(buildUrl + build.getBuildTypeExternalId() + "/" + build.getBuildNumber(),
-                            buildRunnerDescriptor.getName());
-                }
-                break; // Old implementation supports only single buildInfo url
+                return buildInfoUrls;
             }
         }
         return buildInfoUrls;

@@ -30,48 +30,54 @@ public abstract class CredentialsHelper {
     public static CredentialsBean getPreferredResolvingCredentials(ServerConfigBean serverConfigBean,
                                                                    boolean overrideDeployerCredentials,
                                                                    String username, String password) {
-        if (!overrideDeployerCredentials) {
-            if (serverConfigBean.isUseDifferentResolverCredentials()) {
-                CredentialsBean resolverCredentials = serverConfigBean.getDefaultResolverCredentials();
-                if (resolverCredentials != null) {
-                    if (StringUtils.isNotBlank(resolverCredentials.getUsername())) {
-                        username = resolverCredentials.getUsername();
-                    }
-                    if (StringUtils.isNotBlank(resolverCredentials.getPassword())) {
-                        password = resolverCredentials.getPassword();
-                    }
-                }
-            } else {
-                CredentialsBean deployerCredentials = serverConfigBean.getDefaultDeployerCredentials();
-                if (deployerCredentials != null) {
-                    if (StringUtils.isNotBlank(deployerCredentials.getUsername())) {
-                        username = deployerCredentials.getUsername();
-                    }
-                    if (StringUtils.isNotBlank(deployerCredentials.getPassword())) {
-                        password = deployerCredentials.getPassword();
-                    }
-                }
-            }
+        if (overrideDeployerCredentials || serverConfigBean == null) {
+            return new CredentialsBean(username, password);
         }
 
+        if (serverConfigBean.isUseDifferentResolverCredentials()) {
+            CredentialsBean resolverCredentials = serverConfigBean.getDefaultResolverCredentials();
+            if (resolverCredentials != null) {
+                return populateCredentials(resolverCredentials, username, password);
+            }
+            return new CredentialsBean(username, password);
+        }
+
+        CredentialsBean deployerCredentials = serverConfigBean.getDefaultDeployerCredentials();
+        if (deployerCredentials != null) {
+            return populateCredentials(deployerCredentials, username, password);
+        }
         return new CredentialsBean(username, password);
     }
 
     public static CredentialsBean getPreferredDeployingCredentials(ServerConfigBean serverConfigBean,
                                                                    boolean overrideDeployerCredentials,
                                                                    String username, String password) {
-        if (!overrideDeployerCredentials) {
-            CredentialsBean deployerCredentials = serverConfigBean.getDefaultDeployerCredentials();
-            if (deployerCredentials != null) {
-                if (StringUtils.isNotBlank(deployerCredentials.getUsername())) {
-                    username = deployerCredentials.getUsername();
-                }
-                if (StringUtils.isNotBlank(deployerCredentials.getPassword())) {
-                    password = deployerCredentials.getPassword();
-                }
-            }
+        CredentialsBean deployerCredentials = serverConfigBean.getDefaultDeployerCredentials();
+        if (overrideDeployerCredentials || deployerCredentials == null) {
+            return new CredentialsBean(username, password);
         }
+        return populateCredentials(deployerCredentials, username, password);
+    }
 
+    /**
+     * Creates CredentialsBean. The CredentialsBean will contain the default provided username and password which will
+     * be overridden by the provided CredentialsBean.
+     * @param credentials CredentialsBean with username and password which will override the provided username and password
+     * @param username the default username to use in the CredentialsBean
+     * @param password the default password to use in the CredentialsBean
+     * @return A CredentialsBean will contain the default provided username and password which will
+     * be overridden by the provided CredentialsBean.
+     */
+    static CredentialsBean populateCredentials(CredentialsBean credentials, String username, String password) {
+        if (credentials == null || credentials.isEmpty()) {
+            return new CredentialsBean(username, password);
+        }
+        if (StringUtils.isNotBlank(credentials.getUsername())) {
+            username = credentials.getUsername();
+        }
+        if (StringUtils.isNotBlank(credentials.getPassword())) {
+            password = credentials.getPassword();
+        }
         return new CredentialsBean(username, password);
     }
 }

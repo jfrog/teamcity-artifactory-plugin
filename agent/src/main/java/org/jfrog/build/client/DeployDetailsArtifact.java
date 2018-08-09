@@ -16,6 +16,8 @@
 
 package org.jfrog.build.client;
 
+import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
+
 import java.io.File;
 
 
@@ -31,11 +33,11 @@ public class DeployDetailsArtifact {
     }
 
     public String getDeploymentPath() {
-        return deployDetails.artifactPath;
+        return deployDetails.getArtifactPath();
     }
 
     public File getFile() {
-        return deployDetails.file;
+        return deployDetails.getFile();
     }
 
     public DeployDetails getDeployDetails() {
