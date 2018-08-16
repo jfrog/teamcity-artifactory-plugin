@@ -56,20 +56,6 @@
                 <version>2.4</version>
                 <executions>
                     <execution>
-                        <id>make-agent-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>teamcity-artifactory-plugin-agent-${project.version}</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptors>
-                                <descriptor>plugin-agent-assembly.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>make-assembly</id>
                         <phase>package</phase>
                         <goals>
