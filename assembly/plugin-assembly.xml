@@ -29,7 +29,7 @@
             <source>${project.basedir}/../Third-Parties-Usage.html</source>
         </file>
         <file>
-            <source>target/teamcity-artifactory-plugin-agent-${project.version}.zip</source>
+            <source>../agent/target/teamcity-artifactory-plugin-agent-${project.version}.zip</source>
             <outputDirectory>agent</outputDirectory>
         </file>
     </files>
