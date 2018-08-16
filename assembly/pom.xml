@@ -17,7 +17,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>teamcity-artifactory-plugin-assembly</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>2.7.x-SNAPSHOT</version>
     <name>TeamCity Artifactory Plugin Assembly</name>
 
     <licenses>
@@ -31,7 +31,7 @@
     <parent>
         <groupId>org.jfrog.teamcity</groupId>
         <artifactId>teamcity-artifactory-plugin</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>2.7.x-SNAPSHOT</version>
     </parent>
 
     <dependencies>
@@ -55,20 +55,6 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.4</version>
                 <executions>
-                    <execution>
-                        <id>make-agent-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>teamcity-artifactory-plugin-agent-${project.version}</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptors>
-                                <descriptor>plugin-agent-assembly.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>make-assembly</id>
                         <phase>package</phase>
