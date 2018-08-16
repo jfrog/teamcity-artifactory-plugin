@@ -18,7 +18,7 @@
     <groupId>org.jfrog.teamcity</groupId>
     <artifactId>teamcity-artifactory-plugin</artifactId>
     <packaging>pom</packaging>
-    <version>2.7.x-SNAPSHOT</version>
+    <version>2.7.0</version>
     <name>TeamCity Artifactory Plugin Parent</name>
 
     <licenses>
@@ -70,17 +70,17 @@
             <dependency>
                 <groupId>org.jfrog.teamcity</groupId>
                 <artifactId>teamcity-artifactory-plugin-agent</artifactId>
-               <version>2.7.x-SNAPSHOT</version>
+               <version>2.7.0</version>
             </dependency>
             <dependency>
                 <groupId>org.jfrog.teamcity</groupId>
                 <artifactId>teamcity-artifactory-plugin-common</artifactId>
-               <version>2.7.x-SNAPSHOT</version>
+               <version>2.7.0</version>
             </dependency>
             <dependency>
                 <groupId>org.jfrog.teamcity</groupId>
                 <artifactId>teamcity-artifactory-plugin-server</artifactId>
-               <version>2.7.x-SNAPSHOT</version>
+               <version>2.7.0</version>
             </dependency>
 
             <dependency>
