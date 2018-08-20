@@ -13,14 +13,12 @@ import org.jfrog.build.extractor.clientConfiguration.util.BuildDependenciesHelpe
 import org.jfrog.build.extractor.clientConfiguration.util.DependenciesDownloader;
 import org.jfrog.build.extractor.clientConfiguration.util.DependenciesDownloaderImpl;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
-import org.jfrog.teamcity.agent.util.PathHelper;
+import org.jfrog.teamcity.agent.util.SpecHelper;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.io.Closeable;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -94,12 +92,7 @@ public class DependenciesResolver implements Closeable {
         if (StringUtils.isEmpty(downloadSpecFilePath)) {
             return downloadSpecFilePath;
         }
-        String workspace = runnerContext.getWorkingDirectory().getCanonicalPath();
-        String specPath = workspace + File.separator + downloadSpecFilePath;
-        if (!new File(specPath).isFile()) {
-            throw new FileNotFoundException("Could not find Download Spec file at: " + specPath);
-        }
-        return PathHelper.getSpecFromFile(workspace, downloadSpecFilePath);
+        return SpecHelper.getSpecFromFile(runnerContext.getWorkingDirectory().getCanonicalPath(), downloadSpecFilePath);
     }
 
     private boolean verifyParameters() {
