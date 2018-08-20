@@ -40,6 +40,7 @@ import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
 import org.jfrog.teamcity.agent.api.Gavc;
+import org.jfrog.teamcity.agent.util.AgentUtils;
 import org.jfrog.teamcity.agent.util.RepositoryHelper;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
@@ -84,10 +85,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
         try {
             appendRunnerSpecificDetails(builder, context);
         } catch (Exception e) {
-            String errorMessage = e.getMessage();
-            logger.error(errorMessage);
-            logger.exception(e);
-            Loggers.AGENT.error(errorMessage, e);
+            AgentUtils.failBuildWithException(runnerContext, e);
             return null;
         }
 

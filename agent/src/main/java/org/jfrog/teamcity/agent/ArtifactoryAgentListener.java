@@ -90,7 +90,7 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
         try {
             buildInfoHelper.beforeRunnerStart(runner, publishedDependencies, userBuildDependencies);
         } catch (RuntimeException e) {
-            logException(runner, e);
+            AgentUtils.failBuildWithException(runner, e);
         }
 
         xrayScanHelper = new AgentListenerXrayScanHelper();
@@ -99,7 +99,7 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
         try {
             releaseHelper.beforeRunnerStart(runner);
         } catch (Exception e) {
-            logException(runner, e);
+            AgentUtils.failBuildWithException(runner, e);
         }
     }
 
@@ -117,7 +117,7 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
             xrayScanHelper.runnerFinished(runner, buildStatus);
             releaseHelper.runnerFinished(runner, buildStatus);
         } catch (Throwable t) {
-            logException(runner, t);
+            AgentUtils.failBuildWithException(runner, t);
         } finally {
             if (AgentUtils.isReleaseManagementEnabled(runner)) {
                 BuildInterruptReason buildInterruptReason =
@@ -127,19 +127,10 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
                 try {
                     releaseHelper.buildCompleted(buildSuccessful);
                 } catch (Exception e) {
-                    logException(runner, e);
+                    AgentUtils.failBuildWithException(runner, e);
                 }
             }
         }
-    }
-
-    private void logException(BuildRunnerContext runner, Throwable t) {
-        BuildProgressLogger logger = runner.getBuild().getBuildLogger();
-        String errorMessage = t.getLocalizedMessage();
-        logger.buildFailureDescription(errorMessage);
-        logger.exception(t);
-        logger.flush();
-        runner.getBuild().stopBuild(errorMessage);
     }
 
     private boolean isBuildInfoSupportActivated(Map<String, String> runnerParams) {
