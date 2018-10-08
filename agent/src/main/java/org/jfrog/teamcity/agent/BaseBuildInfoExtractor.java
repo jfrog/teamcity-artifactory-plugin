@@ -96,7 +96,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
         }
 
         ModuleBuilder genericModuleBuilder = new ModuleBuilder();
-        genericModuleBuilder.id(runnerParams.get(BUILD_NAME) + " :: " + runnerParams.get(BUILD_NUMBER));
+        genericModuleBuilder.id(runnerParams.get(BUILD_NAME) + " :: " + runnerContext.getBuild().getBuildNumber());
 
         //Add a generic module to hold generically published artifacts
         if ((artifactsToPublish != null) && !artifactsToPublish.isEmpty()) {
@@ -172,7 +172,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
         // Gets the plugin version and sets into the build info
         String pluginVersion = runnerContext.getRunnerParameters().get(ARTIFACTORY_PLUGIN_VERSION);
         BuildInfoBuilder builder = new BuildInfoBuilder(runnerParams.get(BUILD_NAME)).
-                number(runnerParams.get(BUILD_NUMBER)).
+                number(runnerContext.getBuild().getBuildNumber()).
                 artifactoryPluginVersion(pluginVersion).
                 startedDate(buildStarted).
                 durationMillis(buildDuration).
@@ -311,7 +311,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
             params.put(key, filteredMatrixParams.getProperty(key));
         }
         params.put("build.name", runnerParams.get(BUILD_NAME));
-        params.put("build.number", runnerParams.get(BUILD_NUMBER));
+        params.put("build.number", runnerContext.getBuild().getBuildNumber());
         params.put("build.timestamp", runnerParams.get(PROP_BUILD_TIMESTAMP));
 
         if (StringUtils.isNotBlank(runnerParams.get(PROP_PARENT_NAME))) {
@@ -409,7 +409,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
      * This method goes over the provided DeployDetailsArtifact list and adds it to the provided moduleBuilder with
      * the needed properties.
      *
-     * @param moduleBuilder     the moduleBuilder that contains the build information
+     * @param moduleBuilder the moduleBuilder that contains the build information
      * @return updated deployDetails List
      */
     void updatePropsAndModuleArtifacts(ModuleBuilder moduleBuilder) {

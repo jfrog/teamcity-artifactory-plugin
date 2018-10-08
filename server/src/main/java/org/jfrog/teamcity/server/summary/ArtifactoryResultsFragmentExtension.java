@@ -19,6 +19,7 @@ package org.jfrog.teamcity.server.summary;
 import jetbrains.buildServer.controllers.BuildDataExtensionUtil;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.serverSide.*;
+import jetbrains.buildServer.serverSide.impl.auth.SecuredFinishedBuildImpl;
 import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.PlaceId;
 import jetbrains.buildServer.web.openapi.SimplePageExtension;
@@ -31,6 +32,9 @@ import org.jfrog.teamcity.common.CustomDataStorageKeys;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+
+import static jetbrains.buildServer.agent.Constants.SYSTEM_PREFIX;
+import static org.jfrog.teamcity.common.ConstantValues.BUILD_URL;
 
 /**
  * @author Noam Y. Tenne
@@ -69,6 +73,7 @@ public class ArtifactoryResultsFragmentExtension extends SimplePageExtension {
 
     /**
      * Returns a map of Artifactory buildInfo urls. The key is buildInfo url and the value is the name of the build step that created this build.
+     *
      * @param build SBuild
      * @return map of Artifactory buildInfo urls. The key is buildInfo url and the value is the name of the build step that created this build.
      */
@@ -85,7 +90,15 @@ public class ArtifactoryResultsFragmentExtension extends SimplePageExtension {
         CustomDataStorage customDataStorage = buildType.getCustomDataStorage(CustomDataStorageKeys.RUN_HISTORY);
         Map<String, String> buildInfoUrls = new HashMap<String, String>();
         for (SBuildRunnerDescriptor buildRunnerDescriptor : buildType.getBuildRunners()) {
-            String buildUrl = customDataStorage.getValue(build.getBuildTypeExternalId() + "#" +
+            // Get build url from system parameters
+            String buildUrl = getBuildUrlParam(build, buildRunnerDescriptor);
+            if (StringUtils.isNotBlank(buildUrl)) {
+                buildInfoUrls.put(buildUrl, buildRunnerDescriptor.getName());
+                continue;
+            }
+
+            // If build url not in the system parameters, get it from CustomDataStorage
+            buildUrl = customDataStorage.getValue(build.getBuildTypeExternalId() + "#" +
                     Long.toString(build.getBuildId()) + "#" + buildRunnerDescriptor.getId());
             if (StringUtils.isNotBlank(buildUrl)) {
                 buildInfoUrls.put(buildUrl, buildRunnerDescriptor.getName());
@@ -95,12 +108,19 @@ public class ArtifactoryResultsFragmentExtension extends SimplePageExtension {
             // Old implementation supports only single buildInfo url
             String legacyBuildUrl = customDataStorage.getValue(Long.toString(build.getBuildId()) + "#" + buildRunnerDescriptor.getId());
             if (StringUtils.isNotBlank(legacyBuildUrl)) {
-
                 buildInfoUrls.put(legacyBuildUrl + build.getBuildTypeExternalId() + "/" + build.getBuildNumber(),
                         buildRunnerDescriptor.getName());
                 return buildInfoUrls;
             }
         }
         return buildInfoUrls;
+    }
+
+    private String getBuildUrlParam(SBuild build, SBuildRunnerDescriptor buildRunnerDescriptor) {
+        Map<String, String> buildFinishParameters = ((SecuredFinishedBuildImpl) build).getBuildFinishParameters();
+        if (buildFinishParameters == null) {
+            return "";
+        }
+        return buildFinishParameters.get(SYSTEM_PREFIX + BUILD_URL + "." + build.getBuildId() + "." + buildRunnerDescriptor.getId());
     }
 }

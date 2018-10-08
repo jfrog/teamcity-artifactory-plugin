@@ -132,29 +132,6 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
 
             String runType = runnerContext.getRunType().getType();
 
-            /**
-             * Storing the build URL in the custom storage map controls the display of the Artifactory icon in the
-             * results page
-             */
-            SBuildType buildType = build.getBuildType();
-            if (buildType != null && shouldStoreBuildInRunHistory(runParameters)) {
-                String customStorageId = build.getBuildTypeExternalId() + "#" +
-                        Long.toString(build.getBuildId()) + "#" +
-                        runnerContext.getId();
-                StringBuilder artifactoryUrlBuilder = new StringBuilder().append(serverConfigUrl);
-                if (!serverConfigUrl.endsWith("/")) {
-                    artifactoryUrlBuilder.append("/");
-                }
-                String artifactoryUrl = artifactoryUrlBuilder
-                        .append("webapp/builds/")
-                        .append(runnerContext.getParameters().get(BUILD_NAME))
-                        .append("/")
-                        .append(runnerContext.getParameters().get(BUILD_NUMBER))
-                        .toString();
-                CustomDataStorage runHistory = buildType.getCustomDataStorage(CustomDataStorageKeys.RUN_HISTORY);
-                runHistory.putValue(customStorageId, artifactoryUrl);
-            }
-
             if (RunTypeUtils.isMavenRunType(runType)) {
                 runnerContext.addBuildParameter(MAVEN_ENABLE_WATCHER, Boolean.TRUE.toString());
             }
