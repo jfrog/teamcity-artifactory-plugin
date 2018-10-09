@@ -38,7 +38,7 @@ import java.util.Map;
 import static org.jfrog.teamcity.common.ConstantValues.ARTIFACTORY_PLUGIN_VERSION;
 import static org.jfrog.teamcity.common.ConstantValues.PROP_SKIP_LOG_MESSAGE;
 
-public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
+public class ArtifactoryAgentListener extends ArtifactoryAgentLifeCycleAdapter {
 
     private ExtensionHolder extensionsLocator;
     private List<Dependency> publishedDependencies = Lists.newArrayList();
@@ -79,8 +79,8 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
         // Gets the logger from runner
         BuildProgressLogger logger = runner.getBuild().getBuildLogger();
         // If the version of the plugin was retrieved then write the version to the log.
-        if (StringUtils.isNotBlank(pluginVersion)){
-            logInfo(logger,"TeamCity Artifactory Plugin version: " + pluginVersion);
+        if (StringUtils.isNotBlank(pluginVersion)) {
+            logInfo(logger, "TeamCity Artifactory Plugin version: " + pluginVersion);
         }
 
         publishedDependencies.clear();
@@ -137,6 +137,7 @@ public class ArtifactoryAgentListener extends AgentLifeCycleAdapter {
         //Don't run if no server was configured
         return StringUtils.isNotBlank(runnerParams.get(RunnerParameterKeys.URL));
     }
+
     // Write to the log the Artifactory plugin version
     private void logInfo(BuildProgressLogger logger, String message) {
         Loggers.AGENT.info(message);

@@ -1,6 +1,5 @@
 package org.jfrog.teamcity.agent.ivy;
 
-import jetbrains.buildServer.agent.AgentLifeCycleAdapter;
 import jetbrains.buildServer.agent.AgentLifeCycleListener;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.util.EventDispatcher;
@@ -8,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.BuildInfoConfigProperties;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryClientConfiguration;
+import org.jfrog.teamcity.agent.ArtifactoryAgentLifeCycleAdapter;
 import org.jfrog.teamcity.agent.util.ArtifactoryClientConfigurationBuilder;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunTypeUtils;
@@ -25,7 +25,7 @@ import static org.jfrog.teamcity.common.RunnerParameterKeys.URL;
  *
  * @author Noam Y. Tenne
  */
-public class IvyBuildInfoAgentListener extends AgentLifeCycleAdapter {
+public class IvyBuildInfoAgentListener extends ArtifactoryAgentLifeCycleAdapter {
 
     public IvyBuildInfoAgentListener(@NotNull EventDispatcher<AgentLifeCycleListener> dispatcher) {
         dispatcher.addListener(this);
