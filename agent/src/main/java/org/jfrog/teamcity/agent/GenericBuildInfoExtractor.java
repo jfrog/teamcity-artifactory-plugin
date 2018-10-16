@@ -27,7 +27,7 @@ import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.client.DeployDetailsArtifact;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
 import org.jfrog.teamcity.agent.util.SpecHelper;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
@@ -45,12 +45,12 @@ import java.util.List;
 public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
 
     List<Artifact> deployedArtifacts = new ArrayList<Artifact>();
-    ArtifactoryBuildInfoClient infoClient = null;
+    ArtifactoryBuildInfoClientBuilder clientBuilder;
 
     public GenericBuildInfoExtractor(BuildRunnerContext runnerContext, Multimap<File, String> artifactsToPublish,
-                                     List<Dependency> publishedDependencies, ArtifactoryBuildInfoClient infoClient) {
+                                     List<Dependency> publishedDependencies, ArtifactoryBuildInfoClientBuilder clientBuilder) {
         super(runnerContext, artifactsToPublish, publishedDependencies);
-        this.infoClient = infoClient;
+        this.clientBuilder = clientBuilder;
     }
 
     @Override
@@ -65,7 +65,7 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
         }
 
         try {
-            deployedArtifacts = specsHelper.uploadArtifactsBySpec(uploadSpec, runnerContext.getWorkingDirectory(), matrixParams, infoClient);
+            deployedArtifacts = specsHelper.uploadArtifactsBySpec(uploadSpec, runnerContext.getWorkingDirectory(), matrixParams, clientBuilder);
         } catch (IOException e) {
             throw new Exception(
                     String.format("Could not collect artifacts details from the spec: %s", e.getMessage()), e);
