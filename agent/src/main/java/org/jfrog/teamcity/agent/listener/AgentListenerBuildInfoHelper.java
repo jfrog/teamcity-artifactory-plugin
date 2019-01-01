@@ -234,10 +234,11 @@ public class AgentListenerBuildInfoHelper {
 
         if (runnerParams.containsKey(PROXY_HOST)) {
             ProxyConfiguration proxyConfiguration = new ProxyConfiguration();
-            proxyConfiguration.host = runnerParams.get(PROXY_USERNAME);
+            proxyConfiguration.host = runnerParams.get(PROXY_HOST);
             proxyConfiguration.port = Integer.parseInt(runnerParams.get(PROXY_PORT));
-            if (StringUtils.isNotBlank(runnerParams.get(PROXY_USERNAME))) {
-                proxyConfiguration.username = runnerParams.get(PROXY_USERNAME);
+            String proxyUsername = runnerParams.get(PROXY_USERNAME);
+            if (StringUtils.isNotBlank(proxyUsername)) {
+                proxyConfiguration.username = proxyUsername;
                 proxyConfiguration.password = runnerParams.get(PROXY_PASSWORD);
             }
             builder.setProxyConfiguration(proxyConfiguration);
