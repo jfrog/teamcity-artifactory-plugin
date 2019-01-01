@@ -157,6 +157,7 @@ public class AgentListenerBuildInfoHelper {
             String m = "Could not generate build-info.";
             Loggers.AGENT.warn(m);
             build.getBuildLogger().warning(m);
+            infoClient.close();
             return;
         }
 
