@@ -54,7 +54,7 @@ import static org.jfrog.teamcity.common.ConstantValues.*;
 /**
  * @author Noam Y. Tenne
  */
-public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P, ExtractedBuildInfo> {
+public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P> {
 
     protected BuildRunnerContext runnerContext;
     protected Map<String, String> runnerParams;
@@ -62,6 +62,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
     protected BuildProgressLogger logger;
     private Multimap<File, String> artifactsToPublish;
     private List<Dependency> publishedDependencies;
+    private List<DeployDetailsArtifact> deployableArtifacts;
     private Map<String, Map<String, String>> calculatedChecksumCache;
 
     public BaseBuildInfoExtractor(BuildRunnerContext runnerContext, Multimap<File, String> artifactsToPublish,
@@ -76,7 +77,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
         calculatedChecksumCache = Maps.newHashMap();
     }
 
-    public ExtractedBuildInfo extract(P context) {
+    public Build extract(P context) {
         BuildInfoBuilder builder = getBuildInfoBuilder();
         if (builder == null) {
             return null;
@@ -89,7 +90,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
             return null;
         }
 
-        List<DeployDetailsArtifact> deployableArtifacts = Lists.newArrayList();
+        deployableArtifacts = Lists.newArrayList();
         List<DeployDetailsArtifact> runnerSpecificDeployableArtifacts = getDeployableArtifacts();
         if (runnerSpecificDeployableArtifacts != null) {
             deployableArtifacts.addAll(runnerSpecificDeployableArtifacts);
@@ -125,7 +126,11 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P,
                     runnerParams.get(PROP_PARENT_NUMBER));
         }
 
-        return new ExtractedBuildInfo(buildInfo, deployableArtifacts);
+        return buildInfo;
+    }
+
+    public List<DeployDetailsArtifact> getDeployableArtifact() {
+        return this.deployableArtifacts;
     }
 
     protected abstract void appendRunnerSpecificDetails(BuildInfoBuilder builder, P context)
