@@ -32,15 +32,13 @@ import org.jfrog.build.api.BuildRetention;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.client.DeployDetailsArtifact;
-import org.jfrog.build.extractor.BuildInfoExtractor;
+import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
-import org.jfrog.teamcity.agent.DependenciesResolver;
-import org.jfrog.teamcity.agent.GenericBuildInfoExtractor;
-import org.jfrog.teamcity.agent.LoggingArtifactsBuilderAdapter;
-import org.jfrog.teamcity.agent.MavenBuildInfoExtractor;
+import org.jfrog.teamcity.agent.*;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
 import org.jfrog.teamcity.agent.util.BuildRetentionFactory;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
@@ -152,13 +150,14 @@ public class AgentListenerBuildInfoHelper {
         BuildProgressLogger logger = build.getBuildLogger();
 
         String selectedServerUrl = runnerParams.get(RunnerParameterKeys.URL);
-        ArtifactoryBuildInfoClient infoClient = getBuildInfoClient(selectedServerUrl, runnerParams, logger);
+        ArtifactoryBuildInfoClient infoClient = getBuildInfoClient(selectedServerUrl, runnerParams, logger).build();
         ExtractedBuildInfo extractedBuildInfo = extractBuildInfo(runner, dependencies, selectedServerUrl, runnerParams, logger);
 
         if (extractedBuildInfo == null) {
             String m = "Could not generate build-info.";
             Loggers.AGENT.warn(m);
             build.getBuildLogger().warning(m);
+            infoClient.close();
             return;
         }
 
@@ -203,7 +202,7 @@ public class AgentListenerBuildInfoHelper {
         }
     }
 
-    private ExtractedBuildInfo extractBuildInfo(BuildRunnerContext runnerContext, List<Dependency> dependencies, String selectedServerUrl, Map<String, String> runnerParams, BuildProgressLogger logger) {
+    private ExtractedBuildInfo extractBuildInfo(BuildRunnerContext runnerContext, List<Dependency> dependencies, String selectedServerUrl, Map<String, String> runnerParams, BuildProgressLogger logger) throws Exception {
         AgentRunningBuild build = runnerContext.getBuild();
         Multimap<File, String> publishableArtifacts = getPublishableArtifacts(runnerContext);
         if (RunTypeUtils.isMavenRunType(runnerContext.getRunType())) {
@@ -216,39 +215,35 @@ public class AgentListenerBuildInfoHelper {
                 throw new RuntimeException("Error occurred during build info collection. Skipping deployment.");
             }
 
-            BuildInfoExtractor<File, ExtractedBuildInfo> buildInfoExtractor = new MavenBuildInfoExtractor(
-                    runnerContext, publishableArtifacts, dependencies);
-            return buildInfoExtractor.extract(mavenBuildInfoFile);
+            BaseBuildInfoExtractor<File> buildInfoExtractor = new MavenBuildInfoExtractor(runnerContext, publishableArtifacts, dependencies);
+            return new ExtractedBuildInfo(buildInfoExtractor.extract(mavenBuildInfoFile), buildInfoExtractor.getDeployableArtifact());
         }
-        ArtifactoryBuildInfoClient infoClient = getBuildInfoClient(selectedServerUrl, runnerParams, logger);
-        BuildInfoExtractor<Object, ExtractedBuildInfo> buildInfoExtractor = new GenericBuildInfoExtractor(runnerContext, publishableArtifacts, dependencies, infoClient);
-        try {
-            return buildInfoExtractor.extract(null);
-        } finally {
-            infoClient.close();
-        }
+        ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder = getBuildInfoClient(selectedServerUrl, runnerParams, logger);
+        GenericBuildInfoExtractor buildInfoExtractor = new GenericBuildInfoExtractor(runnerContext, publishableArtifacts, dependencies, buildInfoClientBuilder);
+
+        return new ExtractedBuildInfo(buildInfoExtractor.extract(null), buildInfoExtractor.getDeployableArtifact());
     }
 
-    private ArtifactoryBuildInfoClient getBuildInfoClient(String selectedServerUrl, Map<String, String> runnerParams,
-            BuildProgressLogger logger) {
-        ArtifactoryBuildInfoClient infoClient =
-                new ArtifactoryBuildInfoClient(selectedServerUrl,
-                        runnerParams.get(RunnerParameterKeys.DEPLOYER_USERNAME),
-                        runnerParams.get(RunnerParameterKeys.DEPLOYER_PASSWORD),
-                        new TeamcityAgenBuildInfoLog(logger));
-        infoClient.setConnectionTimeout(Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
+    private ArtifactoryBuildInfoClientBuilder getBuildInfoClient(String selectedServerUrl, Map<String, String> runnerParams, BuildProgressLogger logger) {
+        ArtifactoryBuildInfoClientBuilder builder = new ArtifactoryBuildInfoClientBuilder()
+                .setArtifactoryUrl(selectedServerUrl)
+                .setUsername(runnerParams.get(RunnerParameterKeys.DEPLOYER_USERNAME))
+                .setPassword(runnerParams.get(RunnerParameterKeys.DEPLOYER_PASSWORD))
+                .setLog(new TeamcityAgenBuildInfoLog(logger))
+                .setConnectionTimeout(Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
 
         if (runnerParams.containsKey(PROXY_HOST)) {
-            if (StringUtils.isNotBlank(runnerParams.get(PROXY_USERNAME))) {
-                infoClient.setProxyConfiguration(runnerParams.get(PROXY_HOST),
-                        Integer.parseInt(runnerParams.get(PROXY_PORT)), runnerParams.get(PROXY_USERNAME),
-                        runnerParams.get(PROXY_PASSWORD));
-            } else {
-                infoClient.setProxyConfiguration(runnerParams.get(PROXY_HOST),
-                        Integer.parseInt(runnerParams.get(PROXY_PORT)));
+            ProxyConfiguration proxyConfiguration = new ProxyConfiguration();
+            proxyConfiguration.host = runnerParams.get(PROXY_HOST);
+            proxyConfiguration.port = Integer.parseInt(runnerParams.get(PROXY_PORT));
+            String proxyUsername = runnerParams.get(PROXY_USERNAME);
+            if (StringUtils.isNotBlank(proxyUsername)) {
+                proxyConfiguration.username = proxyUsername;
+                proxyConfiguration.password = runnerParams.get(PROXY_PASSWORD);
             }
+            builder.setProxyConfiguration(proxyConfiguration);
         }
-        return infoClient;
+        return builder;
     }
 
     /**
