@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.BuildInfoConfigProperties;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryClientConfiguration;
 import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask;
+import org.jfrog.teamcity.agent.ArtifactoryAgentLifeCycleAdapter;
 import org.jfrog.teamcity.agent.release.ReleaseParameters;
 import org.jfrog.teamcity.agent.util.AgentUtils;
 import org.jfrog.teamcity.agent.util.ArtifactoryClientConfigurationBuilder;
@@ -33,7 +34,7 @@ import static org.jfrog.teamcity.common.RunnerParameterKeys.URL;
  *
  * @author Noam Y. Tenne
  */
-public class GradleBuildInfoAgentListener extends AgentLifeCycleAdapter {
+public class GradleBuildInfoAgentListener extends ArtifactoryAgentLifeCycleAdapter {
 
     private ArtifactsWatcher watcher;
 
