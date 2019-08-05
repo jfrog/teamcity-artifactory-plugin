@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Noam Y. Tenne
@@ -62,6 +63,9 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
         String uploadSpec = getUploadSpec();
         if (StringUtils.isEmpty(uploadSpec)) {
             return;
+        } else if (isUploadSkipped()) {
+            logger.message("Don't upload. Skipping upload on personal build is enabled!");
+            return;
         }
 
         try {
@@ -70,6 +74,18 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
             throw new Exception(
                     String.format("Could not collect artifacts details from the spec: %s", e.getMessage()), e);
         }
+    }
+
+    private boolean isTeamCityPrivateBuild() {
+        Map<String,String> buildParameters =  runnerContext.getBuildParameters().getAllParameters();
+        if(buildParameters.containsKey(ConstantValues.PROP_PERSONAL_BUILD)){
+            return buildParameters.get(ConstantValues.PROP_PERSONAL_BUILD).equals("true");
+        }
+        return false;
+    }
+
+    private boolean isUploadSkipped() {
+        return isTeamCityPrivateBuild() && Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.UPLOAD_SKIP_ON_PERSONAL_BUILD));
     }
 
     private String getUploadSpec() throws IOException {
@@ -95,7 +111,7 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
      * This method goes over the provided DeployDetailsArtifact list and adds it to the provided moduleBuilder with
      * the needed properties.
      *
-     * @param moduleBuilder     the moduleBuilder that contains the build information
+     * @param moduleBuilder the moduleBuilder that contains the build information
      * @return updated deployDetails List
      */
     @Override

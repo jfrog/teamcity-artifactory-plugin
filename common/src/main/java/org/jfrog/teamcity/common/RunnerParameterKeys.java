@@ -77,6 +77,7 @@ public class RunnerParameterKeys {
     public final static String DOWNLOAD_SPEC_SOURCE = PREFIX + "downloadSpecSource";
     public final static String DOWNLOAD_SPEC = PREFIX + "downloadSpec";
     public final static String DOWNLOAD_SPEC_FILE_PATH = PREFIX + "downloadSpecFilePath";
+    public final static String UPLOAD_SKIP_ON_PERSONAL_BUILD = PREFIX + "uploadSkipPersonalBuild";
     public final static String UPLOAD_SPEC_SOURCE = PREFIX + "uploadSpecSource";
     public final static String UPLOAD_SPEC = PREFIX + "uploadSpec";
     public final static String UPLOAD_SPEC_FILE_PATH = PREFIX + "uploadSpecFilePath";

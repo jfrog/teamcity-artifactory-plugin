@@ -71,6 +71,8 @@ public class ConstantValues {
 
     public static final String SPEC_FILE_SOURCE = "File";
 
+    public static final String PROP_PERSONAL_BUILD = "system.build.is.personal";
+
     public static String pluginVersion;
 
     //retrieve the plugin version

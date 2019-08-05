@@ -123,6 +123,17 @@
     </td>
 </tr>
 
+<tr class="noBorder" id="uploadSkipPersonalBuild.container">
+    <th>
+        <label for="org.jfrog.artifactory.selectedDeployableServer.uploadSkipPersonalBuild">
+            Skip upload for personal builds:
+        </label>
+    </th>
+    <td>
+        <props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.uploadSkipPersonalBuild"/>
+    </td>
+</tr>
+
 <script>
     BS.artifactory.setUseSpecsForGenerics('${shouldDisplay}');
 </script>
