@@ -63,8 +63,10 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
         String uploadSpec = getUploadSpec();
         if (StringUtils.isEmpty(uploadSpec)) {
             return;
-        } else if (isUploadSkipped()) {
-            logger.message("Don't upload. Skipping upload on personal build is enabled!");
+        }
+
+        if (shouldSkipUpload()) {
+            logger.message("Skipping files upload to Artifactory. This job is configured to skip uploading files for personal builds.");
             return;
         }
 
@@ -76,16 +78,13 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
         }
     }
 
-    private boolean isTeamCityPrivateBuild() {
-        Map<String,String> buildParameters =  runnerContext.getBuildParameters().getAllParameters();
-        if(buildParameters.containsKey(ConstantValues.PROP_PERSONAL_BUILD)){
-            return buildParameters.get(ConstantValues.PROP_PERSONAL_BUILD).equals("true");
-        }
-        return false;
+    private boolean isPrivateBuild() {
+        Map<String, String> buildParameters = runnerContext.getBuildParameters().getAllParameters();
+        return "true".equals(buildParameters.get(ConstantValues.PROP_PERSONAL_BUILD));
     }
 
-    private boolean isUploadSkipped() {
-        return isTeamCityPrivateBuild() && Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.UPLOAD_SKIP_ON_PERSONAL_BUILD));
+    private boolean shouldSkipUpload() {
+        return isPrivateBuild() && Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.UPLOAD_SKIP_ON_PERSONAL_BUILD));
     }
 
     private String getUploadSpec() throws IOException {

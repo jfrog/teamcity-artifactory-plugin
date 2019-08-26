@@ -126,7 +126,7 @@
 <tr class="noBorder" id="uploadSkipPersonalBuild.container">
     <th>
         <label for="org.jfrog.artifactory.selectedDeployableServer.uploadSkipPersonalBuild">
-            Skip upload for personal builds:
+            Skip upload on personal builds:
         </label>
     </th>
     <td>
