@@ -174,10 +174,14 @@ public class GradleBuildInfoAgentListenerTest {
         AgentRunningBuild agentRunningBuild = EasyMock.createMock(AgentRunningBuild.class);
         EasyMock.expect(agentRunningBuild.getBuildLogger())
                 .andReturn(EasyMock.createMock(BuildProgressLogger.class)).anyTimes();
+
         File tempDir = Files.createTempDir();
+        File buildTempDir = Files.createTempDir();
+
         new File(tempDir, ConstantValues.GRADLE_PROPERTIES_FILE_NAME).createNewFile();
         EasyMock.expect(runner.getWorkingDirectory()).andReturn(tempDir);
         EasyMock.expect(agentRunningBuild.getSharedConfigParameters()).andReturn(Maps.<String, String>newHashMap());
+        EasyMock.expect(agentRunningBuild.getBuildTempDirectory()).andReturn(buildTempDir).times(2);
 
         BuildAgentConfiguration buildAgentConfiguration = EasyMock.createMock(BuildAgentConfiguration.class);
         EasyMock.expect(buildAgentConfiguration.getAgentPluginsDirectory()).andReturn(Files.createTempDir());
