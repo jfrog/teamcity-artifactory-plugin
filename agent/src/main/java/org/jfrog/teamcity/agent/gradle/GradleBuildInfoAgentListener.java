@@ -132,7 +132,7 @@ public class GradleBuildInfoAgentListener extends ArtifactoryAgentLifeCycleAdapt
             }
             taskBuilder.append(ArtifactoryTask.ARTIFACTORY_PUBLISH_TASK_NAME);
             runnerContext.addRunnerParameter("ui.gradleRunner.gradle.tasks.names", taskBuilder.toString());
-            File tempPropFile = File.createTempFile("buildInfo", "properties");
+            File tempPropFile = File.createTempFile("buildInfo", "properties", build.getBuildTempDirectory());
             clientConf.setPropertiesFile(tempPropFile.getCanonicalPath());
             clientConf.persistToPropertiesFile();
             commandBuilder.append("-D").append(BuildInfoConfigProperties.PROP_PROPS_FILE).append("=").
@@ -174,7 +174,7 @@ public class GradleBuildInfoAgentListener extends ArtifactoryAgentLifeCycleAdapt
             return null;
         }
 
-        File tempInitScript = File.createTempFile("artifactory.init.script", "gradle");
+        File tempInitScript = File.createTempFile("artifactory.init.script", "gradle", build.getBuildTempDirectory());
         FileUtils.writeStringToFile(tempInitScript, scriptTemplate, "utf-8");
         return tempInitScript;
     }
