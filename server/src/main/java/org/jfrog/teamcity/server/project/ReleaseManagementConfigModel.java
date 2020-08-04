@@ -19,6 +19,8 @@ package org.jfrog.teamcity.server.project;
 import com.google.common.collect.Lists;
 import jetbrains.buildServer.serverSide.BranchEx;
 import org.apache.commons.lang.StringUtils;
+import org.jfrog.teamcity.server.project.strategy.NextDevelopmentVersion.StrategyEnum;
+import org.jfrog.teamcity.server.project.strategy.NextDevelopmentVersionStrategy;
 
 import java.util.List;
 
@@ -41,6 +43,7 @@ public abstract class ReleaseManagementConfigModel {
     private boolean selectedArtifactoryServerHasAddons = false;
     private List<String> deployableRepoKeys = Lists.newArrayList();
     private BranchEx defaultCheckoutBranch;
+    private NextDevelopmentVersionStrategy nextDevelopmentVersionStrategy;
 
     public void setRootArtifactId(String rootArtifactId) {
         this.rootArtifactId = rootArtifactId;
@@ -59,33 +62,29 @@ public abstract class ReleaseManagementConfigModel {
     }
 
     public String getNextDevelopmentVersion() {
-        String fromVersion = getReleaseVersion();
-        String nextVersion;
-        int lastDotIndex = fromVersion.lastIndexOf('.');
-        try {
-            if (lastDotIndex != -1) {
-                // probably a major minor version e.g., 2.1.1
-                String minorVersionToken = fromVersion.substring(lastDotIndex + 1);
-                String nextMinorVersion;
-                int lastDashIndex = minorVersionToken.lastIndexOf('-');
-                if (lastDashIndex != -1) {
-                    // probably a minor-buildNum e.g., 2.1.1-4 (should change to 2.1.1-5)
-                    String buildNumber = minorVersionToken.substring(lastDashIndex + 1);
-                    int nextBuildNumber = Integer.parseInt(buildNumber) + 1;
-                    nextMinorVersion = minorVersionToken.substring(0, lastDashIndex + 1) + nextBuildNumber;
-                } else {
-                    nextMinorVersion = Integer.toString(Integer.parseInt(minorVersionToken) + 1);
-                }
-                nextVersion = fromVersion.substring(0, lastDotIndex + 1) + nextMinorVersion;
-            } else {
-                // maybe it's just a major version; try to parse as an int
-                int nextMajorVersion = Integer.parseInt(fromVersion) + 1;
-                nextVersion = Integer.toString(nextMajorVersion);
-            }
-        } catch (NumberFormatException e) {
-            return fromVersion;
+        if (nextDevelopmentVersionStrategy == null) {
+            nextDevelopmentVersionStrategy = StrategyEnum.DEFAULT;
         }
-        return nextVersion + "-SNAPSHOT";
+        final List<Integer> versionParts = nextDevelopmentVersionStrategy.apply(getReleaseVersion());
+        final StringBuilder nextVersion = new StringBuilder();
+
+        int buildNumber = versionParts.get(0);
+        int patch = versionParts.get(1);
+        int minor = versionParts.get(2);
+        int major = versionParts.get(3);
+
+        nextVersion.append( major );
+        nextVersion.append(".").append(minor);
+        nextVersion.append(".").append(patch);
+
+        if ( buildNumber > 0 )
+        {
+            nextVersion.append("-").append(buildNumber);
+        }
+
+        nextVersion.append( "-SNAPSHOT" );
+
+        return nextVersion.toString();
     }
 
     public abstract String getDefaultTagUrl();
@@ -118,10 +117,6 @@ public abstract class ReleaseManagementConfigModel {
 
     public String getTagComment() {
         return COMMIT_COMMENT_PREFIX + "Release version " + getReleaseVersion();
-    }
-
-    public String getDefaultNextDevelopmentVersionComment() {
-        return COMMIT_COMMENT_PREFIX + "Next development version";
     }
 
     public boolean isGitVcs() {
@@ -158,6 +153,10 @@ public abstract class ReleaseManagementConfigModel {
 
     public void setDefaultCheckoutBranch(BranchEx defaultCheckoutBranch) {
         this.defaultCheckoutBranch = defaultCheckoutBranch;
+    }
+
+    public void setNextDevelopmentVersionStrategy(NextDevelopmentVersionStrategy nextDevelopmentVersionStrategy) {
+        this.nextDevelopmentVersionStrategy = nextDevelopmentVersionStrategy;
     }
 
     protected String getVcsSpecificTagBaseUrlOrName() {

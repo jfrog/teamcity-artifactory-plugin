@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
+import org.jfrog.teamcity.server.project.strategy.NextDevelopmentVersion;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.jfrog.teamcity.common.ConstantValues.NAME;
+import static org.jfrog.teamcity.server.project.strategy.NextDevelopmentVersion.StrategyEnum.valueOf;
 
 /**
  * @author Noam Y. Tenne
@@ -77,6 +79,13 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
 
         // fill default values to the model
         ReleaseManagementConfigModel managementConfig = getReleaseManagementConfigModel();
+
+        final Map<String, String> configParameters = buildType.getConfigParameters();
+        final String nextDevelopmentVersionStrategy = configParameters.get(NextDevelopmentVersion.PARAMETER_NAME);
+
+        try {
+            managementConfig.setNextDevelopmentVersionStrategy(valueOf(nextDevelopmentVersionStrategy.toUpperCase()));
+        } catch (IllegalArgumentException ignored) {}
 
         Map<String, String> parameters = buildRunner.get(0).getParameters();
         if (parameters.containsKey(RunnerParameterKeys.GIT_RELEASE_BRANCH_NAME_PREFIX)) {
