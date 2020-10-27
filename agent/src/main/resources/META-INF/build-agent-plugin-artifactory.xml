@@ -30,4 +30,7 @@
     <bean id="ivyBuildInfoAgentListener" class="org.jfrog.teamcity.agent.ivy.IvyBuildInfoAgentListener"/>
 
     <bean id="gradleBuildInfoAgentListener" class="org.jfrog.teamcity.agent.gradle.GradleBuildInfoAgentListener"/>
+
+    <bean class="org.jfrog.teamcity.agent.docker.ArtifactoryDockerRunner"/>
+
 </beans>

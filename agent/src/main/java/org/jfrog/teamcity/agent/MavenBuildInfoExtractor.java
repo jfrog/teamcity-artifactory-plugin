@@ -27,7 +27,6 @@ import org.apache.commons.lang.StringUtils;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jfrog.build.api.BuildAgent;
-import org.jfrog.build.api.BuildType;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.builder.*;
 import org.jfrog.build.api.release.Promotion;
@@ -80,7 +79,6 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
     @Override
     protected void appendRunnerSpecificDetails(BuildInfoBuilder builder, File mavenBuildInfoFile)
             throws InfoCollectionException {
-        builder.type(BuildType.MAVEN);
 
         try {
             Element rootElement = FileUtil.parseDocument(mavenBuildInfoFile);

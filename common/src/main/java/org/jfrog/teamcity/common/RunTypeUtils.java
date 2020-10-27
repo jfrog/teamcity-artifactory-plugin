@@ -12,6 +12,8 @@ public abstract class RunTypeUtils {
     public static final String ANT_RUNNER = "Ant";
     public static final String GRADLE_RUNNER = "gradle-runner";
     public static final String MAVEN_RUNNER = "Maven2";
+    public static final String DOCKER_RUNNER = "artifactoryDocker";
+
 
     public static boolean isGradleOrAntWithExtractorActivated(String runType, Map<String, String> runnerParams) {
         return (isGradleWithExtractorActivated(runType, runnerParams) ||
