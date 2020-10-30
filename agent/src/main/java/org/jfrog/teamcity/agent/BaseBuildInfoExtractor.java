@@ -20,28 +20,27 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import jetbrains.buildServer.agent.*;
+import jetbrains.buildServer.agent.BuildProgressLogger;
+import jetbrains.buildServer.agent.BuildRunnerContext;
+import jetbrains.buildServer.agent.Constants;
 import jetbrains.buildServer.agent.impl.BuildRunnerContextImpl;
 import jetbrains.buildServer.log.Loggers;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.*;
-import org.jfrog.build.api.Module;
 import org.jfrog.build.api.builder.ArtifactBuilder;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.api.util.FileChecksumCalculator;
-import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.build.client.DeployDetailsArtifact;
 import org.jfrog.build.extractor.BuildInfoExtractor;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
 import org.jfrog.build.extractor.clientConfiguration.ClientProperties;
-import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
-import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
-import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
+import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.teamcity.agent.api.Gavc;
 import org.jfrog.teamcity.agent.util.AgentUtils;
+import org.jfrog.teamcity.agent.util.BuildInfoUtils;
 import org.jfrog.teamcity.agent.util.RepositoryHelper;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
@@ -140,26 +139,21 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P>
     protected abstract List<DeployDetailsArtifact> getDeployableArtifacts();
 
     protected BuildInfoBuilder getBuildInfoBuilder() {
-        long buildStartedLong = Long.parseLong(runnerParams.get(BUILD_STARTED));
-        Date buildStarted = new Date(buildStartedLong);
-
-        long buildDuration = System.currentTimeMillis() - buildStarted.getTime();
-
         LicenseControl licenseControl =
-                new LicenseControl(Boolean.valueOf(runnerParams.get(RunnerParameterKeys.RUN_LICENSE_CHECKS)));
+                new LicenseControl(Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.RUN_LICENSE_CHECKS)));
         licenseControl.setLicenseViolationsRecipientsList(runnerParams.get(
                 RunnerParameterKeys.LICENSE_VIOLATION_RECIPIENTS));
         licenseControl.setScopesList(runnerParams.get(RunnerParameterKeys.LIMIT_CHECKS_TO_SCOPES));
         licenseControl.setIncludePublishedArtifacts(
-                Boolean.valueOf(runnerParams.get(RunnerParameterKeys.INCLUDE_PUBLISHED_ARTIFACTS)));
-        licenseControl.setAutoDiscover(!Boolean.valueOf(runnerParams.get(
+                Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.INCLUDE_PUBLISHED_ARTIFACTS)));
+        licenseControl.setAutoDiscover(!Boolean.parseBoolean(runnerParams.get(
                 RunnerParameterKeys.DISABLE_AUTO_LICENSE_DISCOVERY)));
 
         //blackduck integration
         Governance governance = new Governance();
         BlackDuckProperties blackDuckProperties = new BlackDuckProperties();
         governance.setBlackDuckProperties(blackDuckProperties);
-        blackDuckProperties.setRunChecks(Boolean.valueOf(runnerParams.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
+        blackDuckProperties.setRunChecks(Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
                 BlackDuckPropertiesFields.RUN_CHECKS)));
         blackDuckProperties.setAppName(runnerParams.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
                 BlackDuckPropertiesFields.APP_NAME));
@@ -169,73 +163,21 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P>
                 BlackDuckPropertiesFields.REPORT_RECIPIENTS));
         blackDuckProperties.setScopes(runnerParams.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
                 BlackDuckPropertiesFields.SCOPES));
-        blackDuckProperties.setIncludePublishedArtifacts(Boolean.valueOf(runnerParams.get(RunnerParameterKeys.
+        blackDuckProperties.setIncludePublishedArtifacts(Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.
                 BLACKDUCK_PREFIX + BlackDuckPropertiesFields.INCLUDE_PUBLISHED_ARTIFACTS)));
-        blackDuckProperties.setAutoCreateMissingComponentRequests(Boolean.valueOf(runnerParams.get(RunnerParameterKeys.
+        blackDuckProperties.setAutoCreateMissingComponentRequests(Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.
                 BLACKDUCK_PREFIX + BlackDuckPropertiesFields.AutoCreateMissingComponentRequests)));
-        blackDuckProperties.setAutoDiscardStaleComponentRequests(Boolean.valueOf(runnerParams.get(RunnerParameterKeys.
+        blackDuckProperties.setAutoDiscardStaleComponentRequests(Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.
                 BLACKDUCK_PREFIX + BlackDuckPropertiesFields.AutoDiscardStaleComponentRequests)));
-        // Gets the plugin version and sets into the build info
-        String pluginVersion = runnerContext.getRunnerParameters().get(ARTIFACTORY_PLUGIN_VERSION);
-        BuildInfoBuilder builder = new BuildInfoBuilder(runnerParams.get(BUILD_NAME)).
-                number(runnerContext.getBuild().getBuildNumber()).
-                artifactoryPluginVersion(pluginVersion).
-                startedDate(buildStarted).
-                durationMillis(buildDuration).
-                url(runnerParams.get(BUILD_URL)).
-                artifactoryPrincipal(runnerParams.get(RunnerParameterKeys.DEPLOYER_USERNAME)).
-                agent(new Agent(runnerParams.get(AGENT_NAME), runnerParams.get(AGENT_VERSION))).
-                principal(runnerParams.get(TRIGGERED_BY)).
-                vcsRevision(runnerParams.get(PROP_VCS_REVISION)).
-                vcsUrl(runnerParams.get(PROP_VCS_URL)).
-                parentName(runnerParams.get(PROP_PARENT_NAME)).
-                parentNumber(runnerParams.get(PROP_PARENT_NUMBER)).
-                licenseControl(licenseControl).
-                governance(governance);
 
-        if (Boolean.valueOf(runnerParams.get(RunnerParameterKeys.INCLUDE_ENV_VARS))) {
-            addBuildInfoProperties(builder);
+        BuildInfoBuilder builder = BuildInfoUtils.getBuildInfoBuilder(runnerParams, runnerContext)
+                .principal(runnerParams.get(TRIGGERED_BY)).parentName(runnerParams.get(PROP_PARENT_NAME)).
+                parentNumber(runnerParams.get(PROP_PARENT_NUMBER)).licenseControl(licenseControl).governance(governance);
+
+        if (Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.INCLUDE_ENV_VARS))) {
+            BuildInfoUtils.addBuildInfoProperties(builder, runnerParams, runnerContext);
         }
         return builder;
-    }
-
-    private void addBuildInfoProperties(BuildInfoBuilder builder) {
-        IncludeExcludePatterns patterns = new IncludeExcludePatterns(
-                runnerParams.get(RunnerParameterKeys.ENV_VARS_INCLUDE_PATTERNS),
-                runnerParams.get(RunnerParameterKeys.ENV_VARS_EXCLUDE_PATTERNS));
-
-        addBuildVariables(builder, patterns);
-        addSystemProperties(builder, patterns);
-    }
-
-    private void addBuildVariables(BuildInfoBuilder builder, IncludeExcludePatterns patterns) {
-        Map<String, String> allParamMap = Maps.newHashMap();
-        allParamMap.putAll(runnerContext.getBuildParameters().getAllParameters());
-        allParamMap.putAll(((BuildRunnerContextEx) runnerContext).getConfigParameters());
-        for (Map.Entry<String, String> entryToAdd : allParamMap.entrySet()) {
-            String key = entryToAdd.getKey();
-            if (key.startsWith(Constants.ENV_PREFIX)) {
-                key = StringUtils.removeStartIgnoreCase(key, Constants.ENV_PREFIX);
-            } else if (key.startsWith(Constants.SYSTEM_PREFIX)) {
-                key = StringUtils.removeStartIgnoreCase(key, Constants.SYSTEM_PREFIX);
-            }
-            if (PatternMatcher.pathConflicts(key, patterns)) {
-                continue;
-            }
-            builder.addProperty(BuildInfoProperties.BUILD_INFO_ENVIRONMENT_PREFIX + key, entryToAdd.getValue());
-        }
-    }
-
-    private void addSystemProperties(BuildInfoBuilder builder, IncludeExcludePatterns patterns) {
-        Properties systemProperties = System.getProperties();
-        Enumeration<?> enumeration = systemProperties.propertyNames();
-        while (enumeration.hasMoreElements()) {
-            String propertyKey = (String) enumeration.nextElement();
-            if (PatternMatcher.pathConflicts(propertyKey, patterns)) {
-                continue;
-            }
-            builder.addProperty(propertyKey, systemProperties.getProperty(propertyKey));
-        }
     }
 
     protected String getDeploymentPath(Gavc gavc, File file) {

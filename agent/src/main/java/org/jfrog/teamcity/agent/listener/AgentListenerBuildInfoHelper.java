@@ -24,24 +24,20 @@ import jetbrains.buildServer.agent.artifacts.ArtifactsWatcher;
 import jetbrains.buildServer.agent.impl.artifacts.ArtifactsBuilder;
 import jetbrains.buildServer.agent.impl.artifacts.ArtifactsCollection;
 import jetbrains.buildServer.log.Loggers;
-import jetbrains.buildServer.util.ArchiveUtil;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jfrog.build.api.Build;
 import org.jfrog.build.api.BuildRetention;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.client.DeployDetailsArtifact;
-import org.jfrog.build.client.ProxyConfiguration;
-import org.jfrog.build.extractor.BuildInfoExtractorUtils;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.teamcity.agent.*;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
+import org.jfrog.teamcity.agent.util.BuildInfoUtils;
 import org.jfrog.teamcity.agent.util.BuildRetentionFactory;
-import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunTypeUtils;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
@@ -52,7 +48,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static org.jfrog.teamcity.common.ConstantValues.*;
+import static org.jfrog.teamcity.common.ConstantValues.BUILD_STARTED;
 
 /**
  * @author Noam Y. Tenne
@@ -150,7 +146,7 @@ public class AgentListenerBuildInfoHelper {
         BuildProgressLogger logger = build.getBuildLogger();
 
         String selectedServerUrl = runnerParams.get(RunnerParameterKeys.URL);
-        ArtifactoryBuildInfoClient infoClient = getBuildInfoClient(selectedServerUrl, runnerParams, logger).build();
+        ArtifactoryBuildInfoClient infoClient = BuildInfoUtils.getArtifactoryBuildInfoClientBuilder(selectedServerUrl, runnerParams, logger).build();
         ExtractedBuildInfo extractedBuildInfo = extractBuildInfo(runner, dependencies, selectedServerUrl, runnerParams, logger);
 
         if (extractedBuildInfo == null) {
@@ -194,8 +190,8 @@ public class AgentListenerBuildInfoHelper {
             BuildRetention retention = BuildRetentionFactory.createBuildRetention(runnerParams, logger);
             String isAsyncBuildRetention = runnerParams.get(RunnerParameterKeys.DISCARD_OLD_BUILDS_ASYNC);
             if (Boolean.parseBoolean(publishBuildInfoValue)) {
-                publishBuildInfoToTeamCityServer(build, extractedBuildInfo.getBuildInfo());
-                sendBuildAndBuildRetention(build, extractedBuildInfo.getBuildInfo(), retention, Boolean.parseBoolean(isAsyncBuildRetention), infoClient);
+                BuildInfoUtils.publishBuildInfoToTeamCityServer(build, extractedBuildInfo.getBuildInfo(), watcher);
+                BuildInfoUtils.sendBuildAndBuildRetention(build, extractedBuildInfo.getBuildInfo(), retention, Boolean.parseBoolean(isAsyncBuildRetention), infoClient);
             }
         } finally {
             infoClient.close();
@@ -218,59 +214,10 @@ public class AgentListenerBuildInfoHelper {
             BaseBuildInfoExtractor<File> buildInfoExtractor = new MavenBuildInfoExtractor(runnerContext, publishableArtifacts, dependencies);
             return new ExtractedBuildInfo(buildInfoExtractor.extract(mavenBuildInfoFile), buildInfoExtractor.getDeployableArtifact());
         }
-        ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder = getBuildInfoClient(selectedServerUrl, runnerParams, logger);
+        ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder = BuildInfoUtils.getArtifactoryBuildInfoClientBuilder(selectedServerUrl, runnerParams, logger);
         GenericBuildInfoExtractor buildInfoExtractor = new GenericBuildInfoExtractor(runnerContext, publishableArtifacts, dependencies, buildInfoClientBuilder);
 
         return new ExtractedBuildInfo(buildInfoExtractor.extract(null), buildInfoExtractor.getDeployableArtifact());
-    }
-
-    private ArtifactoryBuildInfoClientBuilder getBuildInfoClient(String selectedServerUrl, Map<String, String> runnerParams, BuildProgressLogger logger) {
-        ArtifactoryBuildInfoClientBuilder builder = new ArtifactoryBuildInfoClientBuilder()
-                .setArtifactoryUrl(selectedServerUrl)
-                .setUsername(runnerParams.get(RunnerParameterKeys.DEPLOYER_USERNAME))
-                .setPassword(runnerParams.get(RunnerParameterKeys.DEPLOYER_PASSWORD))
-                .setLog(new TeamcityAgenBuildInfoLog(logger))
-                .setConnectionTimeout(Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
-
-        if (runnerParams.containsKey(PROXY_HOST)) {
-            ProxyConfiguration proxyConfiguration = new ProxyConfiguration();
-            proxyConfiguration.host = runnerParams.get(PROXY_HOST);
-            proxyConfiguration.port = Integer.parseInt(runnerParams.get(PROXY_PORT));
-            String proxyUsername = runnerParams.get(PROXY_USERNAME);
-            if (StringUtils.isNotBlank(proxyUsername)) {
-                proxyConfiguration.username = proxyUsername;
-                proxyConfiguration.password = runnerParams.get(PROXY_PASSWORD);
-            }
-            builder.setProxyConfiguration(proxyConfiguration);
-        }
-        return builder;
-    }
-
-    /**
-     * Create gz of the build info and publish it to the server. The file will be saved under
-     * .BuildServer/system/artifacts/$Project/$Build/$BuildNumber/.teamcity/artifactory-build-info.json.gz
-     */
-    private void publishBuildInfoToTeamCityServer(AgentRunningBuild build, Build buildInfo) {
-        try {
-            File buildInfoFile = new File(build.getAgentTempDirectory(), BUILD_INFO_FILE_NAME);
-            BuildInfoExtractorUtils.saveBuildInfoToFile(buildInfo, buildInfoFile);
-            File buildInfoPacked = ArchiveUtil.packFile(buildInfoFile);
-            watcher.addNewArtifactsPath(buildInfoPacked.getAbsolutePath() + "=>.teamcity");
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to publish build info on TeamCity server", e);
-        }
-    }
-
-    private void sendBuildAndBuildRetention(AgentRunningBuild build, Build buildInfo, BuildRetention retention, boolean isAsyncRetention, ArtifactoryBuildInfoClient infoClient)
-            throws Exception {
-        try {
-            build.getBuildLogger().progressMessage("Deploying build info ...");
-            org.jfrog.build.extractor.retention.Utils.sendBuildAndBuildRetention(infoClient, buildInfo, retention, isAsyncRetention);
-            build.getBuildLogger().progressFinished();
-        } catch (Exception e) {
-            throw new Exception("Error deploying Artifactory build-info.", e);
-        }
     }
 
     private Multimap<File, String> getPublishableArtifacts(BuildRunnerContext runnerContext) {

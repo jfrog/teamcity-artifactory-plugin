@@ -80,4 +80,7 @@ public class RunnerParameterKeys {
     public final static String UPLOAD_SPEC_SOURCE = PREFIX + "uploadSpecSource";
     public final static String UPLOAD_SPEC = PREFIX + "uploadSpec";
     public final static String UPLOAD_SPEC_FILE_PATH = PREFIX + "uploadSpecFilePath";
+    public final static String DOCKER_COMMAND = PREFIX + "dockerCommand";
+    public final static String DOCKER_HOST = PREFIX + "dockerHost";
+    public final static String DOCKER_IMAGE_NAME = PREFIX + "dockerImageName";
 }

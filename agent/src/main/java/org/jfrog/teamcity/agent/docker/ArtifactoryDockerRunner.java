@@ -3,6 +3,7 @@ package org.jfrog.teamcity.agent.docker;
 import jetbrains.buildServer.ExtensionHolder;
 import jetbrains.buildServer.RunBuildException;
 import jetbrains.buildServer.agent.*;
+import jetbrains.buildServer.agent.artifacts.ArtifactsWatcher;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.teamcity.common.RunTypeUtils;
 
@@ -11,16 +12,17 @@ import org.jfrog.teamcity.common.RunTypeUtils;
  */
 public class ArtifactoryDockerRunner implements AgentBuildRunner {
 
-    //private static final Logger LOG = Loggers.SERVER;
-    protected final ExtensionHolder myExtensionHolder;
+    protected final ExtensionHolder extensionHolder;
+    protected final ArtifactsWatcher watcher;
 
-    public ArtifactoryDockerRunner(@NotNull final ExtensionHolder extensionHolder) {
-        myExtensionHolder = extensionHolder;
+    public ArtifactoryDockerRunner(@NotNull final ExtensionHolder extensionHolder, @NotNull ArtifactsWatcher watcher) {
+        this.extensionHolder = extensionHolder;
+        this.watcher = watcher;
     }
 
     @NotNull
     public BuildProcess createBuildProcess(@NotNull AgentRunningBuild runningBuild, @NotNull BuildRunnerContext context) throws RunBuildException {
-        return new ArtifactoryDockerBuildProcess(runningBuild, context, myExtensionHolder);
+        return new ArtifactoryDockerBuildProcess(runningBuild, context, extensionHolder, watcher);
     }
 
     @NotNull
@@ -32,10 +34,7 @@ public class ArtifactoryDockerRunner implements AgentBuildRunner {
             }
 
             public boolean canRun(@NotNull BuildAgentConfiguration agentConfiguration) {
-
-                // TODO: check if can run???
                 return true;
-
             }
         };
     }

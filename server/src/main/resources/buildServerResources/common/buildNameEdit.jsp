@@ -38,7 +38,3 @@
         </span>
     </td>
 </tr>
-
-<script>
-    BS.artifactory.setUseSpecsForGenerics('${shouldDisplay}');
-</script>
