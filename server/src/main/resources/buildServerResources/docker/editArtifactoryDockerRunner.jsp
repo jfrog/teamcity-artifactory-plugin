@@ -40,11 +40,6 @@
                 resolveTextDiv = document.getElementById('dockerResolveRepoText');
 
             if (selectedUrlId) {
-                // if (!foundExistingConfig) {
-                //     $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked = false;
-                //     $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
-                //     $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
-                // }
                 BS.Util.show($('overrideDefaultDeployerCredentials.container'));
                 if (BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()) {
                     BS.Util.show($('deployerUsername.container'));
@@ -335,6 +330,7 @@ display:inline-block;
             <span class="smallNote">
                 Docker image to use [DOMAIN]/[NAME]:[TAG].
             </span>
+            <span class="error" id="error_org.jfrog.artifactory.selectedDeployableServer.dockerImageName"></span>
         </td>
     </tr>
 

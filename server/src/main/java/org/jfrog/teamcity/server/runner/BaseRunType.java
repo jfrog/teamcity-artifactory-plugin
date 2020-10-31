@@ -98,9 +98,4 @@ public abstract class BaseRunType extends RunType {
         webControllerManager.registerController(editUrl,
                 new ArtifactoryRunTypeConfigController(editUrl, actualJsp, deployableArtifactoryServers));
     }
-
-    @Override
-    public PropertiesProcessor getRunnerPropertiesProcessor() {
-        return new BaseRunTypeConfigPropertiesProcessor(deployableArtifactoryServers);
-    }
 }

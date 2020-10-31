@@ -1,5 +1,6 @@
 package org.jfrog.teamcity.server.runner.docker;
 
+import jetbrains.buildServer.serverSide.PropertiesProcessor;
 import jetbrains.buildServer.serverSide.RunTypeRegistry;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
@@ -29,5 +30,10 @@ public class ArtifactoryDockerRunType extends BaseRunType {
     @Override
     public String getType() {
         return RunTypeUtils.DOCKER_RUNNER;
+    }
+
+    @Override
+    public PropertiesProcessor getRunnerPropertiesProcessor() {
+        return new DockerPropertiesProcessor(deployableArtifactoryServers);
     }
 }
