@@ -2,7 +2,6 @@ package org.jfrog.teamcity.agent.docker;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimaps;
-import jetbrains.buildServer.ExtensionHolder;
 import jetbrains.buildServer.agent.AgentRunningBuild;
 import jetbrains.buildServer.agent.BuildFinishedStatus;
 import jetbrains.buildServer.agent.BuildRunnerContext;
@@ -36,8 +35,8 @@ public class ArtifactoryDockerBuildProcess extends BaseArtifactoryBuildProcess {
     private ServerConfig serverConfig;
     private ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder;
 
-    public ArtifactoryDockerBuildProcess(@NotNull AgentRunningBuild runningBuild, @NotNull BuildRunnerContext context, @NotNull final ExtensionHolder extensionHolder, @NotNull ArtifactsWatcher watcher) {
-        super(runningBuild, context, extensionHolder, watcher);
+    public ArtifactoryDockerBuildProcess(@NotNull AgentRunningBuild runningBuild, @NotNull BuildRunnerContext context, @NotNull ArtifactsWatcher watcher) {
+        super(runningBuild, context, watcher);
         commandType = runnerParameters.get(RunnerParameterKeys.DOCKER_COMMAND);
         serverConfig = getServerConfig(runnerParameters, commandType);
         buildInfoClientBuilder = BuildInfoUtils.getArtifactoryBuildInfoClientBuilder(serverConfig, runnerParameters, logger);
@@ -97,7 +96,7 @@ public class ArtifactoryDockerBuildProcess extends BaseArtifactoryBuildProcess {
      * @return Map containing all properties.
      */
     private ArrayListMultimap<String, String> getCommonArtifactPropertiesMap(Map<String, String> runnerParameters) {
-        Map<String, String> propertiesMap = new HashMap<String, String>();
+        Map<String, String> propertiesMap = new HashMap<>();
         propertiesMap.put(BuildInfoFields.BUILD_NAME, runnerParameters.get(ConstantValues.BUILD_NAME));
         propertiesMap.put(BuildInfoFields.BUILD_NUMBER, context.getBuild().getBuildNumber());
         propertiesMap.put(BuildInfoFields.BUILD_TIMESTAMP, runnerParameters.get(ConstantValues.PROP_BUILD_TIMESTAMP));

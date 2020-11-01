@@ -1,6 +1,5 @@
 package org.jfrog.teamcity.agent.docker;
 
-import jetbrains.buildServer.ExtensionHolder;
 import jetbrains.buildServer.RunBuildException;
 import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.agent.artifacts.ArtifactsWatcher;
@@ -12,17 +11,15 @@ import org.jfrog.teamcity.common.RunTypeUtils;
  */
 public class ArtifactoryDockerRunner implements AgentBuildRunner {
 
-    protected final ExtensionHolder extensionHolder;
     protected final ArtifactsWatcher watcher;
 
-    public ArtifactoryDockerRunner(@NotNull final ExtensionHolder extensionHolder, @NotNull ArtifactsWatcher watcher) {
-        this.extensionHolder = extensionHolder;
+    public ArtifactoryDockerRunner(@NotNull ArtifactsWatcher watcher) {
         this.watcher = watcher;
     }
 
     @NotNull
     public BuildProcess createBuildProcess(@NotNull AgentRunningBuild runningBuild, @NotNull BuildRunnerContext context) throws RunBuildException {
-        return new ArtifactoryDockerBuildProcess(runningBuild, context, extensionHolder, watcher);
+        return new ArtifactoryDockerBuildProcess(runningBuild, context, watcher);
     }
 
     @NotNull

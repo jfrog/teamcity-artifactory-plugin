@@ -23,7 +23,7 @@ public class DockerPropertiesProcessor implements PropertiesProcessor {
 
     @Override
     public Collection<InvalidProperty> process(Map<String, String> properties) {
-        final Collection<InvalidProperty> invalidProperties = new ArrayList<InvalidProperty>();
+        final Collection<InvalidProperty> invalidProperties = new ArrayList<>();
         if (properties == null) {
             return invalidProperties;
         }
