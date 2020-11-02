@@ -8,7 +8,6 @@ import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.agent.artifacts.ArtifactsWatcher;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.Build;
-import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryDependenciesClientBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
@@ -16,14 +15,11 @@ import org.jfrog.build.extractor.docker.extractor.DockerPull;
 import org.jfrog.build.extractor.docker.extractor.DockerPush;
 import org.jfrog.teamcity.agent.BaseArtifactoryBuildProcess;
 import org.jfrog.teamcity.agent.ServerConfig;
-import org.jfrog.teamcity.agent.util.AgentUtils;
 import org.jfrog.teamcity.agent.util.BuildInfoUtils;
 import org.jfrog.teamcity.agent.util.RepositoryHelper;
-import org.jfrog.teamcity.common.ConstantValues;
-import org.jfrog.teamcity.common.DockerCommands;
+import org.jfrog.teamcity.common.DockerAction;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -31,14 +27,14 @@ import java.util.Map;
  */
 public class ArtifactoryDockerBuildProcess extends BaseArtifactoryBuildProcess {
 
-    private String commandType;
+    private DockerAction commandType;
     private ServerConfig serverConfig;
     private ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder;
 
     public ArtifactoryDockerBuildProcess(@NotNull AgentRunningBuild runningBuild, @NotNull BuildRunnerContext context, @NotNull ArtifactsWatcher watcher) {
         super(runningBuild, context, watcher);
-        commandType = runnerParameters.get(RunnerParameterKeys.DOCKER_COMMAND);
-        serverConfig = getServerConfig(runnerParameters, commandType);
+        commandType = DockerAction.valueOf(runnerParameters.get(RunnerParameterKeys.DOCKER_ACTION));
+        serverConfig = getServerConfig(runnerParameters);
         buildInfoClientBuilder = BuildInfoUtils.getArtifactoryBuildInfoClientBuilder(serverConfig, runnerParameters, logger);
     }
 
@@ -48,7 +44,7 @@ public class ArtifactoryDockerBuildProcess extends BaseArtifactoryBuildProcess {
         ArtifactoryDependenciesClientBuilder dependenciesClientBuilder =
                 BuildInfoUtils.getArtifactoryDependenciesClientBuilder(serverConfig, runnerParameters, logger);
 
-        if (isDockerCommandPull(commandType)) {
+        if (isDockerCommandPull()) {
             // Perform pull.
             buildInfo = executeDockerPull(runnerParameters, imageName, host, buildInfoClientBuilder, dependenciesClientBuilder);;
         } else {
@@ -85,38 +81,33 @@ public class ArtifactoryDockerBuildProcess extends BaseArtifactoryBuildProcess {
         String userName = runnerParameters.get(RunnerParameterKeys.DEPLOYER_USERNAME);
         String password = runnerParameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD);
 
-        return new DockerPush(buildInfoClientBuilder, dependenciesClientBuilder, imageName,
-                host, getCommonArtifactPropertiesMap(runnerParameters), targetRepo, userName, password,
-                buildInfoLog, environmentVariables).execute();
+        return new DockerPush(buildInfoClientBuilder, dependenciesClientBuilder, imageName, host,
+                ArrayListMultimap.create(Multimaps.forMap(BuildInfoUtils.getCommonArtifactPropertiesMap(runnerParameters, context))),
+                targetRepo, userName, password, buildInfoLog, environmentVariables).execute();
     }
 
-    /**
-     * Get a map of the commonly used artifact properties to be set when deploying an artifact.
-     * Build name, build number, vcs url, vcs revision, timestamp.
-     * @return Map containing all properties.
-     */
-    private ArrayListMultimap<String, String> getCommonArtifactPropertiesMap(Map<String, String> runnerParameters) {
-        Map<String, String> propertiesMap = new HashMap<>();
-        propertiesMap.put(BuildInfoFields.BUILD_NAME, runnerParameters.get(ConstantValues.BUILD_NAME));
-        propertiesMap.put(BuildInfoFields.BUILD_NUMBER, context.getBuild().getBuildNumber());
-        propertiesMap.put(BuildInfoFields.BUILD_TIMESTAMP, runnerParameters.get(ConstantValues.PROP_BUILD_TIMESTAMP));
-        propertiesMap.put(BuildInfoFields.VCS_REVISION, runnerParameters.get(ConstantValues.PROP_VCS_REVISION));
-        propertiesMap.put(BuildInfoFields.VCS_URL, runnerParameters.get(ConstantValues.PROP_VCS_URL));
-        return ArrayListMultimap.create(Multimaps.forMap(propertiesMap));
-    }
-
-    private ServerConfig getServerConfig(Map<String, String> runnerParameters, String commandType) {
-        if (isDockerCommandPull(commandType)) {
-            return AgentUtils.getResolverServerConfig(runnerParameters);
+    private ServerConfig getServerConfig(Map<String, String> runnerParameters) {
+        if (isDockerCommandPull()) {
+            return getResolverServerConfig(runnerParameters);
         }
-        return AgentUtils.getDeployerServerConfig(runnerParameters);
+        return getDeployerServerConfig(runnerParameters);
     }
 
-    private boolean isDockerCommandPull(String commandType) {
-        return DockerCommands.valueOf(commandType).equals(DockerCommands.PULL);
+    private boolean isDockerCommandPull() {
+        return DockerAction.PULL.equals(commandType);
     }
 
     protected ArtifactoryBuildInfoClient getBuildInfoPublishClient() {
         return buildInfoClientBuilder.build();
+    }
+
+    private ServerConfig getDeployerServerConfig(Map<String, String> runnerParams) {
+        return new ServerConfig(runnerParams.get(RunnerParameterKeys.URL), runnerParams.get(RunnerParameterKeys.DEPLOYER_USERNAME),
+                runnerParams.get(RunnerParameterKeys.DEPLOYER_PASSWORD), Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
+    }
+
+    private ServerConfig getResolverServerConfig(Map<String, String> runnerParams) {
+        return new ServerConfig(runnerParams.get(RunnerParameterKeys.URL), runnerParams.get(RunnerParameterKeys.RESOLVER_USERNAME),
+                runnerParams.get(RunnerParameterKeys.RESOLVER_PASSWORD), Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
     }
 }

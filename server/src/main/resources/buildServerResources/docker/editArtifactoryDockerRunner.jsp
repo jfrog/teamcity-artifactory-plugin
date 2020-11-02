@@ -1,4 +1,4 @@
-<%@ page import="org.jfrog.teamcity.common.DockerCommands" %>
+<%@ page import="org.jfrog.teamcity.common.DockerAction" %>
 <%@ include file="/include.jsp" %>
 
 <%@ taglib prefix="props" tagdir="/WEB-INF/tags/props" %>
@@ -18,7 +18,7 @@
        && (propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo'] == true) ? true : false}"/>
 
 <c:set var="isPullCommand"
-       value="${(propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.dockerCommand'] == DockerCommands.PULL) ? true : false}"/>
+       value="${(propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.dockerCommand'] == DockerAction.PULL) ? true : false}"/>
 
 <c:set var="shouldDisplayResolvingRepo"
        value="${foundExistingConfig && isPullCommand}"/>
@@ -173,7 +173,7 @@ display:inline-block;
             <props:selectProperty name="org.jfrog.artifactory.selectedDeployableServer.dockerCommand"
                                   onchange="BS.local.onDockerCommandChange()">
                 <c:set var="onChangeRefreshUi" value="true"/>
-                <c:forEach var="command" items="<%=DockerCommands.values()%>">
+                <c:forEach var="command" items="<%=DockerAction.values()%>">
                     <c:set var="selected" value="false"/>
                     <c:if test="${command.commandId == propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.dockerCommand']}">
                         <c:set var="selected" value="true"/>
