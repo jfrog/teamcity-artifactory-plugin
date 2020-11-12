@@ -54,5 +54,6 @@
             <span class="smallNote">
                 Select an Artifactory server.
             </span>
+        <span class="error" id="error_org.jfrog.artifactory.selectedDeployableServer.urlId"></span>
     </td>
 </tr>

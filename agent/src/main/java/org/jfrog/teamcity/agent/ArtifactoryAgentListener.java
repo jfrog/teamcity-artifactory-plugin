@@ -30,6 +30,7 @@ import org.jfrog.teamcity.agent.listener.AgentListenerBuildInfoHelper;
 import org.jfrog.teamcity.agent.listener.AgentListenerReleaseHelper;
 import org.jfrog.teamcity.agent.listener.AgentListenerXrayScanHelper;
 import org.jfrog.teamcity.agent.util.AgentUtils;
+import org.jfrog.teamcity.common.RunTypeUtils;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.util.List;
@@ -38,6 +39,11 @@ import java.util.Map;
 import static org.jfrog.teamcity.common.ConstantValues.ARTIFACTORY_PLUGIN_VERSION;
 import static org.jfrog.teamcity.common.ConstantValues.PROP_SKIP_LOG_MESSAGE;
 
+/**
+ * An adapter for the RunTypeExtension executions.
+ * Maven, Gradle, Ivy and Generic are RunTypeExtension, and this adapter performs necessary operations for their functionality.
+ * This adapter should not run during RunType executions, such as Docker.
+ */
 public class ArtifactoryAgentListener extends ArtifactoryAgentLifeCycleAdapter {
 
     private ExtensionHolder extensionsLocator;
@@ -64,6 +70,12 @@ public class ArtifactoryAgentListener extends ArtifactoryAgentLifeCycleAdapter {
     @Override
     public void beforeRunnerStart(@NotNull BuildRunnerContext runner) {
         super.beforeRunnerStart(runner);
+
+        // Check if should run.
+        String runType = runner.getRunType();
+        if (!RunTypeUtils.isRunTypeExtension(runType)) {
+            return;
+        }
 
         Map<String, String> runnerParameters = runner.getRunnerParameters();
         if (!isBuildInfoSupportActivated(runnerParameters)) {
@@ -108,7 +120,9 @@ public class ArtifactoryAgentListener extends ArtifactoryAgentLifeCycleAdapter {
     public void runnerFinished(@NotNull BuildRunnerContext runner, @NotNull BuildFinishedStatus buildStatus) {
         super.runnerFinished(runner, buildStatus);
 
-        if (!isBuildInfoSupportActivated(runner.getRunnerParameters())) {
+        // Check if should run.
+        String runType = runner.getRunType();
+        if (!RunTypeUtils.isRunTypeExtension(runType) || !isBuildInfoSupportActivated(runner.getRunnerParameters())) {
             return;
         }
 

@@ -16,34 +16,19 @@
 
 package org.jfrog.teamcity.server.runner.generic;
 
-import com.google.common.collect.Sets;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jetbrains.annotations.NotNull;
+import org.jfrog.teamcity.common.RunTypeUtils;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
 import org.jfrog.teamcity.server.runner.BaseRunTypeExtension;
 
 import java.util.Collection;
-import java.util.Set;
 
 /**
  * @author Noam Y. Tenne
  */
 public class GenericRunTypeExtension extends BaseRunTypeExtension {
-
-    private static final Set<String> supportedRunTypes = Sets.newHashSet(
-            "FxCop",
-            "Ipr",
-            "MSBuild",
-            "NAnt",
-            "rake-runner",
-            "simpleRunner",
-            "sln2003",
-            "VS.Solution",
-            "Xcode",
-            "jetbrains_powershell",
-            "jb.nuget.publish",
-            "SBT");
 
     public GenericRunTypeExtension(@NotNull final WebControllerManager webControllerManager,
             @NotNull final PluginDescriptor pluginDescriptor,
@@ -55,6 +40,6 @@ public class GenericRunTypeExtension extends BaseRunTypeExtension {
 
     @Override
     public Collection<String> getRunTypes() {
-        return supportedRunTypes;
+        return RunTypeUtils.GENERIC_SUPPORTED_RUNNERS;
     }
 }

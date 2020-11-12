@@ -22,7 +22,6 @@ import jetbrains.buildServer.agent.BuildRunnerContext;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.BuildAgent;
-import org.jfrog.build.api.BuildType;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.api.builder.ModuleBuilder;
@@ -56,7 +55,6 @@ public class GenericBuildInfoExtractor extends BaseBuildInfoExtractor<Object> {
     @Override
     protected void appendRunnerSpecificDetails(BuildInfoBuilder builder, Object object)
             throws Exception {
-        builder.type(BuildType.GENERIC);
         builder.buildAgent(new BuildAgent(runnerContext.getRunType()));
         SpecsHelper specsHelper = new SpecsHelper(new TeamcityAgenBuildInfoLog(logger));
         String uploadSpec = getUploadSpec();

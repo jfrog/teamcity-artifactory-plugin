@@ -26,6 +26,7 @@ import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.serverSide.SBuildType;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jfrog.build.client.ItemLastModified;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.teamcity.api.ProxyInfo;
 import org.jfrog.teamcity.api.ServerConfigBean;
@@ -137,14 +138,13 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
 
                 String itemUrl = repoKey + "/" + formattedPath;
                 try {
-                    String itemLastModifiedString = client.getItemLastModified(itemUrl);
-                    long itemLastModified = format.parse(itemLastModifiedString).getTime();
+                    long itemLastModified = client.getItemLastModified(itemUrl).getLastModified();
                     if (itemValue != itemLastModified && itemValue != 0) {
                         if (itemLastModified != 0) {
                             buildWatchedItem.setItemLastModified(itemLastModified);
                             String message = String.format("Artifactory trigger has found changes on the watched " +
                                     "item '%s' for build '%s'. Last modified time was %s and is now %s.", itemUrl,
-                                    triggerId, format.format(itemValue), itemLastModifiedString);
+                                    triggerId, format.format(itemValue), itemLastModified);
                             Loggers.SERVER.info(message);
                             foundChange = true;
                         }

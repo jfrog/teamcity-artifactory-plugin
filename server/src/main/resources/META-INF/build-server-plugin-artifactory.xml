@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
+<!--suppress SpringBeanConstructorArgInspection -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:lang="http://www.springframework.org/schema/lang" xmlns:aop="http://www.springframework.org/schema/aop"
@@ -64,4 +64,6 @@
 
     <bean id="gradleReleaseManagementTab"
           class="org.jfrog.teamcity.server.project.gradle.GradleReleaseManagementTab"/>
+
+    <bean id="dockerRunType" class="org.jfrog.teamcity.server.runner.docker.ArtifactoryDockerRunType"/>
 </beans>

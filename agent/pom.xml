@@ -89,6 +89,10 @@
             <artifactId>build-info-extractor-maven3</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.jfrog.buildinfo</groupId>
+            <artifactId>build-info-extractor-docker</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.tmatesoft.svnkit</groupId>
             <artifactId>svnkit</artifactId>
         </dependency>
