@@ -63,23 +63,6 @@ public class BaseRunTypeConfigPropertiesProcessor implements PropertiesProcessor
                             "Artifactory server URL is valid."));
         }
 
-        String runLicenseChecks = properties.get(RunnerParameterKeys.RUN_LICENSE_CHECKS);
-        if (StringUtils.isNotBlank(runLicenseChecks) && Boolean.valueOf(runLicenseChecks)) {
-            String recipients = properties.get(RunnerParameterKeys.LICENSE_VIOLATION_RECIPIENTS);
-            if (StringUtils.isNotBlank(recipients)) {
-                String[] recipientTokens = StringUtils.split(recipients, ' ');
-                for (String recipientToken : recipientTokens) {
-                    if (StringUtils.isNotBlank(recipientToken) &&
-                            (!recipientToken.contains("@")) || recipientToken.startsWith("@") ||
-                            recipientToken.endsWith("@")) {
-                        invalidProperties.add(new InvalidProperty(RunnerParameterKeys.LICENSE_VIOLATION_RECIPIENTS,
-                                "'" + recipientToken + "' is not a valid e-mail address."));
-                        break;
-                    }
-                }
-            }
-        }
-
         String publishedAndBuildDependencies = properties.get(RunnerParameterKeys.BUILD_DEPENDENCIES);
         if (StringUtils.isNotBlank(publishedAndBuildDependencies) &&
                 !publishedAndBuildDependencies.equals(DISABLED_MESSAGE)) {

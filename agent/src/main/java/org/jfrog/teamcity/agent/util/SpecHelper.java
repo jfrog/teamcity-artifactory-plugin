@@ -20,7 +20,7 @@ public class SpecHelper {
         if (!specFile.isFile()) {
             throw new FileNotFoundException("Could not find Spec file at: " + specFile);
         }
-        String spec = FileUtils.readFileToString(specFile);
+        String spec = FileUtils.readFileToString(specFile, "UTF-8");
         if (StringUtils.isBlank(spec)) {
             throw new IllegalArgumentException("The file '" + specFile.getPath() + "' is not a valid File Spec.");
         }

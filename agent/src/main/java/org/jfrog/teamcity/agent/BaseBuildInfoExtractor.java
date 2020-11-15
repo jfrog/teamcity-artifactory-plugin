@@ -119,8 +119,8 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P>
 
         if (StringUtils.isNotBlank(runnerParams.get(PROP_PARENT_NAME)) &&
                 StringUtils.isNotBlank(runnerParams.get(PROP_PARENT_NUMBER))) {
-            buildInfo.setParentBuildId(runnerParams.get(PROP_PARENT_NAME) + ":" +
-                    runnerParams.get(PROP_PARENT_NUMBER));
+            buildInfo.setParentName(runnerParams.get(PROP_PARENT_NAME));
+            buildInfo.setParentNumber(runnerParams.get(PROP_PARENT_NUMBER));
         }
 
         return buildInfo;
@@ -144,40 +144,6 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P>
         if (Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.INCLUDE_ENV_VARS))) {
             BuildInfoUtils.addBuildInfoProperties(builder, runnerParams, runnerContext);
         }
-
-        // Add license control.
-        LicenseControl licenseControl =
-                new LicenseControl(Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.RUN_LICENSE_CHECKS)));
-        licenseControl.setLicenseViolationsRecipientsList(runnerParams.get(
-                RunnerParameterKeys.LICENSE_VIOLATION_RECIPIENTS));
-        licenseControl.setScopesList(runnerParams.get(RunnerParameterKeys.LIMIT_CHECKS_TO_SCOPES));
-        licenseControl.setIncludePublishedArtifacts(
-                Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.INCLUDE_PUBLISHED_ARTIFACTS)));
-        licenseControl.setAutoDiscover(!Boolean.parseBoolean(runnerParams.get(
-                RunnerParameterKeys.DISABLE_AUTO_LICENSE_DISCOVERY)));
-        builder.licenseControl(licenseControl);
-
-        // Add blackduck integration.
-        Governance governance = new Governance();
-        BlackDuckProperties blackDuckProperties = new BlackDuckProperties();
-        governance.setBlackDuckProperties(blackDuckProperties);
-        blackDuckProperties.setRunChecks(Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
-                BlackDuckPropertiesFields.RUN_CHECKS)));
-        blackDuckProperties.setAppName(runnerParams.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
-                BlackDuckPropertiesFields.APP_NAME));
-        blackDuckProperties.setAppVersion(runnerParams.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
-                BlackDuckPropertiesFields.APP_VERSION));
-        blackDuckProperties.setReportRecipients(runnerParams.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
-                BlackDuckPropertiesFields.REPORT_RECIPIENTS));
-        blackDuckProperties.setScopes(runnerParams.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
-                BlackDuckPropertiesFields.SCOPES));
-        blackDuckProperties.setIncludePublishedArtifacts(Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.
-                BLACKDUCK_PREFIX + BlackDuckPropertiesFields.INCLUDE_PUBLISHED_ARTIFACTS)));
-        blackDuckProperties.setAutoCreateMissingComponentRequests(Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.
-                BLACKDUCK_PREFIX + BlackDuckPropertiesFields.AutoCreateMissingComponentRequests)));
-        blackDuckProperties.setAutoDiscardStaleComponentRequests(Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.
-                BLACKDUCK_PREFIX + BlackDuckPropertiesFields.AutoDiscardStaleComponentRequests)));
-        builder.governance(governance);
 
         return builder;
     }

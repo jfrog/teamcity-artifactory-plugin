@@ -64,15 +64,9 @@ BS.local = {
             $('org.jfrog.artifactory.selectedDeployableServer.useM2CompatiblePatterns').checked = true;
             $('org.jfrog.artifactory.selectedDeployableServer.ivyPattern').value = '';
             $('org.jfrog.artifactory.selectedDeployableServer.artifactPattern').value = '';
-            $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks').checked = false;
-            $('org.jfrog.artifactory.selectedDeployableServer.licenseViolationRecipients').value = '';
-            $('org.jfrog.artifactory.selectedDeployableServer.limitChecksToScopes').value = '';
-            $('org.jfrog.artifactory.selectedDeployableServer.includePublishedArtifacts').checked = false;
-            $('org.jfrog.artifactory.selectedDeployableServer.disableAutoLicenseDiscovery').checked = false;
             $('org.jfrog.artifactory.selectedDeployableServer.publishedArtifacts').value = '';
             $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').disabled = true;
             $('org.jfrog.artifactory.selectedDeployableServer.buildDependencies').value = '${disabledMessage}';
-            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.runChecks').checked = false;
 
             BS.Util.hide($('targetRepo.container'));
             BS.Util.hide($('version.warning.container'));
@@ -93,14 +87,8 @@ BS.local = {
             BS.Util.hide($('ivyPattern.container'));
             BS.Util.hide($('artifactPattern.container'));
             BS.Util.hide($('activateIvyIntegration.container'));
-            BS.Util.hide($('runLicenseChecks.container'));
-            BS.Util.hide($('licenseViolationRecipients.container'));
-            BS.Util.hide($('limitChecksToScopes.container'));
-            BS.Util.hide($('includePublishedArtifacts.container'));
-            BS.Util.hide($('disableAutoLicenseDiscovery.container'));
             BS.Util.hide($('publishedArtifacts.container'));
             BS.Util.hide($('buildDependencies.container'));
-            BS.Util.hide($('blackduck.runChecks.container'));
             BS.artifactory.resetBuildRetentionContinerValues();
         } else {
 
@@ -142,29 +130,6 @@ BS.local = {
             BS.Util.show($('publishBuildInfo.container'));
             var publishBuildInfo = BS.artifactory.isPublishBuildInfoSelected();
             if (publishBuildInfo) {
-                BS.Util.show($('runLicenseChecks.container'));
-                var shouldRunLicenseChecks = $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks')
-                        .checked;
-                if (shouldRunLicenseChecks) {
-                    BS.Util.show($('licenseViolationRecipients.container'));
-                    BS.Util.show($('limitChecksToScopes.container'));
-                    BS.Util.show($('includePublishedArtifacts.container'));
-                    BS.Util.show($('disableAutoLicenseDiscovery.container'));
-                }
-
-                BS.Util.show($('blackduck.runChecks.container'));
-                var shouldRunLicenseChecks = $('org.jfrog.artifactory.selectedDeployableServer.blackduck.runChecks')
-                        .checked;
-                if (shouldRunLicenseChecks) {
-                    BS.Util.show($('blackduck.appName.container'));
-                    BS.Util.show($('blackduck.appVersion.container'));
-                    BS.Util.show($('blackduck.reportRecipients.container'));
-                    BS.Util.show($('blackduck.scopes.container'));
-                    BS.Util.show($('blackduck.includePublishedArtifacts.container'));
-                    BS.Util.show($('blackduck.autoCreateMissingComponentRequests.container'));
-                    BS.Util.show($('blackduck.autoDiscardStaleComponentRequests.container'));
-                }
-
                 BS.Util.show($('includeEnvVars.container'));
                 var includeEnvVarsEnabled =
                         $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked;
@@ -275,8 +240,6 @@ BS.local = {
         if (BS.artifactory.isPublishBuildInfoSelected()) {
             BS.Util.show($('includeEnvVars.container'));
             BS.Util.show($('xray.scan.container'));
-            BS.Util.show($('runLicenseChecks.container'));
-            BS.Util.show($('blackduck.runChecks.container'));
             BS.Util.show($('buildRetention.container'));
         } else {
             BS.Util.hide($('includeEnvVars.container'));
@@ -289,24 +252,6 @@ BS.local = {
             $('org.jfrog.artifactory.selectedDeployableServer.xray.scan').checked = false;
             BS.Util.hide($('xray.failBuild.container'));
             $('org.jfrog.artifactory.selectedDeployableServer.xray.failBuild').checked = false;
-            BS.Util.hide($('runLicenseChecks.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.runLicenseChecks').checked = false;
-            BS.Util.hide($('licenseViolationRecipients.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.licenseViolationRecipients').value = '';
-            BS.Util.hide($('limitChecksToScopes.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.limitChecksToScopes').value = '';
-            BS.Util.hide($('includePublishedArtifacts.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.includePublishedArtifacts').checked = false;
-            BS.Util.hide($('disableAutoLicenseDiscovery.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.disableAutoLicenseDiscovery').checked = false;
-            BS.Util.hide($('blackduck.runChecks.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.runChecks').checked = false;
-            BS.Util.hide($('blackduck.includePublishedArtifacts.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.includePublishedArtifacts').checked = false;
-            BS.Util.hide($('blackduck.autoCreateMissingComponentRequests.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.autoCreateMissingComponentRequests').checked = false;
-            BS.Util.hide($('blackduck.autoDiscardStaleComponentRequests.container'));
-            $('org.jfrog.artifactory.selectedDeployableServer.blackduck.autoDiscardStaleComponentRequests').checked = false;
             $('org.jfrog.artifactory.selectedDeployableServer.buildRetention').checked = false;
             BS.artifactory.hideBuildRetentionContainer();
             BS.artifactory.resetBuildRetentionArgs();
@@ -445,14 +390,6 @@ Use the Artifactory-Ivy integration to collect build info data and deploy artifa
     </jsp:include>
 
     <jsp:include page="../common/xrayScanEdit.jsp">
-        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
-    </jsp:include>
-
-    <jsp:include page="../common/licensesEdit.jsp">
-        <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
-    </jsp:include>
-
-    <jsp:include page="../common/blackDuckEdit.jsp">
         <jsp:param name="shouldDisplay" value="${foundExistingConfig && foundPublishBuildInfoSelected}"/>
     </jsp:include>
 
