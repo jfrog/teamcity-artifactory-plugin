@@ -139,7 +139,7 @@ public class BuildInfoUtils {
                 .setPassword(serverConfig.getPassword())
                 .setConnectionTimeout(serverConfig.getTimeout())
                 .setLog(new TeamcityAgenBuildInfoLog(logger));
-        ProxyConfiguration proxyConfiguration = getProxyConfiguration(runnerParams);
+        ProxyConfiguration proxyConfiguration = AgentUtils.getProxyConfiguration(runnerParams);
         if (proxyConfiguration != null) {
             builder.setProxyConfiguration(proxyConfiguration);
         }
@@ -154,7 +154,7 @@ public class BuildInfoUtils {
                 .setConnectionTimeout(serverConfig.getTimeout())
                 .setLog(new TeamcityAgenBuildInfoLog(logger));
 
-        ProxyConfiguration proxyConfiguration = getProxyConfiguration(runnerParams);
+        ProxyConfiguration proxyConfiguration = AgentUtils.getProxyConfiguration(runnerParams);
         if (proxyConfiguration != null) {
             builder.setProxyConfiguration(proxyConfiguration);
         }
@@ -170,26 +170,11 @@ public class BuildInfoUtils {
                 .setLog(new TeamcityAgenBuildInfoLog(logger))
                 .setConnectionTimeout(Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
 
-        ProxyConfiguration proxyConfiguration = getProxyConfiguration(runnerParams);
+        ProxyConfiguration proxyConfiguration = AgentUtils.getProxyConfiguration(runnerParams);
         if (proxyConfiguration != null) {
             builder.setProxyConfiguration(proxyConfiguration);
         }
 
         return builder;
-    }
-
-    private static ProxyConfiguration getProxyConfiguration(Map<String, String> runnerParams) {
-        if (!runnerParams.containsKey(PROXY_HOST)) {
-            return null;
-        }
-        ProxyConfiguration proxyConfiguration = new ProxyConfiguration();
-        proxyConfiguration.host = runnerParams.get(PROXY_HOST);
-        proxyConfiguration.port = Integer.parseInt(runnerParams.get(PROXY_PORT));
-        String proxyUsername = runnerParams.get(PROXY_USERNAME);
-        if (StringUtils.isNotBlank(proxyUsername)) {
-            proxyConfiguration.username = proxyUsername;
-            proxyConfiguration.password = runnerParams.get(PROXY_PASSWORD);
-        }
-        return proxyConfiguration;
     }
 }

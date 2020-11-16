@@ -15,6 +15,7 @@ import org.jfrog.build.extractor.docker.extractor.DockerPull;
 import org.jfrog.build.extractor.docker.extractor.DockerPush;
 import org.jfrog.teamcity.agent.BaseArtifactoryBuildProcess;
 import org.jfrog.teamcity.agent.ServerConfig;
+import org.jfrog.teamcity.agent.util.AgentUtils;
 import org.jfrog.teamcity.agent.util.BuildInfoUtils;
 import org.jfrog.teamcity.agent.util.RepositoryHelper;
 import org.jfrog.teamcity.common.DockerAction;
@@ -88,9 +89,9 @@ public class ArtifactoryDockerBuildProcess extends BaseArtifactoryBuildProcess {
 
     private ServerConfig getServerConfig(Map<String, String> runnerParameters) {
         if (isDockerCommandPull()) {
-            return getResolverServerConfig(runnerParameters);
+            return AgentUtils.getResolverServerConfig(runnerParameters);
         }
-        return getDeployerServerConfig(runnerParameters);
+        return AgentUtils.getDeployerServerConfig(runnerParameters);
     }
 
     private boolean isDockerCommandPull() {
@@ -101,13 +102,13 @@ public class ArtifactoryDockerBuildProcess extends BaseArtifactoryBuildProcess {
         return buildInfoClientBuilder.build();
     }
 
-    private ServerConfig getDeployerServerConfig(Map<String, String> runnerParams) {
-        return new ServerConfig(runnerParams.get(RunnerParameterKeys.URL), runnerParams.get(RunnerParameterKeys.DEPLOYER_USERNAME),
-                runnerParams.get(RunnerParameterKeys.DEPLOYER_PASSWORD), Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
+    @Override
+    protected ServerConfig getUsageServerConfig() {
+        return serverConfig;
     }
 
-    private ServerConfig getResolverServerConfig(Map<String, String> runnerParams) {
-        return new ServerConfig(runnerParams.get(RunnerParameterKeys.URL), runnerParams.get(RunnerParameterKeys.RESOLVER_USERNAME),
-                runnerParams.get(RunnerParameterKeys.RESOLVER_PASSWORD), Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
+    @Override
+    protected String getTaskUsageName() {
+        return "docker";
     }
 }
