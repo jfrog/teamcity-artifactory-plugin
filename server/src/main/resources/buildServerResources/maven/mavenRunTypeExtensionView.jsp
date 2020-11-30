@@ -74,10 +74,6 @@
         <jsp:param name="shouldDisplay" value="${foundPublishBuildInfoSelected}"/>
     </jsp:include>
 
-    <jsp:include page="../common/licensesView.jsp">
-        <jsp:param name="shouldDisplay" value="${foundPublishBuildInfoSelected}"/>
-    </jsp:include>
-
     <jsp:include page="../common/releaseManagementView.jsp">
         <jsp:param name="shouldDisplay" value="true"/>
         <jsp:param name="builderName" value='maven'/>

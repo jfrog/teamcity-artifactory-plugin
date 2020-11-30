@@ -9,7 +9,6 @@ public class RunnerParameterKeys {
     }
 
     public final static String PREFIX = ConstantValues.PLUGIN_PREFIX + "selectedDeployableServer.";
-    public final static String BLACKDUCK_PREFIX = PREFIX + "blackduck.";
     public final static String XRAY_SCAN_PREFIX = PREFIX + "xray.";
 
     public final static String IVY_INTEGRATION = PREFIX + "activateIvyIntegration";
@@ -40,11 +39,6 @@ public class RunnerParameterKeys {
     public final static String USE_M2_COMPATIBLE_PATTERNS = PREFIX + "useM2CompatiblePatterns";
     public final static String IVY_PATTERNS = PREFIX + "ivyPattern";
     public final static String ARTIFACT_PATTERNS = PREFIX + "artifactPattern";
-    public final static String RUN_LICENSE_CHECKS = PREFIX + "runLicenseChecks";
-    public final static String LICENSE_VIOLATION_RECIPIENTS = PREFIX + "licenseViolationRecipients";
-    public final static String LIMIT_CHECKS_TO_SCOPES = PREFIX + "limitChecksToScopes";
-    public final static String INCLUDE_PUBLISHED_ARTIFACTS = PREFIX + "includePublishedArtifacts";
-    public final static String DISABLE_AUTO_LICENSE_DISCOVERY = PREFIX + "disableAutoLicenseDiscovery";
     public final static String PROJECT_USES_ARTIFACTORY_GRADLE_PLUGIN = PREFIX + "projectUsesArtifactoryGradlePlugin";
     public final static String PUBLISH_BUILD_INFO = PREFIX + "publishBuildInfo";
     public final static String XRAY_SCAN_BUILD = XRAY_SCAN_PREFIX + "scan";

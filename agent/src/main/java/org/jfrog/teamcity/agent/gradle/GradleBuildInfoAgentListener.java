@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static org.jfrog.teamcity.common.ConstantValues.PROP_SKIP_LOG_MESSAGE;
@@ -152,7 +153,7 @@ public class GradleBuildInfoAgentListener extends ArtifactoryAgentLifeCycleAdapt
 
         String scriptTemplate;
         try {
-            scriptTemplate = IOUtils.toString(initScriptStream);
+            scriptTemplate = IOUtils.toString(initScriptStream, StandardCharsets.UTF_8);
         } catch (IOException e) {
             logger.warning("An error occurred while loading the gradle init script template. " +
                     "Build-info task will not be added.");

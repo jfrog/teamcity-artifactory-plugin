@@ -9,7 +9,6 @@ import jetbrains.buildServer.agent.Constants;
 import jetbrains.buildServer.agent.impl.BuildRunnerContextImpl;
 import jetbrains.buildServer.parameters.ValueResolver;
 import org.apache.commons.lang.StringUtils;
-import org.jfrog.build.api.BlackDuckPropertiesFields;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.api.BuildRetention;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
@@ -71,60 +70,13 @@ public abstract class ArtifactoryClientConfigurationBuilder {
         clientConf.info.setPrincipal(runnerParameters.get(ConstantValues.TRIGGERED_BY));
         clientConf.info.setAgentName(runnerParameters.get(ConstantValues.AGENT_NAME));
         clientConf.info.setAgentVersion(runnerParameters.get(ConstantValues.AGENT_VERSION));
-        boolean runLicenseChecks =
-                Boolean.parseBoolean(runnerParameters.get(RunnerParameterKeys.RUN_LICENSE_CHECKS));
-        if (runLicenseChecks) {
-            clientConf.info.licenseControl.setRunChecks(runLicenseChecks);
-            String violationRecipients = runnerParameters.get(RunnerParameterKeys.LICENSE_VIOLATION_RECIPIENTS);
-            if (StringUtils.isNotBlank(violationRecipients)) {
-                clientConf.info.licenseControl.setViolationRecipients(violationRecipients);
-            }
 
-            String scopes = runnerParameters.get(RunnerParameterKeys.LIMIT_CHECKS_TO_SCOPES);
-            if (StringUtils.isNotBlank(scopes)) {
-                clientConf.info.licenseControl.setScopes(scopes);
-            }
-
-            boolean includePublishedArtifacts =
-                    Boolean.parseBoolean(runnerParameters.get(RunnerParameterKeys.INCLUDE_PUBLISHED_ARTIFACTS));
-            if (includePublishedArtifacts) {
-                clientConf.info.licenseControl.setIncludePublishedArtifacts(includePublishedArtifacts);
-            }
-            clientConf.info.licenseControl.setAutoDiscover(
-                    Boolean.valueOf(runnerParameters.get(RunnerParameterKeys.DISABLE_AUTO_LICENSE_DISCOVERY)));
-        }
-
-        addBlackDuckConfIfNeeded(clientConf, runnerParameters);
         addBuildRetentionIfNeeded(buildLogger, clientConf, runnerParameters);
         ValueResolver repositoryResolver = runnerContext.getParametersResolver();
         addClientProperties(runnerParameters, repositoryResolver, clientConf);
         addMatrixParamProperties(runnerContext, clientConf);
         addEnvVars(runnerContext, clientConf);
         return clientConf;
-    }
-
-    private static void addBlackDuckConfIfNeeded(ArtifactoryClientConfiguration clientConf, Map<String, String> runnerParameters) {
-        boolean blackDuckRunChecks =
-                Boolean.parseBoolean(runnerParameters.get(RunnerParameterKeys.BLACKDUCK_PREFIX + BlackDuckPropertiesFields.RUN_CHECKS));
-        if (blackDuckRunChecks) {
-            clientConf.info.blackDuckProperties.setRunChecks(blackDuckRunChecks);
-            clientConf.info.blackDuckProperties.setAppName(runnerParameters.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
-                    BlackDuckPropertiesFields.APP_NAME));
-            clientConf.info.blackDuckProperties.setAppVersion(runnerParameters.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
-                    BlackDuckPropertiesFields.APP_VERSION));
-            clientConf.info.blackDuckProperties.setReportRecipients(runnerParameters.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
-                    BlackDuckPropertiesFields.REPORT_RECIPIENTS));
-            clientConf.info.blackDuckProperties.setScopes(runnerParameters.get(RunnerParameterKeys.BLACKDUCK_PREFIX +
-                    BlackDuckPropertiesFields.SCOPES));
-            clientConf.info.blackDuckProperties.setIncludePublishedArtifacts(Boolean.valueOf(runnerParameters.get(
-                    RunnerParameterKeys.BLACKDUCK_PREFIX + BlackDuckPropertiesFields.INCLUDE_PUBLISHED_ARTIFACTS)));
-            clientConf.info.blackDuckProperties.setAutoCreateMissingComponentRequests(Boolean.valueOf(runnerParameters.
-                    get(RunnerParameterKeys.BLACKDUCK_PREFIX + BlackDuckPropertiesFields.
-                            AutoCreateMissingComponentRequests)));
-            clientConf.info.blackDuckProperties.setAutoDiscardStaleComponentRequests(Boolean.valueOf(runnerParameters.
-                    get(RunnerParameterKeys.BLACKDUCK_PREFIX + BlackDuckPropertiesFields.
-                            AutoDiscardStaleComponentRequests)));
-        }
     }
 
     private static void addBuildRetentionIfNeeded(BuildProgressLogger buildLogger, ArtifactoryClientConfiguration clientConf, Map<String, String> runnerParameters) {

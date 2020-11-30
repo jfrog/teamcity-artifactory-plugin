@@ -72,10 +72,6 @@
         <jsp:param name="shouldDisplay" value="${foundPublishBuildInfoSelected}"/>
     </jsp:include>
 
-    <jsp:include page="../common/licensesView.jsp">
-        <jsp:param name="shouldDisplay" value="${foundPublishBuildInfoSelected}"/>
-    </jsp:include>
-
     <jsp:include page="../common/genericItemsView.jsp">
         <jsp:param name="shouldDisplay" value="${!foundActivateIvyIntegrationSelected}"/>
     </jsp:include>

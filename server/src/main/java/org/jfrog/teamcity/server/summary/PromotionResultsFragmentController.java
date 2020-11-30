@@ -306,7 +306,7 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
             }
 
             JsonFactory factory = new JsonFactory();
-            JsonParser parser = factory.createJsonParser(content);
+            JsonParser parser = factory.createParser(content);
             ObjectMapper mapper = new ObjectMapper(factory);
             parser.setCodec(mapper);
 
