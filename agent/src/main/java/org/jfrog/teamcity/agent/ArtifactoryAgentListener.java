@@ -30,6 +30,7 @@ import org.jfrog.teamcity.agent.listener.AgentListenerBuildInfoHelper;
 import org.jfrog.teamcity.agent.listener.AgentListenerReleaseHelper;
 import org.jfrog.teamcity.agent.listener.AgentListenerXrayScanHelper;
 import org.jfrog.teamcity.agent.util.AgentUtils;
+import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
 import org.jfrog.teamcity.common.RunTypeUtils;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
@@ -38,6 +39,7 @@ import java.util.Map;
 
 import static org.jfrog.teamcity.common.ConstantValues.ARTIFACTORY_PLUGIN_VERSION;
 import static org.jfrog.teamcity.common.ConstantValues.PROP_SKIP_LOG_MESSAGE;
+import static org.jfrog.teamcity.common.RunTypeUtils.*;
 
 /**
  * An adapter for the RunTypeExtension executions.
@@ -86,14 +88,15 @@ public class ArtifactoryAgentListener extends ArtifactoryAgentLifeCycleAdapter {
             return;
         }
 
+        BuildProgressLogger logger = runner.getBuild().getBuildLogger();
         // Gets the version from the BuildRunnerContext
         String pluginVersion = runnerParameters.get(ARTIFACTORY_PLUGIN_VERSION);
-        // Gets the logger from runner
-        BuildProgressLogger logger = runner.getBuild().getBuildLogger();
         // If the version of the plugin was retrieved then write the version to the log.
         if (StringUtils.isNotBlank(pluginVersion)) {
             logInfo(logger, "TeamCity Artifactory Plugin version: " + pluginVersion);
         }
+        // Report usage.
+        AgentUtils.reportUsage(getServerConfig(runnerParameters), getTaskUsageName(runType), runnerParameters, new TeamcityAgenBuildInfoLog(logger));
 
         publishedDependencies.clear();
         userBuildDependencies.clear();
@@ -156,5 +159,22 @@ public class ArtifactoryAgentListener extends ArtifactoryAgentLifeCycleAdapter {
     private void logInfo(BuildProgressLogger logger, String message) {
         Loggers.AGENT.info(message);
         logger.message(message);
+    }
+
+    protected ServerConfig getServerConfig(Map<String, String> runnerParams) {
+        return AgentUtils.getDeployerServerConfig(runnerParams);
+    }
+
+    protected String getTaskUsageName(String runType) {
+        switch (runType) {
+            case MAVEN_RUNNER:
+                return "maven";
+            case GRADLE_RUNNER:
+                return "gradle";
+            case ANT_RUNNER:
+                return "ivy";
+            default:
+                return "generic";
+        }
     }
 }

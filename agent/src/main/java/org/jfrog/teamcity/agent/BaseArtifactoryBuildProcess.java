@@ -11,6 +11,7 @@ import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.teamcity.agent.listener.AgentListenerXrayScanHelper;
+import org.jfrog.teamcity.agent.util.AgentUtils;
 import org.jfrog.teamcity.agent.util.BuildInfoUtils;
 import org.jfrog.teamcity.agent.util.BuildRetentionFactory;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
@@ -68,6 +69,10 @@ public abstract class BaseArtifactoryBuildProcess implements BuildProcess, Calla
      * @throws Exception
      */
     public BuildFinishedStatus call() throws Exception {
+        // Report usage.
+        reportUsage();
+
+        // Execute build.
         BuildFinishedStatus buildStatus = runBuild();
 
         boolean collectBuildInfo = Boolean.parseBoolean(runnerParameters.get(RunnerParameterKeys.PUBLISH_BUILD_INFO));
@@ -99,9 +104,22 @@ public abstract class BaseArtifactoryBuildProcess implements BuildProcess, Calla
         return BuildFinishedStatus.FINISHED_SUCCESS;
     }
 
+    protected void reportUsage() {
+        ServerConfig serverConfig = getUsageServerConfig();
+        if (serverConfig == null) {
+            return;
+        }
+        String taskName = getTaskUsageName();
+        AgentUtils.reportUsage(serverConfig, taskName, runnerParameters, buildInfoLog);
+    }
+
     protected abstract BuildFinishedStatus runBuild() throws Exception;
 
     protected abstract ArtifactoryBuildInfoClient getBuildInfoPublishClient();
+
+    protected abstract ServerConfig getUsageServerConfig();
+
+    protected abstract String getTaskUsageName();
 
     public boolean isInterrupted() {
         return futureStatus.isCancelled() && isFinished();
