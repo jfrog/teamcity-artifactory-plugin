@@ -33,11 +33,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <plugin.version>${project.version}</plugin.version>
         <teamcity.version>2017.1</teamcity.version>
-        <build.info.version>2.20.0</build.info.version>
-        <build.info.maven3.version>2.20.0</build.info.maven3.version>
-        <build.info.gradle.version>4.18.0</build.info.gradle.version>
-        <build.info.ivy.version>2.20.0</build.info.ivy.version>
-        <build.info.docker.version>2.20.0</build.info.docker.version>
+        <build.info.version>2.21.0</build.info.version>
+        <build.info.maven3.version>2.21.0</build.info.maven3.version>
+        <build.info.gradle.version>4.18.2</build.info.gradle.version>
+        <build.info.ivy.version>2.21.0</build.info.ivy.version>
+        <build.info.docker.version>2.21.0</build.info.docker.version>
     </properties>
 
     <developers>
