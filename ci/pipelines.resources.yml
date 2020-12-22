@@ -1,0 +1,19 @@
+resources:
+  - name: teamcityGit
+    type: GitRepo
+    configuration:
+      path: jfrog/teamcity-artifactory-plugin
+      gitProvider: github
+      buildOn:
+        pullRequestCreate: true
+      cancelPendingRunsOn:
+        pullRequestUpdate: true
+
+  - name: teamcityReleaseGit
+    type: GitRepo
+    configuration:
+      path: jfrog/teamcity-artifactory-plugin
+      gitProvider: github
+      buildOn:
+        commit: false
+
