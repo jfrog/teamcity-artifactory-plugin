@@ -18,7 +18,7 @@ package org.jfrog.teamcity.server.project;
 
 import com.google.common.collect.Lists;
 import jetbrains.buildServer.serverSide.BranchEx;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 

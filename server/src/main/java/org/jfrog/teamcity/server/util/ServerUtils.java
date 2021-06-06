@@ -1,7 +1,7 @@
 package org.jfrog.teamcity.server.util;
 
 import jetbrains.buildServer.Build;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.util.Map;

@@ -16,7 +16,7 @@
 
 package org.jfrog.teamcity.api.credentials;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.teamcity.api.ServerConfigBean;
 
 /**

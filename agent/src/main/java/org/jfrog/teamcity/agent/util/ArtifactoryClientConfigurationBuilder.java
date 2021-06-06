@@ -8,7 +8,7 @@ import jetbrains.buildServer.agent.BuildRunnerContextEx;
 import jetbrains.buildServer.agent.Constants;
 import jetbrains.buildServer.agent.impl.BuildRunnerContextImpl;
 import jetbrains.buildServer.parameters.ValueResolver;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.api.BuildRetention;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;

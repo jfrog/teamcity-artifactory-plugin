@@ -17,7 +17,7 @@
 package org.jfrog.teamcity.api;
 
 import jetbrains.buildServer.serverSide.TeamCityProperties;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Noam Y. Tenne

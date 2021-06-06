@@ -23,7 +23,7 @@ import jetbrains.buildServer.serverSide.impl.auth.SecuredFinishedBuildImpl;
 import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.PlaceId;
 import jetbrains.buildServer.web.openapi.SimplePageExtension;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.teamcity.common.ConstantValues;

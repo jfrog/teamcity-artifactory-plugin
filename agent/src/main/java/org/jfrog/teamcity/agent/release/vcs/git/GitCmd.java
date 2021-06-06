@@ -3,7 +3,7 @@ package org.jfrog.teamcity.agent.release.vcs.git;
 import com.google.common.base.Charsets;
 import jetbrains.buildServer.CommandLineExecutor;
 import jetbrains.buildServer.StreamGobbler;
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
 import java.util.ArrayList;

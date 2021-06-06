@@ -33,11 +33,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <plugin.version>${project.version}</plugin.version>
         <teamcity.version>2017.1</teamcity.version>
-        <build.info.version>2.21.0</build.info.version>
-        <build.info.maven3.version>2.21.0</build.info.maven3.version>
-        <build.info.gradle.version>4.18.2</build.info.gradle.version>
-        <build.info.ivy.version>2.21.0</build.info.ivy.version>
-        <build.info.docker.version>2.21.0</build.info.docker.version>
+        <build.info.version>2.21.3</build.info.version>
+        <build.info.maven3.version>2.21.3</build.info.maven3.version>
+        <build.info.gradle.version>4.18.4</build.info.gradle.version>
+        <build.info.ivy.version>2.21.3</build.info.ivy.version>
+        <build.info.docker.version>2.21.3</build.info.docker.version>
     </properties>
 
     <developers>
@@ -83,7 +83,6 @@
                 <artifactId>teamcity-artifactory-plugin-server</artifactId>
                <version>2.9.x-SNAPSHOT</version>
             </dependency>
-
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
@@ -93,6 +92,16 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>2.5</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>2.10.5</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.10.5.1</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>

@@ -19,7 +19,7 @@ package org.jfrog.teamcity.agent;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import jetbrains.buildServer.agent.BuildRunnerContext;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.BuildAgent;
 import org.jfrog.build.api.Dependency;
