@@ -1,3 +1,6 @@
+## 2.9.1 (June 06, 2021) 
+- Bug fix - Artifactory response parsing can fail due to missing JSON properties - https://github.com/jfrog/build-info/pull/502
+
 ## 2.9.0 (December 01, 2020) 
 - New "Artifactory Docker" build step.
 
