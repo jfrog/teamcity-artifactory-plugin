@@ -16,7 +16,7 @@
 
 package org.jfrog.teamcity.agent.api;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Noam Y. Tenne

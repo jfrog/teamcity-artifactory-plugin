@@ -26,7 +26,7 @@ import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SRunningBuild;
 import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.util.EventDispatcher;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.CustomDataStorageKeys;

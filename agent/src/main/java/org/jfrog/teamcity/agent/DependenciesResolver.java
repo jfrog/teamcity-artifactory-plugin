@@ -135,7 +135,7 @@ public class DependenciesResolver implements Closeable {
         client.setConnectionTimeout(Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
 
         if (runnerParams.containsKey(PROXY_HOST)) {
-            if (org.apache.commons.lang.StringUtils.isNotBlank(runnerParams.get(PROXY_USERNAME))) {
+            if (StringUtils.isNotBlank(runnerParams.get(PROXY_USERNAME))) {
                 client.setProxyConfiguration(runnerParams.get(PROXY_HOST),
                         Integer.parseInt(runnerParams.get(PROXY_PORT)), runnerParams.get(PROXY_USERNAME),
                         runnerParams.get(PROXY_PASSWORD));

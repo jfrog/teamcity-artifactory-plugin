@@ -19,7 +19,7 @@ package org.jfrog.teamcity.agent.release.vcs.git;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.serverSide.Branch;
 import jetbrains.buildServer.vcs.VcsRoot;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.teamcity.agent.release.vcs.AbstractVcsCoordinator;
 import org.jfrog.teamcity.common.ConstantValues;

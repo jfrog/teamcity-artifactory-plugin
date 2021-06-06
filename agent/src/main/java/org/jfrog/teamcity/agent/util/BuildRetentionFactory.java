@@ -1,7 +1,7 @@
 package org.jfrog.teamcity.agent.util;
 
 import jetbrains.buildServer.agent.BuildProgressLogger;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.api.BuildRetention;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 

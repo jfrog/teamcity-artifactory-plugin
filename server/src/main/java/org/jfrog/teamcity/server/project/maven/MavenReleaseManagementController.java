@@ -3,7 +3,7 @@ package org.jfrog.teamcity.server.project.maven;
 import jetbrains.buildServer.controllers.ActionErrors;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildServer;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.teamcity.common.ReleaseManagementParameterKeys;
 import org.jfrog.teamcity.server.project.BaseReleaseManagementController;
 

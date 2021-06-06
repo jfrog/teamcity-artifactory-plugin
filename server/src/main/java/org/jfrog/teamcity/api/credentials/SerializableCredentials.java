@@ -17,7 +17,7 @@
 package org.jfrog.teamcity.api.credentials;
 
 import jetbrains.buildServer.serverSide.crypt.EncryptUtil;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 

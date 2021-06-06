@@ -8,7 +8,7 @@ import jetbrains.buildServer.controllers.BaseFormXmlController;
 import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.vcs.VcsRootInstance;
 import jetbrains.buildServer.web.util.SessionUser;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jdom.Element;
 import org.jfrog.teamcity.common.CustomDataStorageKeys;
 import org.jfrog.teamcity.common.ReleaseManagementParameterKeys;
