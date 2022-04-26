@@ -34,6 +34,8 @@ import org.jfrog.teamcity.server.util.TeamcityServerBuildInfoLog;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Noam Y. Tenne
@@ -98,7 +100,13 @@ public class DeployableArtifactoryServers {
                 try {
                     CredentialsBean deployingCredentials = CredentialsHelper.getPreferredDeployingCredentials(serverConfig, overrideDeployerCredentials, username, password);
                     ArtifactoryBuildInfoClient client = getArtifactoryBuildInfoClient(deployingCredentials, serverConfig);
-                    return client.getLocalAndCacheRepositoriesKeys();
+                    List<String> localRepos = client.getLocalRepositoriesKeys();
+                    client = getArtifactoryBuildInfoClient(deployingCredentials, serverConfig);
+                    List<String> remoteRepos = client.getRemoteRepositoriesKeys();
+                    List<String> remoteCacheRepos = Lists.newArrayList();
+                    remoteRepos.forEach((element) -> remoteCacheRepos.add(element+"-cache"));
+                    return Stream.concat(localRepos.stream(), remoteCacheRepos.stream())
+                    .collect(Collectors.toList());
                 } catch (Exception e) {
                     logException(serverConfig, e);
                 }
