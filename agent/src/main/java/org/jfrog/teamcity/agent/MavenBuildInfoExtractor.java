@@ -306,7 +306,7 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
                 for (Element idElement : idList) {
                     String idText = idElement.getText();
                     if (StringUtils.isNotBlank(idText)) {
-                        dependencyBuilder.addRequiredBy(idText);
+                        dependencyBuilder.addRequestedBy(new String[]{idText});
                     }
                 }
             }
