@@ -104,9 +104,9 @@ public class DeployableArtifactoryServers {
                     client = getArtifactoryBuildInfoClient(deployingCredentials, serverConfig);
                     List<String> remoteRepos = client.getRemoteRepositoriesKeys();
                     List<String> remoteCacheRepos = Lists.newArrayList();
-                    remoteRepos.forEach((element) -> remoteCacheRepos.add(element+"-cache"));
+                    remoteRepos.forEach((element) -> remoteCacheRepos.add(element + "-cache"));
                     return Stream.concat(localRepos.stream(), remoteCacheRepos.stream())
-                    .collect(Collectors.toList());
+                            .collect(Collectors.toList());
                 } catch (Exception e) {
                     logException(serverConfig, e);
                 }
@@ -185,12 +185,12 @@ public class DeployableArtifactoryServers {
                 } catch (Exception e) {
                     String message =
                             String.format("Error occurred while determining addon existence from url: " +
-                                    "'%s', username: '%s', password: '%s', timeout: '%s'", serverConfig.getUrl(),
+                                            "'%s', username: '%s', password: '%s', timeout: '%s'", serverConfig.getUrl(),
                                     deployerCredentials.getUsername(), deployerCredentials.getPassword(),
                                     serverConfig.getTimeout());
                     if (proxyInfo != null) {
                         message += String.format(", proxy host: '%s', proxy port: '%s', proxy username: '%s', " +
-                                "proxy password: '%s'", proxyInfo.getHost(), proxyInfo.getPort(),
+                                        "proxy password: '%s'", proxyInfo.getHost(), proxyInfo.getPort(),
                                 proxyInfo.getUsername(),
                                 proxyInfo.getPassword());
                     }
@@ -236,12 +236,12 @@ public class DeployableArtifactoryServers {
                 } catch (Exception e) {
                     String message =
                             String.format("Error occurred while determining version compatibility from url: " +
-                                    "'%s', username: '%s', password: '%s', timeout: '%s'", serverConfig.getUrl(),
+                                            "'%s', username: '%s', password: '%s', timeout: '%s'", serverConfig.getUrl(),
                                     deployerCredentials.getUsername(), deployerCredentials.getPassword(),
                                     serverConfig.getTimeout());
                     if (proxyInfo != null) {
                         message += String.format(", proxy host: '%s', proxy port: '%s', proxy username: '%s', " +
-                                "proxy password: '%s'", proxyInfo.getHost(), proxyInfo.getPort(),
+                                        "proxy password: '%s'", proxyInfo.getHost(), proxyInfo.getPort(),
                                 proxyInfo.getUsername(),
                                 proxyInfo.getPassword());
                     }
