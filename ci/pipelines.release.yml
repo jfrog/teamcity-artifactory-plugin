@@ -22,8 +22,8 @@ pipelines:
           inputResources:
             - name: teamcityReleaseGit
           integrations:
-            - name: ojo
-            - name: github_generic
+            - name: il_automation
+            - name: entplus_deployer
         execution:
           onStart:
             - *UPDATE_COMMIT_STATUS
@@ -35,48 +35,50 @@ pipelines:
             - export CI=true
             - export JFROG_CLI_BUILD_NAME=teamcity-artifactory-plugin
             - export JFROG_CLI_BUILD_NUMBER=$run_number
-            # Set M2_HOME
-            - MVN_PATH=`which mvn` && export M2_HOME=`readlink -f $MVN_PATH | xargs dirname | xargs dirname`
+            - export JFROG_CLI_BUILD_PROJECT=ecosys
+
 
             # Configure git
             - git checkout release
-            - git remote set-url origin https://$int_github_generic_token@github.com/jfrog/teamcity-artifactory-plugin.git
+            - git remote set-url origin https://$int_il_automation_token@github.com/jfrog/teamcity-artifactory-plugin.git
 
             # Make sure versions provided
             - echo "Checking variables"
             - test -n "$NEXT_VERSION" -a "$NEXT_VERSION" != "0.0.0"
             - test -n "$NEXT_DEVELOPMENT_VERSION" -a "$NEXT_DEVELOPMENT_VERSION" != "0.0.x-SNAPSHOT"
 
-            # Download JFrog CLI
-            - curl -fL https://getcli.jfrog.io | sh && chmod +x jfrog
-
             # Configure JFrog CLI
-            - ./jfrog rt c ojo --url $int_ojo_rt_url --access-token=$int_ojo_rt_token
-            - ./jfrog rt mvnc
-              --server-id-resolve ojo --repo-resolve-releases jfrog-dependencies --repo-resolve-snapshots jfrog-dependencies
-              --server-id-deploy ojo --repo-deploy-releases oss-release-local --repo-deploy-snapshots oss-snapshot-local
+            - curl -fL https://install-cli.jfrog.io | sh
+            - jf c rm --quiet
+            - jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
+            - jf mvnc
+              --repo-resolve-releases ecosys-maven-remote --repo-resolve-snapshots ecosys-maven-remote
+              --repo-deploy-releases ecosys-oss-release-local --repo-deploy-snapshots  ecosys-oss-snapshot-local
+
+            # Run audit
+            - jf audit --fail=false
 
             # Sync changes with master
             - git merge origin/master
 
             # Update version
-            - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME mvn versions:set -DnewVersion="${NEXT_VERSION}" -B
+            - env -i PATH=$PATH mvn versions:set -DnewVersion="${NEXT_VERSION}" -B
             - git commit -am "[artifactory-release] Release version ${NEXT_VERSION} [skipRun]" --allow-empty
             - git tag ${NEXT_VERSION}
-            - git push
-            - git push --tags
 
             # Run install and publish
             - >
               env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME
               JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
               JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
-              ./jfrog rt mvn clean install -U -B
-            - ./jfrog rt bp
+              JFROG_CLI_BUILD_PROJECT=$JFROG_CLI_BUILD_PROJECT
+              jf rt mvn clean install -U -B
+            - jf rt bag && jf rt bce
+            - jf rt bp
 
-            # Update last version
-            - ./jfrog rt u --flat=true target/teamcity-artifactory-plugin-$NEXT_VERSION.zip oss-release-local/org/jfrog/teamcity/teamcity-artifactory-plugin/teamcity-artifactory-plugin.zip
-            - ./jfrog rt u --flat=true target/teamcity-artifactory-plugin-$NEXT_VERSION.zip oss-release-local/org/jfrog/teamcity/teamcity-artifactory-plugin/
+            # Distribute release bundle
+            - jf ds rbc teamcity-artifactory-plugin $NEXT_VERSION --spec=./ci/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
+            - jf ds rbd teamcity-artifactory-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
 
             # Update next development version
             - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME mvn versions:set -DnewVersion=$NEXT_DEVELOPMENT_VERSION -B
@@ -87,6 +89,7 @@ pipelines:
             - git checkout master
             - git merge origin/release
             - git push
+            - git push --tags
 
           onComplete:
             # Show tests in the *Tests* tab

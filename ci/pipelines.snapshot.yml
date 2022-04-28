@@ -16,45 +16,54 @@ pipelines:
         type: Bash
         configuration:
           inputResources:
-            - name: teamcityGit
+            - name: teamcitySnapshotGit
           integrations:
-            - name: ojo
+            - name: entplus_deployer
         execution:
           onStart:
             - *UPDATE_COMMIT_STATUS
             - restore_cache_files m2_home ${HOME}/.m2
           onExecute:
-            - cd $res_teamcityGit_resourcePath
+            - cd $res_teamcitySnapshotGit_resourcePath
 
             # Set env
             - export CI=true
             - export JFROG_CLI_BUILD_NAME=teamcity-artifactory-plugin
             - export JFROG_CLI_BUILD_NUMBER=$run_number
-            # Set M2_HOME
-            - MVN_PATH=`which mvn` && export M2_HOME=`readlink -f $MVN_PATH | xargs dirname | xargs dirname`
-
-            # Download JFrog CLI
-            - curl -fL https://getcli.jfrog.io | sh && chmod +x jfrog
+            - export JFROG_CLI_BUILD_PROJECT=ecosys
 
             # Configure JFrog CLI
-            - ./jfrog rt c ojo --url $int_ojo_rt_url --access-token=$int_ojo_rt_token
-            - ./jfrog rt mvnc
-              --server-id-resolve ojo --repo-resolve-releases libs-release --repo-resolve-snapshots libs-snapshot
-              --server-id-deploy ojo --repo-deploy-releases oss-release-local --repo-deploy-snapshots oss-snapshot-local
+            - curl -fL https://install-cli.jfrog.io | sh
+            - jf c rm --quiet
+            - jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
+            - jf  mvnc
+              --repo-resolve-releases ecosys-maven-remote --repo-resolve-snapshots ecosys-maven-remote
+              --repo-deploy-releases ecosys-oss-release-local --repo-deploy-snapshots  ecosys-oss-snapshot-local
+
+            # Run audit
+            - jf audit --fail=false
+
+            # Delete former snapshots to make sure the release bundle will not contain the same artifacts
+            - jf rt del "ecosys-oss-snapshot-local/org/jfrog/teamcity/teamcity-artifactory-plugin/*" --quiet
 
             # Run install and publish
             - >
-              env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME
+              env -i PATH=$PATH
               JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
               JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
-              ./jfrog rt mvn install -U -B
-            - ./jfrog rt bag
-            - ./jfrog rt bp
+              JFROG_CLI_BUILD_PROJECT=$JFROG_CLI_BUILD_PROJECT
+              jf rt mvn install -U -B
+            - jf rt bag
+            - jf rt bp
+
+            # Distribute release bundle
+            - jf ds rbc teamcity-artifactory-plugin $NEXT_VERSION --spec=./ci/specs/dev-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
+            - jf ds rbd teamcity-artifactory-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
 
           onComplete:
             # Show tests in the *Tests* tab
-            - save_tests $res_teamcityGit_resourcePath/agent/target/surefire-reports/junitreports
-            - save_tests $res_teamcityGit_resourcePath/server/target/surefire-reports/junitreports
+            - save_tests $res_teamcitySnapshotGit_resourcePath/agent/target/surefire-reports/junitreports
+            - save_tests $res_teamcitySnapshotGit_resourcePath/server/target/surefire-reports/junitreports
 
             - *UPDATE_COMMIT_STATUS
 
