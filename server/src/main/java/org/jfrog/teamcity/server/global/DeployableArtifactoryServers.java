@@ -160,18 +160,7 @@ public class DeployableArtifactoryServers {
 
                 CredentialsBean deployerCredentials = CredentialsHelper.getPreferredResolvingCredentials(serverConfig,
                         overrideDeployerCredentials, username, password);
-                ProxyInfo proxyInfo = null;
-                try {
-                    ArtifactoryBuildInfoClient client = new ArtifactoryBuildInfoClient(serverConfig.getUrl(),
-                            deployerCredentials.getUsername(), deployerCredentials.getPassword(),
-                            new TeamcityServerBuildInfoLog());
-                    client.setConnectionTimeout(serverConfig.getTimeout());
-
-                    proxyInfo = ProxyInfo.getInfo();
-                    if (proxyInfo != null) {
-                        client.setProxyConfiguration(proxyInfo.getHost(), proxyInfo.getPort(), proxyInfo.getUsername(),
-                                proxyInfo.getPassword());
-                    }
+                try (ArtifactoryBuildInfoClient client = getArtifactoryBuildInfoClient(deployerCredentials, serverConfig)) {
                     ArtifactoryVersion version = client.verifyCompatibleArtifactoryVersion();
                     return version.hasAddons();
                 } catch (VersionException ve) {
@@ -194,7 +183,6 @@ public class DeployableArtifactoryServers {
                         overrideDeployerCredentials, username, password);
                 try (ArtifactoryBuildInfoClient client = getArtifactoryBuildInfoClient(deployerCredentials, serverConfig)) {
                     ArtifactoryVersion serverVersion = client.verifyCompatibleArtifactoryVersion();
-
                     boolean compatible = serverVersion.
                             isAtLeast(new ArtifactoryVersion(ConstantValues.MINIMAL_ARTIFACTORY_VERSION));
                     return compatible ? "true" : "false";
