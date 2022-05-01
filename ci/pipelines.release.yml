@@ -38,7 +38,6 @@ pipelines:
             - export JFROG_CLI_BUILD_NUMBER=$run_number
             - export JFROG_CLI_BUILD_PROJECT=ecosys
 
-
             # Configure git
             - git checkout release
             - git remote set-url origin https://$int_il_automation_token@github.com/jfrog/teamcity-artifactory-plugin.git
@@ -54,10 +53,7 @@ pipelines:
             - jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
             - jf mvnc
               --repo-resolve-releases ecosys-maven-remote --repo-resolve-snapshots ecosys-maven-remote
-              --repo-deploy-releases ecosys-oss-release-local --repo-deploy-snapshots  ecosys-oss-snapshot-local
-
-            # Run audit
-            - jf audit --fail=false
+              --repo-deploy-releases ecosys-oss-release-local --repo-deploy-snapshots ecosys-oss-snapshot-local
 
             # Sync changes with master
             - git merge origin/master
@@ -67,9 +63,12 @@ pipelines:
             - git commit -am "[artifactory-release] Release version ${NEXT_VERSION} [skipRun]" --allow-empty
             - git tag ${NEXT_VERSION}
 
+            # Run audit
+            - jf audit --fail=false
+
             # Run install and publish
             - >
-              env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME
+              env -i PATH=$PATH HOME=$HOME
               JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
               JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
               JFROG_CLI_BUILD_PROJECT=$JFROG_CLI_BUILD_PROJECT
@@ -97,8 +96,8 @@ pipelines:
 
           onComplete:
             # Show tests in the *Tests* tab
-            - save_tests $res_teamcityGit_resourcePath/agent/target/surefire-reports/junitreports
-            - save_tests $res_teamcityGit_resourcePath/server/target/surefire-reports/junitreports
+            - save_tests $res_teamcityReleaseGit_resourcePath/agent/target/surefire-reports/junitreports
+            - save_tests $res_teamcityReleaseGit_resourcePath/server/target/surefire-reports/junitreports
 
             - *UPDATE_COMMIT_STATUS
 

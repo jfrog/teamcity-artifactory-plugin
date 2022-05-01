@@ -36,9 +36,9 @@ pipelines:
             - curl -fL https://install-cli.jfrog.io | sh
             - jf c rm --quiet
             - jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
-            - jf  mvnc
+            - jf mvnc
               --repo-resolve-releases ecosys-maven-remote --repo-resolve-snapshots ecosys-maven-remote
-              --repo-deploy-releases ecosys-oss-release-local --repo-deploy-snapshots  ecosys-oss-snapshot-local
+              --repo-deploy-releases ecosys-oss-release-local --repo-deploy-snapshots ecosys-oss-snapshot-local
 
             # Run audit
             - jf audit --fail=false
@@ -48,7 +48,7 @@ pipelines:
 
             # Run install and publish
             - >
-              env -i PATH=$PATH
+              env -i PATH=$PATH HOME=$HOME
               JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
               JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
               JFROG_CLI_BUILD_PROJECT=$JFROG_CLI_BUILD_PROJECT

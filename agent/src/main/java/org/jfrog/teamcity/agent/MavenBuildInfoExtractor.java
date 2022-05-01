@@ -142,7 +142,7 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
 
                 Element dependencyArtifactsElement = projectElement.getChild("dependencyArtifacts");
                 if (dependencyArtifactsElement != null) {
-                    addDependencies(moduleBuilder, dependencyArtifactsElement);
+                    addDependencies(moduleBuilder, dependencyArtifactsElement, id);
                 }
 
                 Element effectivePluginsElement = projectElement.getChild("effectivePlugins");
@@ -276,7 +276,7 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
     }
 
     @SuppressWarnings({"unchecked"})
-    private void addDependencies(ModuleBuilder moduleBuilder, Element dependenciesElement) {
+    private void addDependencies(ModuleBuilder moduleBuilder, Element dependenciesElement, String moduleId) {
 
         List<Element> dependencyList = dependenciesElement.getChildren("artifact");
         for (Element dependencyElement : dependencyList) {
@@ -306,7 +306,7 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
                 for (Element idElement : idList) {
                     String idText = idElement.getText();
                     if (StringUtils.isNotBlank(idText)) {
-                        dependencyBuilder.addRequestedBy(new String[]{idText});
+                        dependencyBuilder.addRequestedBy(new String[]{idText, moduleId});
                     }
                 }
             }
