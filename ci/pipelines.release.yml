@@ -96,6 +96,5 @@ pipelines:
             - save_tests $res_teamcityReleaseGit_resourcePath/agent/target/surefire-reports/junitreports
             - save_tests $res_teamcityReleaseGit_resourcePath/server/target/surefire-reports/junitreports
 
-
             # Save .m2 cache
             - add_cache_files ${HOME}/.m2 m2_home
