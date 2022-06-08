@@ -1,0 +1,8 @@
+{
+  "files": [
+    {
+      "pattern": "ecosys-oss-snapshot-local/(org/jfrog/teamcity/teamcity-artifactory-plugin/*/teamcity-artifactory-plugin-*)",
+      "target": "oss-snapshot-local/{1}"
+    }
+  ]
+}

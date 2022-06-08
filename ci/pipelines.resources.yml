@@ -1,9 +1,9 @@
 resources:
-  - name: teamcityGit
+  - name: teamcitySnapshotGit
     type: GitRepo
     configuration:
       path: jfrog/teamcity-artifactory-plugin
-      gitProvider: github
+      gitProvider: il_automation
       buildOn:
         commit: true
         pullRequestCreate: true
@@ -14,7 +14,7 @@ resources:
     type: GitRepo
     configuration:
       path: jfrog/teamcity-artifactory-plugin
-      gitProvider: github
+      gitProvider: il_automation
       buildOn:
         commit: false
 

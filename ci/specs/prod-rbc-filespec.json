@@ -1,0 +1,8 @@
+{
+  "files": [
+    {
+      "pattern": "ecosys-oss-release-local/(org/jfrog/teamcity/teamcity-artifactory-plugin/${version}/teamcity-artifactory-plugin-*)",
+      "target": "oss-release-local/{1}"
+    }
+  ]
+}
