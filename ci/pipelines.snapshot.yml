@@ -1,4 +1,4 @@
-updateCommitStatus: &UPDATE_COMMIT_STATUS update_commit_status teamcityGit --context "$step_name"
+updateCommitStatus: &UPDATE_COMMIT_STATUS update_commit_status teamcitySnapshotGit --context "$step_name"
 
 pipelines:
   - name: build_teamcity_snapshot
