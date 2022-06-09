@@ -49,7 +49,7 @@ pipelines:
             - jf c rm --quiet
             - jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
             - jf mvnc
-              --repo-resolve-releases ecosys-maven-remote --repo-resolve-snapshots ecosys-maven-remote
+              --repo-resolve-releases ecosys-teamcity-repos --repo-resolve-snapshots ecosys-teamcity-repos
               --repo-deploy-releases ecosys-oss-release-local --repo-deploy-snapshots ecosys-oss-snapshot-local
 
             # Sync changes with master
