@@ -1,3 +1,6 @@
+## 2.9.3 (June 09, 2022) 
+- Bug fix - Trigger configuration does not list repositories - https://github.com/jfrog/teamcity-artifactory-plugin/pull/105
+
 ## 2.9.1 (June 06, 2021) 
 - Bug fix - Artifactory response parsing can fail due to missing JSON properties - https://github.com/jfrog/build-info/pull/502
 
