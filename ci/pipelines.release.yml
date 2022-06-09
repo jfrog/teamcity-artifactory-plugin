@@ -72,6 +72,7 @@ pipelines:
               jf rt mvn clean install -U -B
             - jf rt bag && jf rt bce
             - jf rt bp
+            - jf rt u --flat=true target/teamcity-artifactory-plugin-$NEXT_VERSION.zip ecosys-oss-release-local/org/jfrog/teamcity/teamcity-artifactory-plugin/$NEXT_VERSION/
 
             # Distribute release bundle
             - jf ds rbc teamcity-artifactory-plugin $NEXT_VERSION --spec=./ci/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
