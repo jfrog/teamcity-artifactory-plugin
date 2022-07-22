@@ -35,6 +35,7 @@ import org.jfrog.teamcity.server.util.TeamcityServerBuildInfoLog;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -74,19 +75,19 @@ public class DeployableArtifactoryServers {
         List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
 
         for (ServerConfigBean serverConfig : serverConfigs) {
-            map.put(Long.toString(serverConfig.getId()), serverConfig.getUrl());
+            map.put(serverConfig.getId(), serverConfig.getUrl());
         }
 
         return map;
     }
 
-    public List<String> getServerDeployableRepos(long serverUrlId, boolean overrideDeployerCredentials,
+    public List<String> getServerDeployableRepos(String serverUrlId, boolean overrideDeployerCredentials,
                                                  String username, String password) {
 
         List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
 
         for (ServerConfigBean serverConfig : serverConfigs) {
-            if (serverUrlId == serverConfig.getId()) {
+            if (Objects.equals(serverUrlId, serverConfig.getId())) {
                 CredentialsBean deployingCredentials = CredentialsHelper.getPreferredDeployingCredentials(serverConfig, overrideDeployerCredentials, username, password);
                 try (ArtifactoryBuildInfoClient client = getArtifactoryBuildInfoClient(deployingCredentials, serverConfig)) {
                     return client.getLocalRepositoriesKeys();
@@ -98,13 +99,13 @@ public class DeployableArtifactoryServers {
         return Lists.newArrayList();
     }
 
-    public List<String> getServerLocalAndCacheRepos(long serverUrlId, boolean overrideDeployerCredentials,
+    public List<String> getServerLocalAndCacheRepos(String serverUrlId, boolean overrideDeployerCredentials,
                                                     String username, String password) {
 
         List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
 
         for (ServerConfigBean serverConfig : serverConfigs) {
-            if (serverUrlId == serverConfig.getId()) {
+            if (Objects.equals(serverUrlId, serverConfig.getId())) {
                 CredentialsBean deployingCredentials = CredentialsHelper.getPreferredDeployingCredentials(serverConfig, overrideDeployerCredentials, username, password);
                 try (ArtifactoryBuildInfoClient localRepoClient = getArtifactoryBuildInfoClient(deployingCredentials, serverConfig);
                      ArtifactoryBuildInfoClient remoteReposClient = getArtifactoryBuildInfoClient(deployingCredentials, serverConfig)) {
@@ -122,13 +123,13 @@ public class DeployableArtifactoryServers {
         return Lists.newArrayList();
     }
 
-    public List<String> getServerResolvingRepos(long serverUrlId, boolean overrideDeployerCredentials,
+    public List<String> getServerResolvingRepos(String serverUrlId, boolean overrideDeployerCredentials,
                                                 String username, String password) {
 
         List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
 
         for (ServerConfigBean serverConfig : serverConfigs) {
-            if (serverUrlId == serverConfig.getId()) {
+            if (Objects.equals(serverUrlId, serverConfig.getId())) {
                 CredentialsBean resolvingCredentials = CredentialsHelper.getPreferredResolvingCredentials(serverConfig, overrideDeployerCredentials, username, password);
                 try (ArtifactoryBuildInfoClient client = getArtifactoryBuildInfoClient(resolvingCredentials, serverConfig)) {
                     return client.getVirtualRepositoryKeys();
@@ -163,11 +164,11 @@ public class DeployableArtifactoryServers {
         Loggers.SERVER.error(message, e);
     }
 
-    public boolean serverHasAddons(long serverUrlId, boolean overrideDeployerCredentials, String username, String password) {
+    public boolean serverHasAddons(String serverUrlId, boolean overrideDeployerCredentials, String username, String password) {
         List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
 
         for (ServerConfigBean serverConfig : serverConfigs) {
-            if (serverUrlId == serverConfig.getId()) {
+            if (Objects.equals(serverUrlId, serverConfig.getId())) {
 
                 CredentialsBean deployerCredentials = CredentialsHelper.getPreferredResolvingCredentials(serverConfig,
                         overrideDeployerCredentials, username, password);
@@ -184,11 +185,11 @@ public class DeployableArtifactoryServers {
         return false;
     }
 
-    public String isServerCompatible(long serverUrlId, boolean overrideDeployerCredentials, String username, String password) {
+    public String isServerCompatible(String serverUrlId, boolean overrideDeployerCredentials, String username, String password) {
         List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
 
         for (ServerConfigBean serverConfig : serverConfigs) {
-            if (serverUrlId == serverConfig.getId()) {
+            if (Objects.equals(serverUrlId, serverConfig.getId())) {
 
                 CredentialsBean deployerCredentials = CredentialsHelper.getPreferredResolvingCredentials(serverConfig,
                         overrideDeployerCredentials, username, password);
@@ -212,9 +213,9 @@ public class DeployableArtifactoryServers {
         return "unknown";
     }
 
-    public boolean isUrlIdConfigured(long urlIdToCheck) {
+    public boolean isUrlIdConfigured(String urlIdToCheck) {
         for (ServerConfigBean serverConfigBean : configPersistenceManager.getConfiguredServers()) {
-            if (urlIdToCheck == serverConfigBean.getId()) {
+            if (Objects.equals(urlIdToCheck, serverConfigBean.getId())) {
                 return true;
             }
         }
@@ -222,9 +223,9 @@ public class DeployableArtifactoryServers {
         return false;
     }
 
-    public ServerConfigBean getServerConfigById(long serverId) {
+    public ServerConfigBean getServerConfigById(String serverId) {
         for (ServerConfigBean serverConfigBean : configPersistenceManager.getConfiguredServers()) {
-            if (serverId == serverConfigBean.getId()) {
+            if (Objects.equals(serverId, serverConfigBean.getId())) {
                 return serverConfigBean;
             }
         }

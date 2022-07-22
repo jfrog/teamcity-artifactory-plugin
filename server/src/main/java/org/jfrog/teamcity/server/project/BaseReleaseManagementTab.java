@@ -99,7 +99,7 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
         managementConfig.setSvnVcs(instance.getVcsName().equals("svn"));
 
         if (parameters.containsKey(RunnerParameterKeys.URL_ID)) {
-            long serverId = Long.parseLong(parameters.get(RunnerParameterKeys.URL_ID));
+            String serverId = parameters.get(RunnerParameterKeys.URL_ID);
             boolean overrideDeployerCredentials = false;
             String username = "";
             String password = "";

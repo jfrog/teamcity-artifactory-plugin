@@ -34,7 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 
 import static java.util.Collections.emptyMap;
 
@@ -80,7 +79,6 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
         }
 
         if (isEditMode) {
-            long id = Long.parseLong(request.getParameter("id"));
             String url = request.getParameter("url");
 
             boolean useDifferentResolverCredentials =
@@ -90,7 +88,7 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
                 defaultResolverCredentials = getDeployerCredentialsFromRequest(request.getParameter("defaultResolverUsername"), request.getParameter("encryptedDefaultResolverPassword"));
             }
             int timeout = Integer.parseInt(request.getParameter("timeout"));
-            configPersistenceManager.updateObject(id, url, getDeployerCredentialsFromRequest(request.getParameter("defaultDeployerUsername"), request.getParameter("encryptedDefaultDeployerPassword")),
+            configPersistenceManager.updateObject(request.getParameter("id"), url, getDeployerCredentialsFromRequest(request.getParameter("defaultDeployerUsername"), request.getParameter("encryptedDefaultDeployerPassword")),
                     useDifferentResolverCredentials, defaultResolverCredentials, timeout);
             configPersistenceManager.persist();
             getOrCreateMessages(request).addMessage("objectUpdated", "Artifactory server configuration was updated.");
@@ -113,8 +111,7 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
         }
 
         if (isDeleteMode(request)) {
-            long id = Long.parseLong(request.getParameter("deleteObject"));
-            configPersistenceManager.deleteObject(id);
+            configPersistenceManager.deleteObject(request.getParameter("deleteObject"));
             configPersistenceManager.persist();
             getOrCreateMessages(request).addMessage("objectDeleted", "Artifactory server configuration was deleted.");
         }

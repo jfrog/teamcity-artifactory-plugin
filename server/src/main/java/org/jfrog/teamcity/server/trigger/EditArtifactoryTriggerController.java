@@ -69,7 +69,6 @@ public class EditArtifactoryTriggerController extends BaseFormXmlController {
         String selectedUrl = request.getParameter("selectedUrlId");
 
         if (StringUtils.isNotBlank(selectedUrl)) {
-            long id = Long.parseLong(selectedUrl);
 
             String username = request.getParameter("username");
             String password = request.getParameter("password");
@@ -79,7 +78,7 @@ public class EditArtifactoryTriggerController extends BaseFormXmlController {
             String loadTargetRepos = request.getParameter("loadTargetRepos");
             if (StringUtils.isNotBlank(loadTargetRepos) && Boolean.valueOf(loadTargetRepos)) {
                 Element deployableReposElement = new Element("deployableRepos");
-                List<String> repos = deployableServers.getServerLocalAndCacheRepos(id, useTriggerCredentials, username, password);
+                List<String> repos = deployableServers.getServerLocalAndCacheRepos(selectedUrl, useTriggerCredentials, username, password);
                 for (String repo : repos) {
                     deployableReposElement.addContent(new Element("repoName").addContent(repo));
                 }
@@ -89,14 +88,14 @@ public class EditArtifactoryTriggerController extends BaseFormXmlController {
             String checkArtifactoryHasAddons = request.getParameter("checkArtifactoryHasAddons");
             if (StringUtils.isNotBlank(checkArtifactoryHasAddons) && Boolean.valueOf(checkArtifactoryHasAddons)) {
                 Element hasAddonsElement = new Element("hasAddons");
-                hasAddonsElement.setText(Boolean.toString(deployableServers.serverHasAddons(id, useTriggerCredentials, username, password)));
+                hasAddonsElement.setText(Boolean.toString(deployableServers.serverHasAddons(selectedUrl, useTriggerCredentials, username, password)));
                 element.addContent(hasAddonsElement);
             }
 
             String checkCompatibleVersion = request.getParameter("checkCompatibleVersion");
             if (StringUtils.isNotBlank(checkCompatibleVersion) && Boolean.valueOf(checkCompatibleVersion)) {
                 Element compatibleVersionElement = new Element("compatibleVersion");
-                compatibleVersionElement.setText(deployableServers.isServerCompatible(id, useTriggerCredentials, username, password));
+                compatibleVersionElement.setText(deployableServers.isServerCompatible(selectedUrl, useTriggerCredentials, username, password));
                 element.addContent(compatibleVersionElement);
             }
         }

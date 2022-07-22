@@ -38,10 +38,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -56,7 +53,7 @@ public class ServerConfigPersistenceManager {
 
     private File configFile;
     private final List<ServerConfigBean> configuredServers = new CopyOnWriteArrayList<ServerConfigBean>();
-    private AtomicLong nextAvailableId = new AtomicLong(0);
+    private AtomicLong nextAvailableId = new AtomicLong(0); // todo won't work in a multi-node setup
     private XStream xStream;
     @NotNull
     private final ProjectManager projectManager;
@@ -118,9 +115,13 @@ public class ServerConfigPersistenceManager {
 
                         configuredServers.add(bean);
 
-                        if (nextAvailableId.get() <= serializableServer.getId()) {
-                            nextAvailableId.set(serializableServer.getId() + 1);
-                        }
+                        String id = serializableServer.getId();
+                        try {
+                            long longId = Long.parseLong(id);
+                            if (nextAvailableId.get() <= longId) {
+                                nextAvailableId.set(longId + 1);
+                            }
+                        } catch (NumberFormatException ignored) {}
                     }
                 }
             } catch (FileNotFoundException e) {
@@ -164,7 +165,7 @@ public class ServerConfigPersistenceManager {
 
     private ServerConfigBean toServerConfigBean(SProjectFeatureDescriptor featureDescriptor) {
         ServerConfigBean serverConfigBean = new ServerConfigBean();
-        serverConfigBean.setId((long) (Math.random() * 100000)); // TODO refactor to be a string + type (global/project)
+        serverConfigBean.setId(featureDescriptor.getId());
         Map<String, String> parameters = featureDescriptor.getParameters();
         serverConfigBean.setTimeout(Integer.parseInt(parameters.get("timeout")));
         serverConfigBean.setUrl(parameters.get("url"));
@@ -177,7 +178,7 @@ public class ServerConfigPersistenceManager {
     public void addServerConfiguration(String url, CredentialsBean defaultDeployerCredentials,
             boolean useDefaultResolverCredentials, CredentialsBean defaultResolverCredentials, int timeout) {
         ServerConfigBean bean = new ServerConfigBean();
-        bean.setId(nextAvailableId.getAndIncrement());
+        bean.setId(String.valueOf(nextAvailableId.getAndIncrement()));
         bean.setUrl(url);
         bean.setDefaultDeployerCredentials(defaultDeployerCredentials);
         bean.setUseDifferentResolverCredentials(useDefaultResolverCredentials);
@@ -186,20 +187,20 @@ public class ServerConfigPersistenceManager {
         configuredServers.add(bean);
     }
 
-    public void deleteObject(final long id) {
+    public void deleteObject(final String id) {
         for (ServerConfigBean configuredServer : configuredServers) {
-            if (configuredServer.getId() == id) {
+            if (Objects.equals(configuredServer.getId(), id)) {
                 configuredServers.remove(configuredServer);
                 break;
             }
         }
     }
 
-    public void updateObject(final long id, final String url, final CredentialsBean defaultDeployerCredentials,
+    public void updateObject(final String id, final String url, final CredentialsBean defaultDeployerCredentials,
             final boolean useDefaultResolverCredentials, final CredentialsBean defaultResolverCredentials,
             final int timeout) {
         for (ServerConfigBean bean : configuredServers) {
-            if (bean.getId() == id) {
+            if (Objects.equals(bean.getId(), id)) {
                 bean.setUrl(url);
                 bean.setDefaultDeployerCredentials(defaultDeployerCredentials);
                 bean.setUseDifferentResolverCredentials(useDefaultResolverCredentials);

@@ -75,10 +75,9 @@ public class ArtifactoryBuildTriggerService extends BuildTriggerService {
         Map<String, String> map = descriptor.getProperties();
 
         String urlId = map.get(TriggerParameterKeys.URL_ID);
-        long urlIdToCheck = Long.parseLong(urlId);
 
-        if (StringUtils.isNotBlank(urlId) && deployableServers.isUrlIdConfigured(urlIdToCheck)) {
-            String url = deployableServers.getServerConfigById(urlIdToCheck).getUrl();
+        if (StringUtils.isNotBlank(urlId) && deployableServers.isUrlIdConfigured(urlId)) {
+            String url = deployableServers.getServerConfigById(urlId).getUrl();
             String targetRepo = map.get(TriggerParameterKeys.TARGET_REPO);
             return String.format("Watching items of the repository '%s' on the server '%s'", targetRepo, url);
         }
@@ -112,8 +111,7 @@ public class ArtifactoryBuildTriggerService extends BuildTriggerService {
                 if (StringUtils.isBlank(urlId)) {
                     invalidProperties.add(new InvalidProperty(TriggerParameterKeys.URL_ID, "Please select a server."));
                 } else {
-                    long id = Long.parseLong(urlId);
-                    if (!deployableServers.isUrlIdConfigured(id)) {
+                    if (!deployableServers.isUrlIdConfigured(urlId)) {
                         invalidProperties.add(new InvalidProperty(TriggerParameterKeys.URL_ID,
                                 "Selected server ID is not configured."));
                     }

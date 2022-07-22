@@ -77,7 +77,7 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
                 continue;
             }
 
-            ServerConfigBean serverConfig = deployableServers.getServerConfigById(Long.parseLong(selectedUrlId));
+            ServerConfigBean serverConfig = deployableServers.getServerConfigById(selectedUrlId);
             if (serverConfig == null) {
                 runnerContext.addRunnerParameter(PROP_SKIP_LOG_MESSAGE, "Skipping build info collection: The " +
                         "Artifactory server which was set to this build couldn't be found. Please review the runner " +

@@ -97,7 +97,6 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
         String selectedUrl = request.getParameter("selectedUrlId");
 
         if (StringUtils.isNotBlank(selectedUrl)) {
-            long id = Long.parseLong(selectedUrl);
 
             boolean overrideDeployerCredentials = Boolean.valueOf(request.getParameter("overrideDeployerCredentials"));
             String username = request.getParameter("username");
@@ -107,7 +106,7 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
             String loadTargetRepos = request.getParameter("loadTargetRepos");
             if (StringUtils.isNotBlank(loadTargetRepos) && Boolean.valueOf(loadTargetRepos)) {
                 Element deployableReposElement = new Element("deployableRepos");
-                List<String> deployableRepos = deployableServers.getServerDeployableRepos(id, overrideDeployerCredentials, username, password);
+                List<String> deployableRepos = deployableServers.getServerDeployableRepos(selectedUrl, overrideDeployerCredentials, username, password);
                 for (String deployableRepo : deployableRepos) {
                     deployableReposElement.addContent(new Element("repoName").addContent(deployableRepo));
                 }
@@ -118,7 +117,7 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
             if (StringUtils.isNotBlank(loadResolvingRepos) && Boolean.valueOf(loadResolvingRepos)) {
                 Element resolvingReposElement = new Element("resolvingRepos");
 
-                List<String> resolvingRepos = deployableServers.getServerResolvingRepos(id, overrideDeployerCredentials, username, password);
+                List<String> resolvingRepos = deployableServers.getServerResolvingRepos(selectedUrl, overrideDeployerCredentials, username, password);
                 for (String resolvingRepo : resolvingRepos) {
                     resolvingReposElement.addContent(new Element("repoName").addContent(resolvingRepo));
                 }
@@ -128,14 +127,14 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
             String checkArtifactoryHasAddons = request.getParameter("checkArtifactoryHasAddons");
             if (StringUtils.isNotBlank(checkArtifactoryHasAddons) && Boolean.valueOf(checkArtifactoryHasAddons)) {
                 Element hasAddonsElement = new Element("hasAddons");
-                hasAddonsElement.setText(Boolean.toString(deployableServers.serverHasAddons(id, overrideDeployerCredentials, username, password)));
+                hasAddonsElement.setText(Boolean.toString(deployableServers.serverHasAddons(selectedUrl, overrideDeployerCredentials, username, password)));
                 xmlResponse.addContent(hasAddonsElement);
             }
 
             String checkCompatibleVersion = request.getParameter("checkCompatibleVersion");
             if (StringUtils.isNotBlank(checkCompatibleVersion) && Boolean.valueOf(checkCompatibleVersion)) {
                 Element compatibleVersionElement = new Element("compatibleVersion");
-                compatibleVersionElement.setText(deployableServers.isServerCompatible(id, overrideDeployerCredentials, username, password));
+                compatibleVersionElement.setText(deployableServers.isServerCompatible(selectedUrl, overrideDeployerCredentials, username, password));
                 xmlResponse.addContent(compatibleVersionElement);
             }
         }

@@ -22,15 +22,15 @@ package org.jfrog.teamcity.api;
  */
 public class DeployableServerId {
 
-    private long id;
+    private String id;
     private String url;
 
-    public DeployableServerId(long id, String url) {
+    public DeployableServerId(String id, String url) {
         this.id = id;
         this.url = url;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 

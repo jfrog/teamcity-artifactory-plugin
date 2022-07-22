@@ -26,7 +26,6 @@ import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.serverSide.SBuildType;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.client.ItemLastModified;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.teamcity.api.ProxyInfo;
 import org.jfrog.teamcity.api.ServerConfigBean;
@@ -76,11 +75,10 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
         Map<String, String> map = descriptor.getProperties();
 
         String serverUrlId = map.get(TriggerParameterKeys.URL_ID);
-        long urlIdToCheck = Long.parseLong(serverUrlId);
-        if (!deployableArtifactoryServers.isUrlIdConfigured(urlIdToCheck)) {
+        if (!deployableArtifactoryServers.isUrlIdConfigured(serverUrlId)) {
             return;
         }
-        ServerConfigBean serverConfigBy = deployableArtifactoryServers.getServerConfigById(urlIdToCheck);
+        ServerConfigBean serverConfigBy = deployableArtifactoryServers.getServerConfigById(serverUrlId);
         String targetRepo = map.get(TriggerParameterKeys.TARGET_REPO);
 
         String username = map.get(TriggerParameterKeys.DEPLOYER_USERNAME);
