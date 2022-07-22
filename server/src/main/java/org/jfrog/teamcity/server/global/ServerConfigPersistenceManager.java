@@ -19,6 +19,9 @@ package org.jfrog.teamcity.server.global;
 import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.XStream;
 import jetbrains.buildServer.log.Loggers;
+import jetbrains.buildServer.serverSide.ProjectManager;
+import jetbrains.buildServer.serverSide.SProject;
+import jetbrains.buildServer.serverSide.SProjectFeatureDescriptor;
 import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.serverSide.crypt.EncryptUtil;
 import jetbrains.buildServer.serverSide.crypt.RSACipher;
@@ -35,9 +38,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 
 /**
@@ -51,8 +58,11 @@ public class ServerConfigPersistenceManager {
     private final List<ServerConfigBean> configuredServers = new CopyOnWriteArrayList<ServerConfigBean>();
     private AtomicLong nextAvailableId = new AtomicLong(0);
     private XStream xStream;
+    @NotNull
+    private final ProjectManager projectManager;
 
-    public ServerConfigPersistenceManager(@NotNull ServerPaths serverPaths) {
+    public ServerConfigPersistenceManager(@NotNull ServerPaths serverPaths, @NotNull ProjectManager projectManager) {
+        this.projectManager = projectManager;
         xStream = new XStream();
         xStream.setClassLoader(SerializableServers.class.getClassLoader());
         xStream.processAnnotations(new Class[]{SerializableServer.class, SerializableServers.class});
@@ -139,6 +149,29 @@ public class ServerConfigPersistenceManager {
 
     public List<ServerConfigBean> getConfiguredServers() {
         return Lists.newArrayList(configuredServers);
+    }
+
+    public List<ServerConfigBean> getConfiguredServers(SProject project) {
+        List<ServerConfigBean> configsFromProjects = project.getAvailableFeaturesOfType("OAuthProvider")
+                .stream()
+                .filter(f -> "JFrog_Artifactory".equals(f.getParameters().get("providerType")))
+                .map(this::toServerConfigBean)
+                .collect(Collectors.toList());
+        ArrayList<ServerConfigBean> serverConfigBeans = Lists.newArrayList(configuredServers);
+        serverConfigBeans.addAll(configsFromProjects);
+        return serverConfigBeans;
+    }
+
+    private ServerConfigBean toServerConfigBean(SProjectFeatureDescriptor featureDescriptor) {
+        ServerConfigBean serverConfigBean = new ServerConfigBean();
+        serverConfigBean.setId((long) (Math.random() * 100000)); // TODO refactor to be a string + type (global/project)
+        Map<String, String> parameters = featureDescriptor.getParameters();
+        serverConfigBean.setTimeout(Integer.parseInt(parameters.get("timeout")));
+        serverConfigBean.setUrl(parameters.get("url"));
+        serverConfigBean.setUseDifferentResolverCredentials(Boolean.parseBoolean(parameters.get("useDifferentResolverCredentials")));
+        serverConfigBean.setDefaultResolverCredentials(new CredentialsBean(parameters.get("defaultResolverUsername"), parameters.get("defaultResolverPassword")));
+        serverConfigBean.setDefaultDeployerCredentials(new CredentialsBean(parameters.get("defaultDeployerUsername"), parameters.get("defaultDeployerPassword")));
+        return serverConfigBean;
     }
 
     public void addServerConfiguration(String url, CredentialsBean defaultDeployerCredentials,

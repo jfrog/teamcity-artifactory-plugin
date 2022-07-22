@@ -19,6 +19,7 @@ package org.jfrog.teamcity.server.global;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import jetbrains.buildServer.log.Loggers;
+import jetbrains.buildServer.serverSide.SProject;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
@@ -51,6 +52,16 @@ public class DeployableArtifactoryServers {
     public List<DeployableServerId> getDeployableServerIds() {
         List<DeployableServerId> deployableServerUrls = Lists.newArrayList();
         List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
+
+        for (ServerConfigBean serverConfig : serverConfigs) {
+            deployableServerUrls.add(new DeployableServerId(serverConfig.getId(), serverConfig.getUrl()));
+        }
+        return deployableServerUrls;
+    }
+
+    public List<DeployableServerId> getDeployableServerIds(SProject project) {
+        List<DeployableServerId> deployableServerUrls = Lists.newArrayList();
+        List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers(project);
 
         for (ServerConfigBean serverConfig : serverConfigs) {
             deployableServerUrls.add(new DeployableServerId(serverConfig.getId(), serverConfig.getUrl()));

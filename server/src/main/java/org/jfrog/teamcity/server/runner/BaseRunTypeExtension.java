@@ -17,6 +17,7 @@
 package org.jfrog.teamcity.server.runner;
 
 import jetbrains.buildServer.controllers.BaseController;
+import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
 import jetbrains.buildServer.serverSide.RunTypeExtension;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
@@ -40,12 +41,16 @@ public abstract class BaseRunTypeExtension extends RunTypeExtension {
     protected final DeployableArtifactoryServers deployableArtifactoryServers;
     private String viewUrl;
     private String editUrl;
+    @NotNull
+    private final ProjectManager projectManager;
 
     public BaseRunTypeExtension(@NotNull final WebControllerManager webControllerManager,
-            @NotNull final PluginDescriptor pluginDescriptor,
-            @NotNull final DeployableArtifactoryServers deployableArtifactoryServers) {
+                                @NotNull final PluginDescriptor pluginDescriptor,
+                                @NotNull final DeployableArtifactoryServers deployableArtifactoryServers,
+                                @NotNull final ProjectManager projectManager) {
         this.webControllerManager = webControllerManager;
         this.pluginDescriptor = pluginDescriptor;
+        this.projectManager = projectManager;
         // Gets the plugin version from the pluginDescriptor and sets it to the pluginVersion String in ConstantValues.
         ConstantValues.setPluginVersion(pluginDescriptor.getPluginVersion());
         this.deployableArtifactoryServers = deployableArtifactoryServers;
@@ -85,7 +90,7 @@ public abstract class BaseRunTypeExtension extends RunTypeExtension {
         editUrl = pluginDescriptor.getPluginResourcesPath(url);
         String actualJsp = pluginDescriptor.getPluginResourcesPath(jsp);
         webControllerManager.registerController(editUrl,
-                new ArtifactoryRunTypeConfigController(editUrl, actualJsp, deployableArtifactoryServers));
+                new ArtifactoryRunTypeConfigController(editUrl, actualJsp, deployableArtifactoryServers, projectManager));
     }
 
     @Override

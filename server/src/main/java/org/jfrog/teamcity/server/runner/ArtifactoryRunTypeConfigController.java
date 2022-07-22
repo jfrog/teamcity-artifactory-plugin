@@ -17,10 +17,15 @@
 package org.jfrog.teamcity.server.runner;
 
 import jetbrains.buildServer.controllers.BaseFormXmlController;
+import jetbrains.buildServer.serverSide.BuildTypeTemplate;
+import jetbrains.buildServer.serverSide.ProjectManager;
+import jetbrains.buildServer.serverSide.SBuildType;
+import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.crypt.RSACipher;
 import org.apache.commons.lang3.StringUtils;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
 import org.springframework.web.servlet.ModelAndView;
@@ -37,12 +42,16 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
     private DeployableArtifactoryServers deployableServers;
     private final String actualUrl;
     private final String actualJsp;
+    @NotNull
+    private final ProjectManager projectManager;
 
     public ArtifactoryRunTypeConfigController(@NotNull final String actualUrl, @NotNull final String actualJsp,
-                                              @NotNull final DeployableArtifactoryServers deployableServers) {
+                                              @NotNull final DeployableArtifactoryServers deployableServers,
+                                              @NotNull ProjectManager projectManager) {
         this.actualUrl = actualUrl;
         this.actualJsp = actualJsp;
         this.deployableServers = deployableServers;
+        this.projectManager = projectManager;
     }
 
     @Override
@@ -59,10 +68,28 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
         modelAndView.getModel().put("runnerType", request.getParameter("runnerType"));
         modelAndView.getModel().put("controllerUrl", actualUrl);
         modelAndView.getModel().put("deployableArtifactoryServers", deployableServers);
+        SProject project = getProject(request);
+        modelAndView.getModel().put("deployableServerIds", project != null ? deployableServers.getDeployableServerIds(project) : deployableServers.getDeployableServerIds());
         modelAndView.getModel().put("disabledMessage", ConstantValues.DISABLED_MESSAGE);
         modelAndView.getModel().put("offlineMessage", ConstantValues.OFFLINE_MESSAGE);
         modelAndView.getModel().put("incompatibleVersionMessage", ConstantValues.INCOMPATIBLE_VERSION_MESSAGE);
         return modelAndView;
+    }
+
+    @Nullable
+    private SProject getProject(@NotNull final HttpServletRequest request) {
+        String id = request.getParameter("id");
+        if (id.startsWith("buildType:")) {
+            SBuildType bt = projectManager.findBuildTypeByExternalId(id.substring(10));
+            return bt != null ? bt.getProject() : null;
+        }
+
+        if (id.startsWith("template:")) {
+            BuildTypeTemplate t = projectManager.findBuildTypeTemplateByExternalId(id.substring(9));
+            return t != null ? t.getProject() : null;
+        }
+
+        return null;
     }
 
     @Override

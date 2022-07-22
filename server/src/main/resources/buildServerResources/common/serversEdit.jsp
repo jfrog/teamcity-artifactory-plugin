@@ -22,6 +22,7 @@
 <jsp:useBean id="propertiesBean" scope="request" type="jetbrains.buildServer.controllers.BasePropertiesBean"/>
 <jsp:useBean id="deployableArtifactoryServers" scope="request"
              type="org.jfrog.teamcity.server.global.DeployableArtifactoryServers"/>
+<%--@elvariable id="deployableServerIds" type="java.util.List<org.jfrog.teamcity.api.DeployableServerId>"--%>
 
 <c:set var="shouldDisplay" value="${param.shouldDisplay}" scope="request"/>
 
@@ -40,7 +41,7 @@
                 <c:set var="selected" value="true"/>
             </c:if>
             <props:option value="" selected="${selected}">&lt;Do not activate&gt;</props:option>
-            <c:forEach var="deployableServerId" items="${deployableArtifactoryServers.deployableServerIds}">
+            <c:forEach var="deployableServerId" items="${deployableServerIds}">
                 <c:set var="selected" value="false"/>
                 <c:if test="${deployableServerId.id ==
                 propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']}">

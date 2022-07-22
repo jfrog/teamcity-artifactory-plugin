@@ -16,6 +16,7 @@
 
 package org.jfrog.teamcity.server.runner.generic;
 
+import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jetbrains.annotations.NotNull;
@@ -31,9 +32,10 @@ import java.util.Collection;
 public class GenericRunTypeExtension extends BaseRunTypeExtension {
 
     public GenericRunTypeExtension(@NotNull final WebControllerManager webControllerManager,
-            @NotNull final PluginDescriptor pluginDescriptor,
-            @NotNull final DeployableArtifactoryServers deployableArtifactoryServers) {
-        super(webControllerManager, pluginDescriptor, deployableArtifactoryServers);
+                                   @NotNull final PluginDescriptor pluginDescriptor,
+                                   @NotNull final DeployableArtifactoryServers deployableArtifactoryServers,
+                                   @NotNull final ProjectManager projectManager) {
+        super(webControllerManager, pluginDescriptor, deployableArtifactoryServers, projectManager);
         registerView("genericRunTypeExtensionView.html", "generic/genericRunTypeExtensionView.jsp");
         registerEdit("genericRunTypeExtensionEdit.html", "generic/genericRunTypeExtensionEdit.jsp");
     }

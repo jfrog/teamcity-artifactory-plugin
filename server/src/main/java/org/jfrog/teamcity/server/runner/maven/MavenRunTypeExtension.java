@@ -17,6 +17,7 @@
 package org.jfrog.teamcity.server.runner.maven;
 
 import com.google.common.collect.Sets;
+import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jetbrains.annotations.NotNull;
@@ -35,9 +36,10 @@ public class MavenRunTypeExtension extends BaseRunTypeExtension {
     private static final Set<String> supportedRunType = Sets.newHashSet(RunTypeUtils.MAVEN_RUNNER);
 
     public MavenRunTypeExtension(@NotNull final PluginDescriptor pluginDescriptor,
-            @NotNull final WebControllerManager webControllerManager,
-            @NotNull final DeployableArtifactoryServers deployableArtifactoryServers) {
-        super(webControllerManager, pluginDescriptor, deployableArtifactoryServers);
+                                 @NotNull final WebControllerManager webControllerManager,
+                                 @NotNull final DeployableArtifactoryServers deployableArtifactoryServers,
+                                 @NotNull final ProjectManager projectManager) {
+        super(webControllerManager, pluginDescriptor, deployableArtifactoryServers, projectManager);
         registerView("mavenRunTypeExtensionView.html", "maven/mavenRunTypeExtensionView.jsp");
         registerEdit("mavenRunTypeExtensionEdit.html", "maven/mavenRunTypeExtensionEdit.jsp");
     }

@@ -18,13 +18,7 @@ package org.jfrog.teamcity.server.global;
 
 import jetbrains.buildServer.BuildTypeDescriptor;
 import jetbrains.buildServer.log.Loggers;
-import jetbrains.buildServer.serverSide.BuildServerAdapter;
-import jetbrains.buildServer.serverSide.BuildServerListener;
-import jetbrains.buildServer.serverSide.CustomDataStorage;
-import jetbrains.buildServer.serverSide.SBuildServer;
-import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.SRunningBuild;
-import jetbrains.buildServer.serverSide.ServerPaths;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -37,12 +31,13 @@ public class ArtifactoryServerListener extends BuildServerAdapter {
     private ServerConfigPersistenceManager configPersistenceManager;
 
     public ArtifactoryServerListener(@NotNull final EventDispatcher<BuildServerListener> dispatcher,
-            @NotNull final SBuildServer server, @NotNull ServerPaths serverPaths) {
+                                     @NotNull final SBuildServer server, @NotNull ServerPaths serverPaths,
+                                     @NotNull final ProjectManager projectManager) {
         this.server = server;
 
         dispatcher.addListener(this);
 
-        configPersistenceManager = new ServerConfigPersistenceManager(serverPaths);
+        configPersistenceManager = new ServerConfigPersistenceManager(serverPaths, projectManager);
     }
 
     @Override

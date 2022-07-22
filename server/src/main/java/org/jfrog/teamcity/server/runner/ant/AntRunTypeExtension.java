@@ -17,6 +17,7 @@
 package org.jfrog.teamcity.server.runner.ant;
 
 import com.google.common.collect.Sets;
+import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jetbrains.annotations.NotNull;
@@ -35,9 +36,10 @@ public class AntRunTypeExtension extends BaseRunTypeExtension {
     private static final Set<String> supportedRunType = Sets.newHashSet(RunTypeUtils.ANT_RUNNER);
 
     public AntRunTypeExtension(@NotNull final WebControllerManager webControllerManager,
-            @NotNull final PluginDescriptor pluginDescriptor,
-            @NotNull final DeployableArtifactoryServers deployableArtifactoryServers) {
-        super(webControllerManager, pluginDescriptor, deployableArtifactoryServers);
+                               @NotNull final PluginDescriptor pluginDescriptor,
+                               @NotNull final DeployableArtifactoryServers deployableArtifactoryServers,
+                               @NotNull final ProjectManager projectManager) {
+        super(webControllerManager, pluginDescriptor, deployableArtifactoryServers, projectManager);
         registerView("antRunTypeExtensionView.html", "ant/antRunTypeExtensionView.jsp");
         registerEdit("antRunTypeExtensionEdit.html", "ant/antRunTypeExtensionEdit.jsp");
     }

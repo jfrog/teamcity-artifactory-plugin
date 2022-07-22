@@ -1,6 +1,7 @@
 package org.jfrog.teamcity.server.runner;
 
 import jetbrains.buildServer.controllers.BaseController;
+import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.RunType;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
@@ -27,12 +28,16 @@ public abstract class BaseRunType extends RunType {
     private String editUrl;
     private String displayName;
     private String descriptor;
+    @NotNull
+    private final ProjectManager projectManager;
 
     public BaseRunType(@NotNull final WebControllerManager webControllerManager,
                        @NotNull final PluginDescriptor pluginDescriptor,
-                       @NotNull final DeployableArtifactoryServers deployableArtifactoryServers) {
+                       @NotNull final DeployableArtifactoryServers deployableArtifactoryServers,
+                       @NotNull final ProjectManager projectManager) {
         this.webControllerManager = webControllerManager;
         this.pluginDescriptor = pluginDescriptor;
+        this.projectManager = projectManager;
         // Gets the plugin version from the pluginDescriptor and sets it to the pluginVersion String in ConstantValues.
         ConstantValues.setPluginVersion(pluginDescriptor.getPluginVersion());
         this.deployableArtifactoryServers = deployableArtifactoryServers;
@@ -95,6 +100,6 @@ public abstract class BaseRunType extends RunType {
         editUrl = pluginDescriptor.getPluginResourcesPath(url);
         String actualJsp = pluginDescriptor.getPluginResourcesPath(jsp);
         webControllerManager.registerController(editUrl,
-                new ArtifactoryRunTypeConfigController(editUrl, actualJsp, deployableArtifactoryServers));
+                new ArtifactoryRunTypeConfigController(editUrl, actualJsp, deployableArtifactoryServers, projectManager));
     }
 }
