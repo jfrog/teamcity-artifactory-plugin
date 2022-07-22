@@ -29,7 +29,6 @@ public class ServerConfigBean {
     private boolean useDifferentResolverCredentials;
     private CredentialsBean defaultResolverCredentials;
     private int timeout;
-    private boolean isProjectConnection;
 
     public String getId() {
         return id;

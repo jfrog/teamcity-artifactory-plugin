@@ -55,11 +55,8 @@ public class ServerConfigPersistenceManager {
     private final List<ServerConfigBean> configuredServers = new CopyOnWriteArrayList<ServerConfigBean>();
     private AtomicLong nextAvailableId = new AtomicLong(0); // todo won't work in a multi-node setup
     private XStream xStream;
-    @NotNull
-    private final ProjectManager projectManager;
 
-    public ServerConfigPersistenceManager(@NotNull ServerPaths serverPaths, @NotNull ProjectManager projectManager) {
-        this.projectManager = projectManager;
+    public ServerConfigPersistenceManager(@NotNull ServerPaths serverPaths) {
         xStream = new XStream();
         xStream.setClassLoader(SerializableServers.class.getClassLoader());
         xStream.processAnnotations(new Class[]{SerializableServer.class, SerializableServers.class});

@@ -31,13 +31,12 @@ public class ArtifactoryServerListener extends BuildServerAdapter {
     private ServerConfigPersistenceManager configPersistenceManager;
 
     public ArtifactoryServerListener(@NotNull final EventDispatcher<BuildServerListener> dispatcher,
-                                     @NotNull final SBuildServer server, @NotNull ServerPaths serverPaths,
-                                     @NotNull final ProjectManager projectManager) {
+                                     @NotNull final SBuildServer server, @NotNull ServerPaths serverPaths) {
         this.server = server;
 
         dispatcher.addListener(this);
 
-        configPersistenceManager = new ServerConfigPersistenceManager(serverPaths, projectManager);
+        configPersistenceManager = new ServerConfigPersistenceManager(serverPaths);
     }
 
     @Override
