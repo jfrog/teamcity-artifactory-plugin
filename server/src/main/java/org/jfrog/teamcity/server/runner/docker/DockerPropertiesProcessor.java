@@ -46,8 +46,5 @@ public class DockerPropertiesProcessor implements PropertiesProcessor {
             invalidProperties.add(new InvalidProperty(RunnerParameterKeys.URL_ID, "Please specify a Server."));
             return;
         }
-        if (!deployableServers.isUrlIdConfigured(selectedUrl)) {
-            invalidProperties.add(new InvalidProperty(RunnerParameterKeys.URL_ID, "Selected server isn't configured."));
-        }
     }
 }

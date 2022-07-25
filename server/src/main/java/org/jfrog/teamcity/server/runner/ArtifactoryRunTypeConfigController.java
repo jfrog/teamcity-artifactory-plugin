@@ -69,7 +69,8 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
         modelAndView.getModel().put("controllerUrl", actualUrl);
         modelAndView.getModel().put("deployableArtifactoryServers", deployableServers);
         SProject project = getProject(request);
-        modelAndView.getModel().put("deployableServerIds", project != null ? deployableServers.getDeployableServerIds(project) : deployableServers.getDeployableServerIds());
+        modelAndView.getModel().put("deployableServerIdUrlMap", deployableServers.getDeployableServerIdUrlMap(getProject(request)));
+        modelAndView.getModel().put("deployableServerIds", deployableServers.getDeployableServerIds(project));
         modelAndView.getModel().put("disabledMessage", ConstantValues.DISABLED_MESSAGE);
         modelAndView.getModel().put("offlineMessage", ConstantValues.OFFLINE_MESSAGE);
         modelAndView.getModel().put("incompatibleVersionMessage", ConstantValues.INCOMPATIBLE_VERSION_MESSAGE);
@@ -79,6 +80,9 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
     @Nullable
     private SProject getProject(@NotNull final HttpServletRequest request) {
         String id = request.getParameter("id");
+        if (id == null) {
+            return null;
+        }
         if (id.startsWith("buildType:")) {
             SBuildType bt = projectManager.findBuildTypeByExternalId(id.substring(10));
             return bt != null ? bt.getProject() : null;
@@ -95,6 +99,7 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response, Element xmlResponse) {
         String selectedUrl = request.getParameter("selectedUrlId");
+        SProject project = getProject(request);
 
         if (StringUtils.isNotBlank(selectedUrl)) {
 
@@ -106,7 +111,7 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
             String loadTargetRepos = request.getParameter("loadTargetRepos");
             if (StringUtils.isNotBlank(loadTargetRepos) && Boolean.valueOf(loadTargetRepos)) {
                 Element deployableReposElement = new Element("deployableRepos");
-                List<String> deployableRepos = deployableServers.getServerDeployableRepos(selectedUrl, overrideDeployerCredentials, username, password);
+                List<String> deployableRepos = deployableServers.getServerDeployableRepos(selectedUrl, overrideDeployerCredentials, username, password, project);
                 for (String deployableRepo : deployableRepos) {
                     deployableReposElement.addContent(new Element("repoName").addContent(deployableRepo));
                 }
@@ -117,7 +122,7 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
             if (StringUtils.isNotBlank(loadResolvingRepos) && Boolean.valueOf(loadResolvingRepos)) {
                 Element resolvingReposElement = new Element("resolvingRepos");
 
-                List<String> resolvingRepos = deployableServers.getServerResolvingRepos(selectedUrl, overrideDeployerCredentials, username, password);
+                List<String> resolvingRepos = deployableServers.getServerResolvingRepos(selectedUrl, overrideDeployerCredentials, username, password, project);
                 for (String resolvingRepo : resolvingRepos) {
                     resolvingReposElement.addContent(new Element("repoName").addContent(resolvingRepo));
                 }
@@ -127,14 +132,14 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
             String checkArtifactoryHasAddons = request.getParameter("checkArtifactoryHasAddons");
             if (StringUtils.isNotBlank(checkArtifactoryHasAddons) && Boolean.valueOf(checkArtifactoryHasAddons)) {
                 Element hasAddonsElement = new Element("hasAddons");
-                hasAddonsElement.setText(Boolean.toString(deployableServers.serverHasAddons(selectedUrl, overrideDeployerCredentials, username, password)));
+                hasAddonsElement.setText(Boolean.toString(deployableServers.serverHasAddons(selectedUrl, overrideDeployerCredentials, username, password, project)));
                 xmlResponse.addContent(hasAddonsElement);
             }
 
             String checkCompatibleVersion = request.getParameter("checkCompatibleVersion");
             if (StringUtils.isNotBlank(checkCompatibleVersion) && Boolean.valueOf(checkCompatibleVersion)) {
                 Element compatibleVersionElement = new Element("compatibleVersion");
-                compatibleVersionElement.setText(deployableServers.isServerCompatible(selectedUrl, overrideDeployerCredentials, username, password));
+                compatibleVersionElement.setText(deployableServers.isServerCompatible(selectedUrl, overrideDeployerCredentials, username, password, project));
                 xmlResponse.addContent(compatibleVersionElement);
             }
         }

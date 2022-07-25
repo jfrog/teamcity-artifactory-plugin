@@ -28,6 +28,7 @@ import jetbrains.buildServer.serverSide.crypt.RSACipher;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jfrog.teamcity.api.SerializableServer;
 import org.jfrog.teamcity.api.SerializableServers;
 import org.jfrog.teamcity.api.ServerConfigBean;
@@ -149,12 +150,14 @@ public class ServerConfigPersistenceManager {
         return Lists.newArrayList(configuredServers);
     }
 
-    public List<ServerConfigBean> getConfiguredServers(SProject project) {
-        List<ServerConfigBean> configsFromProjects = project.getAvailableFeaturesOfType("OAuthProvider")
+    public List<ServerConfigBean> getConfiguredServers(@Nullable final SProject project) {
+        List<ServerConfigBean> configsFromProjects = project != null ? project.getAvailableFeaturesOfType("OAuthProvider")
                 .stream()
                 .filter(f -> "JFrog_Artifactory".equals(f.getParameters().get("providerType")))
                 .map(this::toServerConfigBean)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()) : Collections.emptyList();
+
+        // ordering is important - first adding the global servers, then project ones
         ArrayList<ServerConfigBean> serverConfigBeans = Lists.newArrayList(configuredServers);
         serverConfigBeans.addAll(configsFromProjects);
         return serverConfigBeans;
@@ -167,8 +170,8 @@ public class ServerConfigPersistenceManager {
         serverConfigBean.setTimeout(Integer.parseInt(parameters.get("timeout")));
         serverConfigBean.setUrl(parameters.get("url"));
         serverConfigBean.setUseDifferentResolverCredentials(Boolean.parseBoolean(parameters.get("useDifferentResolverCredentials")));
-        serverConfigBean.setDefaultResolverCredentials(new CredentialsBean(parameters.get("defaultResolverUsername"), parameters.get("defaultResolverPassword")));
-        serverConfigBean.setDefaultDeployerCredentials(new CredentialsBean(parameters.get("defaultDeployerUsername"), parameters.get("defaultDeployerPassword")));
+        serverConfigBean.setDefaultResolverCredentials(new CredentialsBean(parameters.get("defaultResolverUsername"), parameters.get("secure:defaultResolverPassword")));
+        serverConfigBean.setDefaultDeployerCredentials(new CredentialsBean(parameters.get("defaultDeployerUsername"), parameters.get("secure:defaultDeployerPassword")));
         return serverConfigBean;
     }
 

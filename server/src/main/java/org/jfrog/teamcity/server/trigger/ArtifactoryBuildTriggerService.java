@@ -24,6 +24,7 @@ import jetbrains.buildServer.buildTriggers.BuildTriggerDescriptor;
 import jetbrains.buildServer.buildTriggers.BuildTriggerService;
 import jetbrains.buildServer.buildTriggers.BuildTriggeringPolicy;
 import jetbrains.buildServer.serverSide.InvalidProperty;
+import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
@@ -47,14 +48,15 @@ public class ArtifactoryBuildTriggerService extends BuildTriggerService {
 
     public ArtifactoryBuildTriggerService(@NotNull final PluginDescriptor descriptor,
                                           @NotNull final WebControllerManager wcm,
-                                          @NotNull final DeployableArtifactoryServers deployableServers) {
+                                          @NotNull final DeployableArtifactoryServers deployableServers,
+                                          @NotNull final ProjectManager projectManager) {
         this.deployableServers = deployableServers;
         this.watchedItems = HashMultimap.create();
         this.watchedItems = Multimaps.synchronizedMultimap(watchedItems);
         actualUrl = descriptor.getPluginResourcesPath("editArtifactoryTrigger.html");
         final String actualJsp = descriptor.getPluginResourcesPath("editArtifactoryTrigger.jsp");
         wcm.registerController(actualUrl,
-                new EditArtifactoryTriggerController(actualUrl, actualJsp, deployableServers));
+                new EditArtifactoryTriggerController(actualUrl, actualJsp, deployableServers, projectManager));
     }
 
     @NotNull
@@ -77,7 +79,7 @@ public class ArtifactoryBuildTriggerService extends BuildTriggerService {
         String urlId = map.get(TriggerParameterKeys.URL_ID);
 
         if (StringUtils.isNotBlank(urlId) && deployableServers.isUrlIdConfigured(urlId)) {
-            String url = deployableServers.getServerConfigById(urlId).getUrl();
+            String url = deployableServers.getServerConfigById(urlId).getUrl(); // build type is inaccessible here, so it's impossible to show a meaningful description
             String targetRepo = map.get(TriggerParameterKeys.TARGET_REPO);
             return String.format("Watching items of the repository '%s' on the server '%s'", targetRepo, url);
         }
@@ -110,11 +112,6 @@ public class ArtifactoryBuildTriggerService extends BuildTriggerService {
                 String urlId = map.get(TriggerParameterKeys.URL_ID);
                 if (StringUtils.isBlank(urlId)) {
                     invalidProperties.add(new InvalidProperty(TriggerParameterKeys.URL_ID, "Please select a server."));
-                } else {
-                    if (!deployableServers.isUrlIdConfigured(urlId)) {
-                        invalidProperties.add(new InvalidProperty(TriggerParameterKeys.URL_ID,
-                                "Selected server ID is not configured."));
-                    }
                 }
 
                 if (!invalidProperties.isEmpty()) {

@@ -66,7 +66,7 @@ BS.artifactory = {
                 parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&checkArtifactoryHasAddons=true'
                 + '&overrideDeployerCredentials=' + BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()
                 + '&username=' + $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value
-                + '&password=' + encyptedPass,
+                + '&password=' + encyptedPass + '&id=' + new URLSearchParams(window.location.search).get('id'),
                 onComplete: function (response, options) {
 
                     var xmlDoc = response.responseXML;
@@ -107,7 +107,7 @@ BS.artifactory = {
             parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&checkCompatibleVersion=true'
             + '&overrideDeployerCredentials=' + BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()
             + '&username=' + $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value
-            + '&password=' + encyptedPass,
+            + '&password=' + encyptedPass + '&id=' + new URLSearchParams(window.location.search).get('id'),
             onComplete: function (response, options) {
 
                 var xmlDoc = response.responseXML;

@@ -26,10 +26,7 @@ import jetbrains.buildServer.controllers.ActionErrors;
 import jetbrains.buildServer.controllers.BaseFormXmlController;
 import jetbrains.buildServer.controllers.BuildDataExtensionUtil;
 import jetbrains.buildServer.log.Loggers;
-import jetbrains.buildServer.serverSide.SBuild;
-import jetbrains.buildServer.serverSide.SBuildRunnerDescriptor;
-import jetbrains.buildServer.serverSide.SBuildServer;
-import jetbrains.buildServer.serverSide.SBuildType;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.web.util.SessionUser;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -98,7 +95,7 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
             return;
         }
 
-        ServerConfigBean server = getServerConfigBean(xmlResponse, errors, selectUrlIdParam);
+        ServerConfigBean server = getServerConfigBean(xmlResponse, errors, selectUrlIdParam, type.getProject());
         if (server == null) {
             return;
         }
@@ -107,7 +104,7 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
         CredentialsBean preferredDeployer = getDeployerCredentialsBean(parameters, server, overrideDeployerCredentials);
         String loadTargetRepos = request.getParameter("loadTargetRepos");
         if (StringUtils.isNotBlank(loadTargetRepos) && Boolean.valueOf(loadTargetRepos)) {
-            populateTargetRepos(xmlResponse, selectUrlIdParam, overrideDeployerCredentials, preferredDeployer);
+            populateTargetRepos(xmlResponse, selectUrlIdParam, overrideDeployerCredentials, preferredDeployer, type.getProject());
             return;
         }
 
@@ -181,10 +178,10 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
         return true;
     }
 
-    private void populateTargetRepos(@NotNull Element xmlResponse, String selectedUrlId, boolean overrideDeployerCredentials, CredentialsBean preferredDeployer) {
+    private void populateTargetRepos(@NotNull Element xmlResponse, String selectedUrlId, boolean overrideDeployerCredentials, CredentialsBean preferredDeployer, SProject project) {
         Element deployableReposElement = new Element("deployableRepos");
         List<String> deployableRepos = deployableServers.getServerDeployableRepos(selectedUrlId,
-                overrideDeployerCredentials, preferredDeployer.getUsername(), preferredDeployer.getPassword());
+                overrideDeployerCredentials, preferredDeployer.getUsername(), preferredDeployer.getPassword(), project);
         for (String deployableRepo : deployableRepos) {
             deployableReposElement.addContent(new Element("repoName").addContent(deployableRepo));
         }
@@ -208,8 +205,8 @@ public class PromotionResultsFragmentController extends BaseFormXmlController {
     }
 
     @Nullable
-    private ServerConfigBean getServerConfigBean(@NotNull Element xmlResponse, ActionErrors errors, String selectedUrlId) {
-        ServerConfigBean server = deployableServers.getServerConfigById(selectedUrlId);
+    private ServerConfigBean getServerConfigBean(@NotNull Element xmlResponse, ActionErrors errors, String selectedUrlId, SProject project) {
+        ServerConfigBean server = deployableServers.getServerConfigById(selectedUrlId, project);
         if (server == null) {
             addError(errors, "errorPromotion", "Unable to perform any promotion operations: could not find an " +
                     "Artifactory server associated with the configuration ID of '" + selectedUrlId + "'.", xmlResponse);

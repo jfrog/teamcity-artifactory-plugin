@@ -112,8 +112,8 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
                     password = parameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD);
                 }
             }
-            managementConfig.setSelectedArtifactoryServerHasAddons(deployableServers.serverHasAddons(serverId, overrideDeployerCredentials, username, password));
-            managementConfig.setDeployableRepoKeys(deployableServers.getServerDeployableRepos(serverId, overrideDeployerCredentials, username, password));
+            managementConfig.setSelectedArtifactoryServerHasAddons(deployableServers.serverHasAddons(serverId, overrideDeployerCredentials, username, password, buildType.getProject()));
+            managementConfig.setDeployableRepoKeys(deployableServers.getServerDeployableRepos(serverId, overrideDeployerCredentials, username, password, buildType.getProject()));
         }
 
         BranchEx checkoutBranch = getCheckoutBranches(buildType, ((BranchBean) model.get("branchBean")));

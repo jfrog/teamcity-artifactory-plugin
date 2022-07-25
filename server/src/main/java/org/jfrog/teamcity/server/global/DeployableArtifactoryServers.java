@@ -21,6 +21,7 @@ import com.google.common.collect.Maps;
 import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.serverSide.SProject;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.util.VersionCompatibilityType;
@@ -44,20 +45,10 @@ import java.util.stream.Stream;
  */
 public class DeployableArtifactoryServers {
 
-    private ServerConfigPersistenceManager configPersistenceManager;
+    private final ServerConfigPersistenceManager configPersistenceManager;
 
     public DeployableArtifactoryServers(@NotNull final ArtifactoryServerListener serverListener) {
         configPersistenceManager = serverListener.getConfigModel();
-    }
-
-    public List<DeployableServerId> getDeployableServerIds() {
-        List<DeployableServerId> deployableServerUrls = Lists.newArrayList();
-        List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
-
-        for (ServerConfigBean serverConfig : serverConfigs) {
-            deployableServerUrls.add(new DeployableServerId(serverConfig.getId(), serverConfig.getUrl()));
-        }
-        return deployableServerUrls;
     }
 
     public List<DeployableServerId> getDeployableServerIds(SProject project) {
@@ -70,9 +61,9 @@ public class DeployableArtifactoryServers {
         return deployableServerUrls;
     }
 
-    public Map<String, String> getDeployableServerIdUrlMap() {
+    public Map<String, String> getDeployableServerIdUrlMap(@Nullable SProject project) {
         Map<String, String> map = Maps.newHashMap();
-        List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
+        List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers(project);
 
         for (ServerConfigBean serverConfig : serverConfigs) {
             map.put(serverConfig.getId(), serverConfig.getUrl());
@@ -82,9 +73,9 @@ public class DeployableArtifactoryServers {
     }
 
     public List<String> getServerDeployableRepos(String serverUrlId, boolean overrideDeployerCredentials,
-                                                 String username, String password) {
+                                                 String username, String password, @Nullable SProject project) {
 
-        List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
+        List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers(project);
 
         for (ServerConfigBean serverConfig : serverConfigs) {
             if (Objects.equals(serverUrlId, serverConfig.getId())) {
@@ -100,9 +91,9 @@ public class DeployableArtifactoryServers {
     }
 
     public List<String> getServerLocalAndCacheRepos(String serverUrlId, boolean overrideDeployerCredentials,
-                                                    String username, String password) {
+                                                    String username, String password, SProject project) {
 
-        List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
+        List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers(project);
 
         for (ServerConfigBean serverConfig : serverConfigs) {
             if (Objects.equals(serverUrlId, serverConfig.getId())) {
@@ -124,9 +115,9 @@ public class DeployableArtifactoryServers {
     }
 
     public List<String> getServerResolvingRepos(String serverUrlId, boolean overrideDeployerCredentials,
-                                                String username, String password) {
+                                                String username, String password, @Nullable SProject project) {
 
-        List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
+        List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers(project);
 
         for (ServerConfigBean serverConfig : serverConfigs) {
             if (Objects.equals(serverUrlId, serverConfig.getId())) {
@@ -164,8 +155,8 @@ public class DeployableArtifactoryServers {
         Loggers.SERVER.error(message, e);
     }
 
-    public boolean serverHasAddons(String serverUrlId, boolean overrideDeployerCredentials, String username, String password) {
-        List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
+    public boolean serverHasAddons(String serverUrlId, boolean overrideDeployerCredentials, String username, String password, @Nullable SProject project) {
+        List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers(project);
 
         for (ServerConfigBean serverConfig : serverConfigs) {
             if (Objects.equals(serverUrlId, serverConfig.getId())) {
@@ -185,8 +176,8 @@ public class DeployableArtifactoryServers {
         return false;
     }
 
-    public String isServerCompatible(String serverUrlId, boolean overrideDeployerCredentials, String username, String password) {
-        List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers();
+    public String isServerCompatible(String serverUrlId, boolean overrideDeployerCredentials, String username, String password, @Nullable SProject project) {
+        List<ServerConfigBean> serverConfigs = configPersistenceManager.getConfiguredServers(project);
 
         for (ServerConfigBean serverConfig : serverConfigs) {
             if (Objects.equals(serverUrlId, serverConfig.getId())) {
@@ -223,8 +214,28 @@ public class DeployableArtifactoryServers {
         return false;
     }
 
+    public boolean isUrlIdConfigured(String urlIdToCheck, SProject project) {
+        for (ServerConfigBean serverConfigBean : configPersistenceManager.getConfiguredServers(project)) {
+            if (Objects.equals(urlIdToCheck, serverConfigBean.getId())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public ServerConfigBean getServerConfigById(String serverId) {
         for (ServerConfigBean serverConfigBean : configPersistenceManager.getConfiguredServers()) {
+            if (Objects.equals(serverId, serverConfigBean.getId())) {
+                return serverConfigBean;
+            }
+        }
+
+        return null;
+    }
+
+    public ServerConfigBean getServerConfigById(String serverId, SProject project) {
+        for (ServerConfigBean serverConfigBean : configPersistenceManager.getConfiguredServers(project)) {
             if (Objects.equals(serverId, serverConfigBean.getId())) {
                 return serverConfigBean;
             }

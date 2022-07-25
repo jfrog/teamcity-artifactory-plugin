@@ -26,6 +26,7 @@
 <jsp:useBean id="incompatibleVersionMessage" scope="request" type="java.lang.String"/>
 <jsp:useBean id="deployableArtifactoryServers" scope="request"
              type="org.jfrog.teamcity.server.global.DeployableArtifactoryServers"/>
+<%--@elvariable id="deployableServerIds" type="java.util.List<org.jfrog.teamcity.api.DeployableServerId>"--%>
 
 <c:set var="foundExistingConfig"
        value="${not empty propertiesBean.properties['org.jfrog.artifactory.selectedTriggerServer.urlId'] ? true : false}"/>
@@ -84,7 +85,7 @@
             }
             BS.ajaxRequest(base_uri + '${controllerUrl}', {
                 parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadTargetRepos=true'
-                        + '&username=' + username + '&password=' + encyptedPass,
+                        + '&username=' + username + '&password=' + encyptedPass + '&id=' + new URLSearchParams(window.location.search).get('id'),
                 onComplete: function (response, options) {
                     var repoSelect = $('org.jfrog.artifactory.selectedTriggerServer.targetRepo');
                     var xmlDoc = response.responseXML;
@@ -124,7 +125,7 @@
             BS.ajaxRequest(base_uri + '${controllerUrl}', {
                 parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&checkArtifactoryHasAddons=true' +
                         '&checkCompatibleVersion=true'
-                        + '&username=' + username + '&password=' + encyptedPass,
+                        + '&username=' + username + '&password=' + encyptedPass + '&id=' + new URLSearchParams(window.location.search).get('id'),
                 onComplete: function (response, options) {
                     var xmlDoc = response.responseXML;
                     if (xmlDoc) {
@@ -199,7 +200,7 @@ display:inline-block;
                 <c:set var="selected" value="true"/>
             </c:if>
             <props:option value="" selected="${selected}"/>
-            <c:forEach var="deployableServerId" items="${deployableArtifactoryServers.deployableServerIds}">
+            <c:forEach var="deployableServerId" items="${deployableServerIds}">
                 <c:set var="selected" value="false"/>
                 <c:if test="${deployableServerId.id ==
                 propertiesBean.properties['org.jfrog.artifactory.selectedTriggerServer.urlId']}">

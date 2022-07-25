@@ -45,7 +45,8 @@ BS.local = {
                 deployReleaseText = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseText'),
                 deployReleaseFlag = $('org.jfrog.artifactory.selectedDeployableServer.deployReleaseFlag'),
                 selectedUrlId = urlIdSelect.options[urlIdSelect.selectedIndex].value,
-                targetTextDiv = document.getElementById('antTargetReleaseText');
+                targetTextDiv = document.getElementById('antTargetReleaseText'),
+                settingsId = new URLSearchParams(window.location.search).get('id');
 
         if (!selectedUrlId) {
             $('org.jfrog.artifactory.selectedDeployableServer.overrideDefaultDeployerCredentials').checked = false;
@@ -174,7 +175,7 @@ BS.local = {
             parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadTargetRepos=true'
             + '&overrideDeployerCredentials=' + BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()
             + '&username=' + $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value
-            + '&password=' + encyptedPass,
+            + '&password=' + encyptedPass + '&id=' + new URLSearchParams(window.location.search).get('id'),
             onComplete: function (response, options) {
 
                 var publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo');
