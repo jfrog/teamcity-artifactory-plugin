@@ -1,21 +1,20 @@
 package org.jfrog.teamcity.agent.util;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
 import jetbrains.buildServer.agent.AgentRunningBuild;
 import jetbrains.buildServer.agent.BuildProgressLogger;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.agent.Constants;
 import jetbrains.buildServer.agent.artifacts.ArtifactsWatcher;
+import jetbrains.buildServer.agent.impl.BuildRunnerContextImpl;
 import jetbrains.buildServer.util.ArchiveUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.api.*;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
-import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
-import org.jfrog.build.extractor.clientConfiguration.ArtifactoryDependenciesClientBuilder;
-import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
-import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
+import org.jfrog.build.extractor.clientConfiguration.*;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.teamcity.agent.ServerConfig;
 import org.jfrog.teamcity.common.ConstantValues;
@@ -129,7 +128,45 @@ public class BuildInfoUtils {
         propertiesMap.put(BuildInfoFields.BUILD_TIMESTAMP, runnerParameters.get(ConstantValues.PROP_BUILD_TIMESTAMP));
         propertiesMap.put(BuildInfoFields.VCS_REVISION, runnerParameters.get(ConstantValues.PROP_VCS_REVISION));
         propertiesMap.put(BuildInfoFields.VCS_URL, runnerParameters.get(ConstantValues.PROP_VCS_URL));
+
+        HashMap<String, String> allParamMap = Maps.newHashMap(runnerContext.getBuildParameters().getAllParameters());
+        allParamMap.putAll(runnerContext.getConfigParameters());
+        gatherBuildInfoParams(allParamMap, propertiesMap, ClientProperties.PROP_DEPLOY_PARAM_PROP_PREFIX,
+                Constants.ENV_PREFIX, Constants.SYSTEM_PREFIX);
         return propertiesMap;
+    }
+
+    private static void gatherBuildInfoParams(Map<String, String> allParamMap, Map propertyReceiver, final String propPrefix,
+                                       final String... propTypes) {
+        Map<String, String> filteredProperties = Maps.filterKeys(allParamMap, new Predicate<String>() {
+            public boolean apply(String key) {
+                if (StringUtils.isNotBlank(key)) {
+                    if (key.startsWith(propPrefix)) {
+                        return true;
+                    }
+                    for (String propType : propTypes) {
+                        if (key.startsWith(propType + propPrefix)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+        });
+        filteredProperties = Maps.filterValues(filteredProperties, new Predicate<String>() {
+            public boolean apply(String value) {
+                return StringUtils.isNotBlank(value);
+            }
+        });
+
+        for (Map.Entry<String, String> entryToAdd : filteredProperties.entrySet()) {
+            String key = entryToAdd.getKey();
+            for (String propType : propTypes) {
+                key = StringUtils.remove(key, propType);
+            }
+            key = StringUtils.remove(key, propPrefix);
+            propertyReceiver.put(key, entryToAdd.getValue());
+        }
     }
 
     public static ArtifactoryDependenciesClientBuilder getArtifactoryDependenciesClientBuilder(ServerConfig serverConfig, Map<String, String> runnerParams, BuildProgressLogger logger) {

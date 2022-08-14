@@ -250,39 +250,6 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P>
         return publishableArtifacts;
     }
 
-    private void gatherBuildInfoParams(Map<String, String> allParamMap, Map propertyReceiver, final String propPrefix,
-                                       final String... propTypes) {
-        Map<String, String> filteredProperties = Maps.filterKeys(allParamMap, new Predicate<String>() {
-            public boolean apply(String key) {
-                if (StringUtils.isNotBlank(key)) {
-                    if (key.startsWith(propPrefix)) {
-                        return true;
-                    }
-                    for (String propType : propTypes) {
-                        if (key.startsWith(propType + propPrefix)) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            }
-        });
-        filteredProperties = Maps.filterValues(filteredProperties, new Predicate<String>() {
-            public boolean apply(String value) {
-                return StringUtils.isNotBlank(value);
-            }
-        });
-
-        for (Map.Entry<String, String> entryToAdd : filteredProperties.entrySet()) {
-            String key = entryToAdd.getKey();
-            for (String propType : propTypes) {
-                key = StringUtils.remove(key, propType);
-            }
-            key = StringUtils.remove(key, propPrefix);
-            propertyReceiver.put(key, entryToAdd.getValue());
-        }
-    }
-
     /**
      * This method is used when using specs (not the legacy pattern).
      * This method goes over the provided DeployDetailsArtifact list and adds it to the provided moduleBuilder with
