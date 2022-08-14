@@ -1,3 +1,6 @@
+## 2.9.4 (August 14, 2022) 
+- Bug fix - Artifactory deploy proprieties are not saved on deployed artifacts - https://github.com/jfrog/teamcity-artifactory-plugin/pull/116
+
 ## 2.9.3 (June 09, 2022) 
 - Bug fix - Trigger configuration does not list repositories - https://github.com/jfrog/teamcity-artifactory-plugin/pull/105
 
