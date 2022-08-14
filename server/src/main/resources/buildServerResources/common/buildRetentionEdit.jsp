@@ -40,7 +40,7 @@
         <props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.buildRetention"
                                 onclick="BS.artifactory.toggleBuildRetentionArgsVisibility()"/>
             <span class="smallNote">
-                Check if you wish to include discard old buils.
+                Check if you wish to discard old builds.
             </span>
     </td>
 </tr>
