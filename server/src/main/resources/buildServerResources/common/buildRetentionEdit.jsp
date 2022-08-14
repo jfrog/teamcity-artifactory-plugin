@@ -88,7 +88,7 @@
         <props:textProperty name="org.jfrog.artifactory.selectedDeployableServer.buildRetentionBuildsToKeep"
                             className="longField"/>
         <span class="smallNote">
-                Comma or space-separated list of build numbers to be exclude during the retention procedure.
+                Comma or space-separated list of build numbers to be excluded during the retention procedure.
             </span>
     </td>
 </tr>
