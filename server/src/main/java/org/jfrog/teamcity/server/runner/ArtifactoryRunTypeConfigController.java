@@ -17,22 +17,22 @@
 package org.jfrog.teamcity.server.runner;
 
 import jetbrains.buildServer.controllers.BaseFormXmlController;
-import jetbrains.buildServer.serverSide.BuildTypeTemplate;
 import jetbrains.buildServer.serverSide.ProjectManager;
-import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.crypt.RSACipher;
 import org.apache.commons.lang3.StringUtils;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
+import org.jfrog.teamcity.server.util.ServerUtils;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+
+import static org.jfrog.teamcity.server.util.ServerUtils.getProject;
 
 /**
  * @author Noam Y. Tenne
@@ -68,8 +68,8 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
         modelAndView.getModel().put("runnerType", request.getParameter("runnerType"));
         modelAndView.getModel().put("controllerUrl", actualUrl);
         modelAndView.getModel().put("deployableArtifactoryServers", deployableServers);
-        SProject project = getProject(request);
-        modelAndView.getModel().put("deployableServerIdUrlMap", deployableServers.getDeployableServerIdUrlMap(getProject(request)));
+        SProject project = getProject(projectManager, request);
+        modelAndView.getModel().put("deployableServerIdUrlMap", deployableServers.getDeployableServerIdUrlMap(getProject(projectManager, request)));
         modelAndView.getModel().put("deployableServerIds", deployableServers.getDeployableServerIds(project));
         modelAndView.getModel().put("disabledMessage", ConstantValues.DISABLED_MESSAGE);
         modelAndView.getModel().put("offlineMessage", ConstantValues.OFFLINE_MESSAGE);
@@ -77,29 +77,10 @@ public class ArtifactoryRunTypeConfigController extends BaseFormXmlController {
         return modelAndView;
     }
 
-    @Nullable
-    private SProject getProject(@NotNull final HttpServletRequest request) {
-        String id = request.getParameter("id");
-        if (id == null) {
-            return null;
-        }
-        if (id.startsWith("buildType:")) {
-            SBuildType bt = projectManager.findBuildTypeByExternalId(id.substring(10));
-            return bt != null ? bt.getProject() : null;
-        }
-
-        if (id.startsWith("template:")) {
-            BuildTypeTemplate t = projectManager.findBuildTypeTemplateByExternalId(id.substring(9));
-            return t != null ? t.getProject() : null;
-        }
-
-        return null;
-    }
-
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response, Element xmlResponse) {
         String selectedUrl = request.getParameter("selectedUrlId");
-        SProject project = getProject(request);
+        SProject project = getProject(projectManager, request);
 
         if (StringUtils.isNotBlank(selectedUrl)) {
 
