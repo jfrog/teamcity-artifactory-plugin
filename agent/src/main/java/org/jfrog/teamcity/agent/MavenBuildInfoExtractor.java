@@ -26,10 +26,14 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jdom.Element;
 import org.jdom.JDOMException;
-import org.jfrog.build.api.BuildAgent;
-import org.jfrog.build.api.Dependency;
-import org.jfrog.build.api.builder.*;
+import org.jfrog.build.api.builder.PromotionStatusBuilder;
 import org.jfrog.build.api.release.Promotion;
+import org.jfrog.build.extractor.builder.ArtifactBuilder;
+import org.jfrog.build.extractor.builder.BuildInfoBuilder;
+import org.jfrog.build.extractor.builder.DependencyBuilder;
+import org.jfrog.build.extractor.builder.ModuleBuilder;
+import org.jfrog.build.extractor.ci.BuildAgent;
+import org.jfrog.build.extractor.ci.Dependency;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.build.client.DeployDetailsArtifact;
 import org.jfrog.teamcity.agent.api.Gavc;
@@ -62,7 +66,7 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
     private boolean releaseManagementActivated;
 
     public MavenBuildInfoExtractor(BuildRunnerContext runnerContext, Multimap<File, String> artifactsToPublish,
-            List<Dependency> publishedDependencies) {
+                                   List<Dependency> publishedDependencies) {
         super(runnerContext, artifactsToPublish, publishedDependencies);
 
         ValueResolver parametersResolver = runnerContext.getParametersResolver();
@@ -208,7 +212,7 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
                 moduleBuilder.addArtifact(artifactBuilder.build());
             } else {
                 logger.message(String.format("Warning: %s includes a path to an artifact that does not exist: %s Skipping checksum calculation for this artifact",
-                    AgentListenerBuildInfoHelper.MAVEN_BUILD_INFO_XML, artifactPath));
+                        AgentListenerBuildInfoHelper.MAVEN_BUILD_INFO_XML, artifactPath));
             }
         }
         return gavc;
@@ -230,7 +234,7 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
             moduleBuilder.addArtifact(pomBuilder.build());
         } else {
             logger.message(String.format("Warning: %s includes a path to pom artifact that does not exist: %s Skipping checksum calculation for this artifact",
-                AgentListenerBuildInfoHelper.MAVEN_BUILD_INFO_XML, pomPath));
+                    AgentListenerBuildInfoHelper.MAVEN_BUILD_INFO_XML, pomPath));
         }
     }
 
@@ -243,7 +247,7 @@ public class MavenBuildInfoExtractor extends BaseBuildInfoExtractor<File> {
     }
 
     private void addChecksumInfo(File artifactFile, String deploymentRepo, String deploymentPath,
-            ArtifactBuilder artifactBuilder) {
+                                 ArtifactBuilder artifactBuilder) {
         Map<String, String> artifactChecksumMap = getArtifactChecksumMap(artifactFile.getAbsolutePath());
         artifactBuilder.md5(artifactChecksumMap.get("md5"));
         artifactBuilder.sha1(artifactChecksumMap.get("sha1"));

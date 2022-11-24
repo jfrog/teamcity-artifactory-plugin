@@ -2,7 +2,7 @@ package org.jfrog.teamcity.agent.util;
 
 import jetbrains.buildServer.agent.BuildProgressLogger;
 import org.apache.commons.lang3.StringUtils;
-import org.jfrog.build.api.BuildRetention;
+import org.jfrog.build.extractor.ci.BuildRetention;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import java.util.Arrays;
@@ -18,7 +18,7 @@ public class BuildRetentionFactory {
     public static BuildRetention createBuildRetention(Map<String, String> runnerParams, BuildProgressLogger logger) {
         String shouldDiscardOldBuilds = runnerParams.get(RunnerParameterKeys.DISCARD_OLD_BUILDS);
         BuildRetention result = new BuildRetention();
-        if (!Boolean.valueOf(shouldDiscardOldBuilds)) {
+        if (!Boolean.parseBoolean(shouldDiscardOldBuilds)) {
             return result;
         }
         try {

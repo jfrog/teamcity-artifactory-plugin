@@ -4,10 +4,10 @@ import com.google.common.collect.Lists;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
+import org.jfrog.build.extractor.ci.Dependency;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.clientConfiguration.util.AntPatternsDependenciesHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.BuildDependenciesHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.DependenciesDownloader;
@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.jfrog.teamcity.common.ConstantValues.*;
-import static org.jfrog.teamcity.common.ConstantValues.PROXY_HOST;
-import static org.jfrog.teamcity.common.ConstantValues.PROXY_PORT;
 
 /**
  * Resolves artifacts from Artifactory (published dependencies and build dependencies)
@@ -35,12 +33,12 @@ import static org.jfrog.teamcity.common.ConstantValues.PROXY_PORT;
  */
 public class DependenciesResolver implements Closeable {
 
-    private BuildRunnerContext runnerContext;
-    private Log log;
-    private Map<String, String> runnerParams;
-    private String serverUrl;
-    private String selectedPublishedDependencies;
-    private DependenciesDownloader dependenciesDownloader;
+    private final BuildRunnerContext runnerContext;
+    private final Log log;
+    private final Map<String, String> runnerParams;
+    private final String serverUrl;
+    private final String selectedPublishedDependencies;
+    private final DependenciesDownloader dependenciesDownloader;
 
     public DependenciesResolver(@NotNull BuildRunnerContext runnerContext) {
         this.runnerContext = runnerContext;
@@ -71,14 +69,12 @@ public class DependenciesResolver implements Closeable {
      * Downloads Dependencies according to a spec which should be provided by the RunnerParameterKeys.DOWNLOAD_SPEC property.
      *
      * @return list of the downloaded dependencies represented by List of Dependency objects
-     * @throws IOException
-     * @throws InterruptedException
      */
-    public List<Dependency> retrieveDependenciesBySpec() throws IOException, InterruptedException {
+    public List<Dependency> retrieveDependenciesBySpec() throws IOException {
         SpecsHelper specsHelper = new SpecsHelper(log);
         String spec = getDownloadSpec();
         if (StringUtils.isNotEmpty(spec)) {
-            return specsHelper.downloadArtifactsBySpec(spec, dependenciesDownloader.getClient(), runnerContext.getWorkingDirectory().getAbsolutePath());
+            return specsHelper.downloadArtifactsBySpec(spec, dependenciesDownloader.getArtifactoryManager(), runnerContext.getWorkingDirectory().getAbsolutePath());
         }
         return Collections.emptyList();
     }
@@ -118,7 +114,7 @@ public class DependenciesResolver implements Closeable {
 
     private DependenciesDownloader createDependenciesDownloader() {
         String workspacePath = runnerContext.getWorkingDirectory().getAbsolutePath();
-        return new DependenciesDownloaderImpl(newArtifactoryClient(), workspacePath, log);
+        return new DependenciesDownloaderImpl(newArtifactoryManager(), workspacePath, log);
     }
 
     /**
@@ -126,33 +122,33 @@ public class DependenciesResolver implements Closeable {
      *
      * @return Artifactory HTTP client.
      */
-    private ArtifactoryDependenciesClient newArtifactoryClient() {
-        ArtifactoryDependenciesClient client = new ArtifactoryDependenciesClient(serverUrl,
-            runnerParams.get(RunnerParameterKeys.RESOLVER_USERNAME),
-            runnerParams.get(RunnerParameterKeys.RESOLVER_PASSWORD),
-            log);
+    private ArtifactoryManager newArtifactoryManager() {
+        ArtifactoryManager artifactoryManager = new ArtifactoryManager(serverUrl,
+                runnerParams.get(RunnerParameterKeys.RESOLVER_USERNAME),
+                runnerParams.get(RunnerParameterKeys.RESOLVER_PASSWORD),
+                log);
 
-        client.setConnectionTimeout(Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
+        artifactoryManager.setConnectionTimeout(Integer.parseInt(runnerParams.get(RunnerParameterKeys.TIMEOUT)));
 
         if (runnerParams.containsKey(PROXY_HOST)) {
             if (StringUtils.isNotBlank(runnerParams.get(PROXY_USERNAME))) {
-                client.setProxyConfiguration(runnerParams.get(PROXY_HOST),
+                artifactoryManager.setProxyConfiguration(runnerParams.get(PROXY_HOST),
                         Integer.parseInt(runnerParams.get(PROXY_PORT)), runnerParams.get(PROXY_USERNAME),
                         runnerParams.get(PROXY_PASSWORD));
             } else {
-                client.setProxyConfiguration(runnerParams.get(PROXY_HOST),
+                artifactoryManager.setProxyConfiguration(runnerParams.get(PROXY_HOST),
                         Integer.parseInt(runnerParams.get(PROXY_PORT)));
             }
         }
 
-        return client;
+        return artifactoryManager;
     }
 
     public void close() {
         if (dependenciesDownloader != null) {
-            ArtifactoryDependenciesClient client = dependenciesDownloader.getClient();
-            if (client != null) {
-                client.close();
+            ArtifactoryManager artifactoryManager = dependenciesDownloader.getArtifactoryManager();
+            if (artifactoryManager != null) {
+                artifactoryManager.close();
             }
         }
     }

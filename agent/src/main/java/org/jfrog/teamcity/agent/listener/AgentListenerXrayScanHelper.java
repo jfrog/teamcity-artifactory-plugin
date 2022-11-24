@@ -9,7 +9,7 @@ import jetbrains.buildServer.agent.BuildRunnerContext;
 import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.client.artifactoryXrayResponse.ArtifactoryXrayResponse;
 import org.jfrog.build.client.artifactoryXrayResponse.Summary;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryXrayClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
@@ -28,7 +28,7 @@ public class AgentListenerXrayScanHelper {
             return;
         }
 
-        Boolean isBuildInfoPublished = Boolean.parseBoolean(runner.getRunnerParameters().get(RunnerParameterKeys.PUBLISH_BUILD_INFO));
+        boolean isBuildInfoPublished = Boolean.parseBoolean(runner.getRunnerParameters().get(RunnerParameterKeys.PUBLISH_BUILD_INFO));
         if (isBuildInfoPublished) {
             xrayScan(runner);
         }
@@ -46,13 +46,13 @@ public class AgentListenerXrayScanHelper {
         String buildNumber = runner.getBuild().getBuildNumber();
 
         logger.message("Initiating Xray scan...");
-        ArtifactoryXrayClient xrayClient = new ArtifactoryXrayClient(runnerParams.get(RunnerParameterKeys.URL),
+        try (ArtifactoryManager artifactoryManager = new ArtifactoryManager(runnerParams.get(RunnerParameterKeys.URL),
                 runnerParams.get(RunnerParameterKeys.DEPLOYER_USERNAME),
                 runnerParams.get(RunnerParameterKeys.DEPLOYER_PASSWORD),
-                new TeamcityAgenBuildInfoLog(logger));
-
-        ArtifactoryXrayResponse scanResult = xrayClient.xrayScanBuild(buildName, buildNumber, "TeamCity");
-        logXrayScan(runner, runnerParams, logger, scanResult);
+                new TeamcityAgenBuildInfoLog(logger))) {
+            ArtifactoryXrayResponse scanResult = artifactoryManager.scanBuild(buildName, buildNumber, "", "TeamCity");
+            logXrayScan(runner, runnerParams, logger, scanResult);
+        }
     }
 
     private void logXrayScan(BuildRunnerContext runner, Map<String, String> runnerParams, BuildProgressLogger logger, ArtifactoryXrayResponse scanResult) throws JsonProcessingException {

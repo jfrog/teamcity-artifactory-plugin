@@ -3,7 +3,9 @@ package org.jfrog.teamcity.agent;
 import jetbrains.buildServer.agent.AgentLifeCycleAdapter;
 import jetbrains.buildServer.agent.BuildFinishedStatus;
 import jetbrains.buildServer.agent.BuildRunnerContext;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jfrog.build.extractor.BuildInfoExtractorUtils;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import static org.jfrog.teamcity.common.ConstantValues.BUILD_NAME;
@@ -24,17 +26,18 @@ public class ArtifactoryAgentLifeCycleAdapter extends AgentLifeCycleAdapter {
     }
 
     private static void addBuildInfoUrlParam(BuildRunnerContext runner) {
-        String selectedServerUrl = runner.getRunnerParameters().get(RunnerParameterKeys.URL);
-        StringBuilder artifactoryUrlBuilder = new StringBuilder().append(selectedServerUrl);
-        if (!selectedServerUrl.endsWith("/")) {
-            artifactoryUrlBuilder.append("/");
+        String artifactoryUrl = StringUtils.removeEnd(runner.getRunnerParameters().get(RunnerParameterKeys.URL), "/");
+
+        String buildInfoUrl;
+        if (StringUtils.endsWith(artifactoryUrl, "/artifactory")) {
+            // Here we can deduce the platform URL
+            buildInfoUrl = BuildInfoExtractorUtils.createBuildInfoUrl(StringUtils.removeEnd(artifactoryUrl, "/artifactory"),
+                    runner.getRunnerParameters().get(BUILD_NAME), runner.getBuild().getBuildNumber(), "", "", false, true);
+        } else {
+            // Without the platform URL it would work only on Artifactory 6
+            buildInfoUrl = BuildInfoExtractorUtils.createBuildInfoUrl(artifactoryUrl, runner.getRunnerParameters().get(BUILD_NAME),
+                    runner.getBuild().getBuildNumber(), "", "", false, false);
         }
-        String artifactoryUrl = artifactoryUrlBuilder
-                .append("webapp/builds/")
-                .append(runner.getRunnerParameters().get(BUILD_NAME))
-                .append("/")
-                .append(runner.getBuild().getBuildNumber())
-                .toString();
-        runner.getBuild().addSharedSystemProperty(BUILD_URL + "." + runner.getBuild().getBuildId() + "." + runner.getId(), artifactoryUrl);
+        runner.getBuild().addSharedSystemProperty(BUILD_URL + "." + runner.getBuild().getBuildId() + "." + runner.getId(), buildInfoUrl);
     }
 }

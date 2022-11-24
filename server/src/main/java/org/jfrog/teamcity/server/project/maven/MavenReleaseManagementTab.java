@@ -19,16 +19,12 @@ package org.jfrog.teamcity.server.project.maven;
 import com.google.common.collect.Lists;
 import com.google.common.io.CharStreams;
 import jetbrains.buildServer.log.Loggers;
-import jetbrains.buildServer.serverSide.ProjectManager;
-import jetbrains.buildServer.serverSide.SBuildRunnerDescriptor;
-import jetbrains.buildServer.serverSide.SBuildServer;
-import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.SFinishedBuild;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.api.Build;
-import org.jfrog.build.api.Module;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
+import org.jfrog.build.extractor.ci.BuildInfo;
+import org.jfrog.build.extractor.ci.Module;
 import org.jfrog.teamcity.common.RunTypeUtils;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
 import org.jfrog.teamcity.server.project.BaseReleaseManagementTab;
@@ -49,7 +45,7 @@ import static org.jfrog.teamcity.common.ConstantValues.BUILD_INFO_FILE_NAME_PACK
 public class MavenReleaseManagementTab extends BaseReleaseManagementTab {
 
     public MavenReleaseManagementTab(@NotNull WebControllerManager manager, @NotNull ProjectManager projectManager,
-            @NotNull DeployableArtifactoryServers deployableServers, @NotNull SBuildServer buildServer) {
+                                     @NotNull DeployableArtifactoryServers deployableServers, @NotNull SBuildServer buildServer) {
         super(manager, projectManager, "mavenReleaseManagementTab.jsp", "/artifactory/mavenReleaseManagement.html",
                 new MavenReleaseManagementController(projectManager, buildServer), deployableServers);
     }
@@ -72,7 +68,7 @@ public class MavenReleaseManagementTab extends BaseReleaseManagementTab {
 
     @Override
     protected void fillBuildSpecificModel(Map<String, Object> model, SBuildType buildType,
-            ReleaseManagementConfigModel managementConfig) {
+                                          ReleaseManagementConfigModel managementConfig) {
         setIncludeUrl("mavenReleaseManagementTab.jsp");
 
         List<ModuleNameVersion> previousModules;
@@ -96,7 +92,7 @@ public class MavenReleaseManagementTab extends BaseReleaseManagementTab {
 
     private List<ModuleNameVersion> collectModulesFromLastPublishedBuildInfo(SBuildType buildType) throws Exception {
         List<ModuleNameVersion> modules = Lists.newArrayList();
-        Build latestBuildInfo = locateLatestBuildInfo(buildType);
+        BuildInfo latestBuildInfo = locateLatestBuildInfo(buildType);
         if (latestBuildInfo != null) {
             List<Module> buildInfoModules = latestBuildInfo.getModules();
             if (buildInfoModules != null) {
@@ -113,7 +109,7 @@ public class MavenReleaseManagementTab extends BaseReleaseManagementTab {
         return modules;
     }
 
-    private Build locateLatestBuildInfo(SBuildType buildType) throws Exception {
+    private BuildInfo locateLatestBuildInfo(SBuildType buildType) throws Exception {
         List<SFinishedBuild> finishedBuilds = buildType.getHistory();
         for (SFinishedBuild finishedBuild : finishedBuilds) {
             SBuildType finishedBuildType = finishedBuild.getBuildType();

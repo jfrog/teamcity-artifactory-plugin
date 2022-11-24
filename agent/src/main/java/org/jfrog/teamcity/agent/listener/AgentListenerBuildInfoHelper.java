@@ -26,14 +26,14 @@ import jetbrains.buildServer.agent.impl.artifacts.ArtifactsCollection;
 import jetbrains.buildServer.log.Loggers;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jfrog.build.api.BuildRetention;
-import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.client.DeployDetailsArtifact;
-import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
+import org.jfrog.build.extractor.ci.BuildRetention;
+import org.jfrog.build.extractor.ci.Dependency;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.teamcity.agent.*;
 import org.jfrog.teamcity.agent.api.ExtractedBuildInfo;
 import org.jfrog.teamcity.agent.util.BuildInfoUtils;
@@ -65,8 +65,8 @@ public class AgentListenerBuildInfoHelper {
     }
 
     public void beforeRunnerStart(BuildRunnerContext runner,
-            List<Dependency> publishedDependencies,
-            List<BuildDependency> buildDependencies) {
+                                  List<Dependency> publishedDependencies,
+                                  List<BuildDependency> buildDependencies) {
         Map<String, String> runnerParams = runner.getRunnerParameters();
         /**
          * This method handles the generic build info dependency publication which is not applicable to gradle or ant
@@ -86,20 +86,17 @@ public class AgentListenerBuildInfoHelper {
     }
 
     private void retrieveDependenciesFromSpec(BuildRunnerContext runner, List<Dependency> publishedDependencies,
-            BuildProgressLogger logger) {
-        DependenciesResolver dependenciesResolver = new DependenciesResolver(runner);
-        try {
+                                              BuildProgressLogger logger) {
+        try (DependenciesResolver dependenciesResolver = new DependenciesResolver(runner)) {
             publishedDependencies.addAll(dependenciesResolver.retrieveDependenciesBySpec());
         } catch (Exception e) {
             String errorMessage = "Error occurred while resolving dependencies from the spec: " + e.getMessage();
             throwExceptionAndLogError(e, errorMessage, logger);
-        } finally {
-            dependenciesResolver.close();
         }
     }
 
     private void retrievePublishedAndBuildDependencies(BuildRunnerContext runner,
-            List<Dependency> publishedDependencies, List<BuildDependency> buildDependencies, BuildProgressLogger logger) {
+                                                       List<Dependency> publishedDependencies, List<BuildDependency> buildDependencies, BuildProgressLogger logger) {
 
         // In case the BUILD_DEPENDENCIES property value contains the DISABLED_MESSAGE value,
         // we do not want to pass it on:
@@ -108,15 +105,12 @@ public class AgentListenerBuildInfoHelper {
             runner.addRunnerParameter(RunnerParameterKeys.BUILD_DEPENDENCIES, "");
         }
 
-        DependenciesResolver dependenciesResolver = new DependenciesResolver(runner);
-        try {
+        try (DependenciesResolver dependenciesResolver = new DependenciesResolver(runner)) {
             publishedDependencies.addAll(dependenciesResolver.retrievePublishedDependencies());
             buildDependencies.addAll(dependenciesResolver.retrieveBuildDependencies());
         } catch (Exception e) {
             String errorMessage = "Error occurred while resolving published or build dependencies: " + e.getMessage();
             throwExceptionAndLogError(e, errorMessage, logger);
-        } finally {
-            dependenciesResolver.close();
         }
     }
 
@@ -128,9 +122,9 @@ public class AgentListenerBuildInfoHelper {
     }
 
     public void runnerFinished(BuildRunnerContext runner,
-            BuildFinishedStatus status,
-            List<Dependency> dependencies,
-            List<BuildDependency> buildDependencies) throws Exception {
+                               BuildFinishedStatus status,
+                               List<Dependency> dependencies,
+                               List<BuildDependency> buildDependencies) throws Exception {
 
         /**
          * This method handles the build info and artifact publication which is not applicable to gradle or ant
@@ -146,20 +140,11 @@ public class AgentListenerBuildInfoHelper {
         BuildProgressLogger logger = build.getBuildLogger();
 
         String selectedServerUrl = runnerParams.get(RunnerParameterKeys.URL);
-        ArtifactoryBuildInfoClient infoClient = BuildInfoUtils.getArtifactoryBuildInfoClientBuilder(selectedServerUrl, runnerParams, logger).build();
-        ExtractedBuildInfo extractedBuildInfo = extractBuildInfo(runner, dependencies, selectedServerUrl, runnerParams, logger);
 
-        if (extractedBuildInfo == null) {
-            String m = "Could not generate build-info.";
-            Loggers.AGENT.warn(m);
-            build.getBuildLogger().warning(m);
-            infoClient.close();
-            return;
-        }
+        try (ArtifactoryManager artifactoryManager = BuildInfoUtils.getArtifactoryManagerBuilder(selectedServerUrl, runnerParams, logger).build()) {
+            ExtractedBuildInfo extractedBuildInfo = extractBuildInfo(runner, dependencies, selectedServerUrl, runnerParams, logger);
 
-        extractedBuildInfo.getBuildInfo().setBuildDependencies(buildDependencies);
-
-        try {
+            extractedBuildInfo.getBuildInfo().setBuildDependencies(buildDependencies);
             List<DeployDetailsArtifact> deployableArtifacts = extractedBuildInfo.getDeployableArtifacts();
             if (!deployableArtifacts.isEmpty()) {
 
@@ -178,7 +163,7 @@ public class AgentListenerBuildInfoHelper {
                         continue;
                     }
                     try {
-                        infoClient.deployArtifact(deployableArtifact.getDeployDetails());
+                        artifactoryManager.upload(deployableArtifact.getDeployDetails());
                     } catch (IOException e) {
                         throw new RuntimeException("Error deploying artifact: " + deployableArtifact.getFile() +
                                 ".\n Skipping deployment of remaining artifacts (if any) and build info.", e);
@@ -191,10 +176,8 @@ public class AgentListenerBuildInfoHelper {
             String isAsyncBuildRetention = runnerParams.get(RunnerParameterKeys.DISCARD_OLD_BUILDS_ASYNC);
             if (Boolean.parseBoolean(publishBuildInfoValue)) {
                 BuildInfoUtils.publishBuildInfoToTeamCityServer(build, extractedBuildInfo.getBuildInfo(), watcher);
-                BuildInfoUtils.sendBuildAndBuildRetention(build, extractedBuildInfo.getBuildInfo(), retention, Boolean.parseBoolean(isAsyncBuildRetention), infoClient);
+                BuildInfoUtils.sendBuildAndBuildRetention(build, extractedBuildInfo.getBuildInfo(), retention, Boolean.parseBoolean(isAsyncBuildRetention), artifactoryManager);
             }
-        } finally {
-            infoClient.close();
         }
     }
 
@@ -214,7 +197,7 @@ public class AgentListenerBuildInfoHelper {
             BaseBuildInfoExtractor<File> buildInfoExtractor = new MavenBuildInfoExtractor(runnerContext, publishableArtifacts, dependencies);
             return new ExtractedBuildInfo(buildInfoExtractor.extract(mavenBuildInfoFile), buildInfoExtractor.getDeployableArtifact());
         }
-        ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder = BuildInfoUtils.getArtifactoryBuildInfoClientBuilder(selectedServerUrl, runnerParams, logger);
+        ArtifactoryManagerBuilder buildInfoClientBuilder = BuildInfoUtils.getArtifactoryManagerBuilder(selectedServerUrl, runnerParams, logger);
         GenericBuildInfoExtractor buildInfoExtractor = new GenericBuildInfoExtractor(runnerContext, publishableArtifacts, dependencies, buildInfoClientBuilder);
 
         return new ExtractedBuildInfo(buildInfoExtractor.extract(null), buildInfoExtractor.getDeployableArtifact());

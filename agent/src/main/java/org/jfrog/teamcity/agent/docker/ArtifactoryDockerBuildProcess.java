@@ -7,10 +7,9 @@ import jetbrains.buildServer.agent.BuildFinishedStatus;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.agent.artifacts.ArtifactsWatcher;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.api.Build;
-import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
-import org.jfrog.build.extractor.clientConfiguration.ArtifactoryDependenciesClientBuilder;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.ci.BuildInfo;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.docker.extractor.DockerPull;
 import org.jfrog.build.extractor.docker.extractor.DockerPush;
 import org.jfrog.teamcity.agent.BaseArtifactoryBuildProcess;
@@ -28,29 +27,27 @@ import java.util.Map;
  */
 public class ArtifactoryDockerBuildProcess extends BaseArtifactoryBuildProcess {
 
-    private DockerAction commandType;
-    private ServerConfig serverConfig;
-    private ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder;
+    private final DockerAction commandType;
+    private final ServerConfig serverConfig;
+    private final ArtifactoryManagerBuilder artifactoryManagerBuilder;
 
     public ArtifactoryDockerBuildProcess(@NotNull AgentRunningBuild runningBuild, @NotNull BuildRunnerContext context, @NotNull ArtifactsWatcher watcher) {
         super(runningBuild, context, watcher);
         commandType = DockerAction.valueOf(runnerParameters.get(RunnerParameterKeys.DOCKER_ACTION));
         serverConfig = getServerConfig(runnerParameters);
-        buildInfoClientBuilder = BuildInfoUtils.getArtifactoryBuildInfoClientBuilder(serverConfig, runnerParameters, logger);
+        artifactoryManagerBuilder = BuildInfoUtils.getArtifactoryManagerBuilder(serverConfig, runnerParameters, logger);
     }
 
-    protected BuildFinishedStatus runBuild() throws Exception {
+    protected BuildFinishedStatus runBuild() {
         String host = runnerParameters.get(RunnerParameterKeys.DOCKER_HOST);
         String imageName = runnerParameters.get(RunnerParameterKeys.DOCKER_IMAGE_NAME);
-        ArtifactoryDependenciesClientBuilder dependenciesClientBuilder =
-                BuildInfoUtils.getArtifactoryDependenciesClientBuilder(serverConfig, runnerParameters, logger);
 
         if (isDockerCommandPull()) {
             // Perform pull.
-            buildInfo = executeDockerPull(runnerParameters, imageName, host, buildInfoClientBuilder, dependenciesClientBuilder);;
+            buildInfo = executeDockerPull(runnerParameters, imageName, host, artifactoryManagerBuilder);
         } else {
             // Perform push.
-            buildInfo = executeDockerPush(runnerParameters, imageName, host, buildInfoClientBuilder, dependenciesClientBuilder);
+            buildInfo = executeDockerPush(runnerParameters, imageName, host, artifactoryManagerBuilder);
         }
 
         // Fail run if no build was returned.
@@ -62,27 +59,25 @@ public class ArtifactoryDockerBuildProcess extends BaseArtifactoryBuildProcess {
         return BuildFinishedStatus.FINISHED_SUCCESS;
     }
 
-    private Build executeDockerPull(Map<String, String> runnerParameters, String imageName, String host,
-                                    ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder,
-                                    ArtifactoryDependenciesClientBuilder dependenciesClientBuilder) {
+    private BuildInfo executeDockerPull(Map<String, String> runnerParameters, String imageName, String host,
+                                        ArtifactoryManagerBuilder buildInfoClientBuilder) {
         // Get pull parameters.
         String sourceRepo = RepositoryHelper.getResolutionRepository(runnerParameters, valueResolver);
         String userName = runnerParameters.get(RunnerParameterKeys.RESOLVER_USERNAME);
         String password = runnerParameters.get(RunnerParameterKeys.RESOLVER_PASSWORD);
 
-        return new DockerPull(buildInfoClientBuilder, dependenciesClientBuilder, imageName, host, sourceRepo, userName, password,
+        return new DockerPull(buildInfoClientBuilder, imageName, host, sourceRepo, userName, password,
                 buildInfoLog, environmentVariables).execute();
     }
 
-    private Build executeDockerPush(Map<String, String> runnerParameters, String imageName, String host,
-                                    ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder,
-                                    ArtifactoryDependenciesClientBuilder dependenciesClientBuilder) {
+    private BuildInfo executeDockerPush(Map<String, String> runnerParameters, String imageName, String host,
+                                        ArtifactoryManagerBuilder buildInfoClientBuilder) {
         // Get push parameters.
         String targetRepo = RepositoryHelper.getTargetRepository(runnerParameters, valueResolver);
         String userName = runnerParameters.get(RunnerParameterKeys.DEPLOYER_USERNAME);
         String password = runnerParameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD);
 
-        return new DockerPush(buildInfoClientBuilder, dependenciesClientBuilder, imageName, host,
+        return new DockerPush(buildInfoClientBuilder, imageName, host,
                 ArrayListMultimap.create(Multimaps.forMap(BuildInfoUtils.getCommonArtifactPropertiesMap(runnerParameters, context))),
                 targetRepo, userName, password, buildInfoLog, environmentVariables).execute();
     }
@@ -98,8 +93,8 @@ public class ArtifactoryDockerBuildProcess extends BaseArtifactoryBuildProcess {
         return DockerAction.PULL.equals(commandType);
     }
 
-    protected ArtifactoryBuildInfoClient getBuildInfoPublishClient() {
-        return buildInfoClientBuilder.build();
+    protected ArtifactoryManager getArtifactoryManager() {
+        return artifactoryManagerBuilder.build();
     }
 
     @Override
