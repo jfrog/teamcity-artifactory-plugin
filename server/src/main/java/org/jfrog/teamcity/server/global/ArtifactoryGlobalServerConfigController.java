@@ -20,9 +20,9 @@ import jetbrains.buildServer.controllers.ActionErrors;
 import jetbrains.buildServer.controllers.BaseFormXmlController;
 import jetbrains.buildServer.log.Loggers;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jdom.Element;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
-import org.jfrog.build.util.VersionException;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.teamcity.api.ProxyInfo;
 import org.jfrog.teamcity.api.credentials.CredentialsBean;
 import org.jfrog.teamcity.server.util.TeamcityServerBuildInfoLog;
@@ -30,12 +30,13 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public class ArtifactoryGlobalServerConfigController extends BaseFormXmlController {
 
-    private ServerConfigPersistenceManager configPersistenceManager;
+    private final ServerConfigPersistenceManager configPersistenceManager;
 
     public ArtifactoryGlobalServerConfigController(final ServerConfigPersistenceManager configPersistenceManager) {
         this.configPersistenceManager = configPersistenceManager;
@@ -72,7 +73,7 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
             String url = request.getParameter("url");
 
             boolean useDifferentResolverCredentials =
-                    Boolean.valueOf(request.getParameter("useDifferentResolverCredentials"));
+                    Boolean.parseBoolean(request.getParameter("useDifferentResolverCredentials"));
             CredentialsBean defaultResolverCredentials = null;
             if (useDifferentResolverCredentials) {
                 defaultResolverCredentials = getResolverCredentialsFromRequest(request);
@@ -88,7 +89,7 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
             String url = request.getParameter("url");
 
             boolean useDifferentResolverCredentials =
-                    Boolean.valueOf(request.getParameter("useDifferentResolverCredentials"));
+                    Boolean.parseBoolean(request.getParameter("useDifferentResolverCredentials"));
             CredentialsBean defaultResolverCredentials = null;
             if (useDifferentResolverCredentials) {
                 defaultResolverCredentials = getResolverCredentialsFromRequest(request);
@@ -144,24 +145,21 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
         CredentialsBean resolvingCredentials = getPreferredResolvingCredentials(request);
 
         String url = request.getParameter("url");
-        ArtifactoryBuildInfoClient client = new ArtifactoryBuildInfoClient(url, resolvingCredentials.getUsername(),
-                resolvingCredentials.getPassword(), new TeamcityServerBuildInfoLog());
-        client.setConnectionTimeout(Integer.parseInt(request.getParameter("timeout")));
 
-        ProxyInfo proxyInfo = ProxyInfo.getInfo();
-        if (proxyInfo != null) {
-            client.setProxyConfiguration(proxyInfo.getHost(), proxyInfo.getPort(), proxyInfo.getUsername(),
-                    proxyInfo.getPassword());
-        }
+        try (ArtifactoryManager artifactoryManager = new ArtifactoryManager(url, resolvingCredentials.getUsername(),
+                resolvingCredentials.getPassword(), new TeamcityServerBuildInfoLog())) {
+            artifactoryManager.setConnectionTimeout(Integer.parseInt(request.getParameter("timeout")));
+            ProxyInfo proxyInfo = ProxyInfo.getInfo();
+            if (proxyInfo != null) {
+                artifactoryManager.setProxyConfiguration(proxyInfo.getHost(), proxyInfo.getPort(), proxyInfo.getUsername(),
+                        proxyInfo.getPassword());
+            }
 
-        try {
-            client.verifyCompatibleArtifactoryVersion();
-        } catch (VersionException ve) {
-            handleConnectionException(errors, url, ve);
-        } catch (IllegalArgumentException iae) {
-            handleConnectionException(errors, url, iae);
-        } finally {
-            client.close();
+            try {
+                artifactoryManager.getVersion();
+            } catch (IllegalArgumentException | IOException ve) {
+                handleConnectionException(errors, url, ve);
+            }
         }
         return errors;
     }
@@ -169,7 +167,7 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
     private CredentialsBean getPreferredResolvingCredentials(HttpServletRequest request) {
 
         boolean useDifferentResolverCredentials =
-                Boolean.valueOf(request.getParameter("useDifferentResolverCredentials"));
+                Boolean.parseBoolean(request.getParameter("useDifferentResolverCredentials"));
         if (useDifferentResolverCredentials) {
             return getResolverCredentialsFromRequest(request);
         } else {
@@ -186,7 +184,7 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
     }
 
     private CredentialsBean getCredentialsFromRequest(HttpServletRequest request, String usernameKey,
-            String passwordKey) {
+                                                      String passwordKey) {
         CredentialsBean credentialsBean = new CredentialsBean(request.getParameter(usernameKey));
         credentialsBean.setEncryptedPassword(request.getParameter(passwordKey));
         return credentialsBean;
@@ -206,18 +204,11 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
 
     private boolean isTestConnectionRequest(final HttpServletRequest req) {
         String testConnectionParamValue = req.getParameter("testConnection");
-        return StringUtils.isNotBlank(testConnectionParamValue) && Boolean.valueOf(testConnectionParamValue);
+        return StringUtils.isNotBlank(testConnectionParamValue) && Boolean.parseBoolean(testConnectionParamValue);
     }
 
     private void handleConnectionException(ActionErrors errors, String url, Exception e) {
-        Throwable throwable = e.getCause();
-        String errorMessage;
-        if (throwable != null) {
-            errorMessage = e.getMessage() + " (" + throwable.getClass().getCanonicalName() + ")";
-        } else {
-            errorMessage = e.getClass().getCanonicalName() + ": " + e.getMessage();
-        }
-        errors.addError("errorConnection", errorMessage);
+        errors.addError("errorConnection", ExceptionUtils.getRootCauseMessage(e));
         Loggers.SERVER.error("Error while testing the connection to Artifactory server " + url, e);
     }
 }

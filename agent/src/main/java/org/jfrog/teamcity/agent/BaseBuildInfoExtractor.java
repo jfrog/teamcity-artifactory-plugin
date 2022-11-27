@@ -16,7 +16,6 @@
 
 package org.jfrog.teamcity.agent;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -26,13 +25,16 @@ import jetbrains.buildServer.log.Loggers;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jfrog.build.api.*;
-import org.jfrog.build.api.builder.ArtifactBuilder;
-import org.jfrog.build.api.builder.BuildInfoBuilder;
-import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.api.util.FileChecksumCalculator;
 import org.jfrog.build.client.DeployDetailsArtifact;
 import org.jfrog.build.extractor.BuildInfoExtractor;
+import org.jfrog.build.extractor.builder.ArtifactBuilder;
+import org.jfrog.build.extractor.builder.BuildInfoBuilder;
+import org.jfrog.build.extractor.builder.ModuleBuilder;
+import org.jfrog.build.extractor.ci.Artifact;
+import org.jfrog.build.extractor.ci.BuildInfo;
+import org.jfrog.build.extractor.ci.Dependency;
+import org.jfrog.build.extractor.ci.Module;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.teamcity.agent.api.Gavc;
 import org.jfrog.teamcity.agent.util.AgentUtils;
@@ -57,10 +59,10 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P>
     protected Map<String, String> runnerParams;
     protected Map<String, String> matrixParams;
     protected BuildProgressLogger logger;
-    private Multimap<File, String> artifactsToPublish;
-    private List<Dependency> publishedDependencies;
+    private final Multimap<File, String> artifactsToPublish;
+    private final List<Dependency> publishedDependencies;
     private List<DeployDetailsArtifact> deployableArtifacts;
-    private Map<String, Map<String, String>> calculatedChecksumCache;
+    private final Map<String, Map<String, String>> calculatedChecksumCache;
 
     public BaseBuildInfoExtractor(BuildRunnerContext runnerContext, Multimap<File, String> artifactsToPublish,
                                   List<Dependency> publishedDependencies) {
@@ -74,7 +76,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P>
         calculatedChecksumCache = Maps.newHashMap();
     }
 
-    public Build extract(P context) {
+    public BuildInfo extract(P context) {
         BuildInfoBuilder builder = getBuildInfoBuilder();
         if (builder == null) {
             return null;
@@ -115,7 +117,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P>
             builder.addModule(genericModule);
         }
 
-        Build buildInfo = builder.build();
+        BuildInfo buildInfo = builder.build();
 
         if (StringUtils.isNotBlank(runnerParams.get(PROP_PARENT_NAME)) &&
                 StringUtils.isNotBlank(runnerParams.get(PROP_PARENT_NUMBER))) {
@@ -138,7 +140,7 @@ public abstract class BaseBuildInfoExtractor<P> implements BuildInfoExtractor<P>
     protected BuildInfoBuilder getBuildInfoBuilder() {
         BuildInfoBuilder builder = BuildInfoUtils.getBuildInfoBuilder(runnerParams, runnerContext)
                 .principal(runnerParams.get(TRIGGERED_BY)).parentName(runnerParams.get(PROP_PARENT_NAME)).
-                        parentNumber(runnerParams.get(PROP_PARENT_NUMBER));
+                parentNumber(runnerParams.get(PROP_PARENT_NUMBER));
 
         // Include env-vars.
         if (Boolean.parseBoolean(runnerParams.get(RunnerParameterKeys.INCLUDE_ENV_VARS))) {

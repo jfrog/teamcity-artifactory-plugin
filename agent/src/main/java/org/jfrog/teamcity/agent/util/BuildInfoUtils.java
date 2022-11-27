@@ -7,18 +7,24 @@ import jetbrains.buildServer.agent.BuildProgressLogger;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 import jetbrains.buildServer.agent.Constants;
 import jetbrains.buildServer.agent.artifacts.ArtifactsWatcher;
-import jetbrains.buildServer.agent.impl.BuildRunnerContextImpl;
 import jetbrains.buildServer.util.ArchiveUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.jfrog.build.api.*;
-import org.jfrog.build.api.builder.BuildInfoBuilder;
+import org.jfrog.build.api.BuildInfoFields;
+import org.jfrog.build.api.BuildInfoProperties;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
-import org.jfrog.build.extractor.clientConfiguration.*;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.builder.BuildInfoBuilder;
+import org.jfrog.build.extractor.ci.Agent;
+import org.jfrog.build.extractor.ci.BuildRetention;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
+import org.jfrog.build.extractor.clientConfiguration.ClientProperties;
+import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
+import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.teamcity.agent.ServerConfig;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
+import org.jfrog.build.extractor.ci.BuildInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +41,7 @@ public class BuildInfoUtils {
      * Create gz of the build info and publish it to the server. The file will be saved under
      * .BuildServer/system/artifacts/$Project/$Build/$BuildNumber/.teamcity/artifactory-build-info.json.gz
      */
-    public static void publishBuildInfoToTeamCityServer(AgentRunningBuild build, Build buildInfo, ArtifactsWatcher watcher) {
+    public static void publishBuildInfoToTeamCityServer(AgentRunningBuild build, BuildInfo buildInfo, ArtifactsWatcher watcher) {
         try {
             File buildInfoFile = new File(build.getAgentTempDirectory(), BUILD_INFO_FILE_NAME);
             BuildInfoExtractorUtils.saveBuildInfoToFile(buildInfo, buildInfoFile);
@@ -47,7 +53,7 @@ public class BuildInfoUtils {
         }
     }
 
-    public static void sendBuildAndBuildRetention(AgentRunningBuild build, Build buildInfo, BuildRetention retention, boolean isAsyncRetention, ArtifactoryBuildInfoClient infoClient)
+    public static void sendBuildAndBuildRetention(AgentRunningBuild build, BuildInfo buildInfo, BuildRetention retention, boolean isAsyncRetention, ArtifactoryManager infoClient)
             throws Exception {
         try {
             build.getBuildLogger().progressMessage("Deploying build info ...");
@@ -63,7 +69,7 @@ public class BuildInfoUtils {
         Date buildStarted = new Date(buildStartedLong);
         long buildDuration = System.currentTimeMillis() - buildStarted.getTime();
 
-        BuildInfoBuilder builder = new BuildInfoBuilder(runnerParams.get(BUILD_NAME)).
+        return new BuildInfoBuilder(runnerParams.get(BUILD_NAME)).
                 number(runnerContext.getBuild().getBuildNumber()).
                 artifactoryPluginVersion(runnerParams.get(ARTIFACTORY_PLUGIN_VERSION)).
                 startedDate(buildStarted).
@@ -73,8 +79,6 @@ public class BuildInfoUtils {
                 agent(new Agent(runnerParams.get(AGENT_NAME), runnerParams.get(AGENT_VERSION))).
                 vcsRevision(runnerParams.get(PROP_VCS_REVISION)).
                 vcsUrl(runnerParams.get(PROP_VCS_URL));
-
-        return builder;
     }
 
     public static void addBuildInfoProperties(BuildInfoBuilder builder, Map<String, String> runnerParams, BuildRunnerContext runnerContext) {
@@ -119,6 +123,7 @@ public class BuildInfoUtils {
     /**
      * Get a map of the commonly used artifact properties to be set when deploying an artifact.
      * Build name, build number, vcs url, vcs revision, timestamp.
+     *
      * @return Map containing all properties.
      */
     public static Map<String, String> getCommonArtifactPropertiesMap(Map<String, String> runnerParameters, BuildRunnerContext runnerContext) {
@@ -137,7 +142,7 @@ public class BuildInfoUtils {
     }
 
     private static void gatherBuildInfoParams(Map<String, String> allParamMap, Map propertyReceiver, final String propPrefix,
-                                       final String... propTypes) {
+                                              final String... propTypes) {
         Map<String, String> filteredProperties = Maps.filterKeys(allParamMap, new Predicate<String>() {
             public boolean apply(String key) {
                 if (StringUtils.isNotBlank(key)) {
@@ -169,23 +174,9 @@ public class BuildInfoUtils {
         }
     }
 
-    public static ArtifactoryDependenciesClientBuilder getArtifactoryDependenciesClientBuilder(ServerConfig serverConfig, Map<String, String> runnerParams, BuildProgressLogger logger) {
-        ArtifactoryDependenciesClientBuilder builder = new ArtifactoryDependenciesClientBuilder()
-                .setArtifactoryUrl(serverConfig.getUrl())
-                .setUsername(serverConfig.getUsername())
-                .setPassword(serverConfig.getPassword())
-                .setConnectionTimeout(serverConfig.getTimeout())
-                .setLog(new TeamcityAgenBuildInfoLog(logger));
-        ProxyConfiguration proxyConfiguration = AgentUtils.getProxyConfiguration(runnerParams);
-        if (proxyConfiguration != null) {
-            builder.setProxyConfiguration(proxyConfiguration);
-        }
-        return builder;
-    }
-
-    public static ArtifactoryBuildInfoClientBuilder getArtifactoryBuildInfoClientBuilder(ServerConfig serverConfig, Map<String, String> runnerParams, BuildProgressLogger logger) {
-        ArtifactoryBuildInfoClientBuilder builder = new ArtifactoryBuildInfoClientBuilder()
-                .setArtifactoryUrl(serverConfig.getUrl())
+    public static ArtifactoryManagerBuilder getArtifactoryManagerBuilder(ServerConfig serverConfig, Map<String, String> runnerParams, BuildProgressLogger logger) {
+        ArtifactoryManagerBuilder builder = new ArtifactoryManagerBuilder()
+                .setServerUrl(serverConfig.getUrl())
                 .setUsername(serverConfig.getUsername())
                 .setPassword(serverConfig.getPassword())
                 .setConnectionTimeout(serverConfig.getTimeout())
@@ -199,9 +190,9 @@ public class BuildInfoUtils {
         return builder;
     }
 
-    public static ArtifactoryBuildInfoClientBuilder getArtifactoryBuildInfoClientBuilder(String selectedServerUrl, Map<String, String> runnerParams, BuildProgressLogger logger) {
-        ArtifactoryBuildInfoClientBuilder builder = new ArtifactoryBuildInfoClientBuilder()
-                .setArtifactoryUrl(selectedServerUrl)
+    public static ArtifactoryManagerBuilder getArtifactoryManagerBuilder(String selectedServerUrl, Map<String, String> runnerParams, BuildProgressLogger logger) {
+        ArtifactoryManagerBuilder builder = new ArtifactoryManagerBuilder()
+                .setServerUrl(selectedServerUrl)
                 .setUsername(runnerParams.get(RunnerParameterKeys.DEPLOYER_USERNAME))
                 .setPassword(runnerParams.get(RunnerParameterKeys.DEPLOYER_PASSWORD))
                 .setLog(new TeamcityAgenBuildInfoLog(logger))
