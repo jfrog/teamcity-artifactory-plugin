@@ -40,7 +40,7 @@
         <props:checkboxProperty name="org.jfrog.artifactory.selectedDeployableServer.buildRetention"
                                 onclick="BS.artifactory.toggleBuildRetentionArgsVisibility()"/>
             <span class="smallNote">
-                Check if you wish to include discard old buils.
+                Check if you wish to discard old builds.
             </span>
     </td>
 </tr>
@@ -88,7 +88,7 @@
         <props:textProperty name="org.jfrog.artifactory.selectedDeployableServer.buildRetentionBuildsToKeep"
                             className="longField"/>
         <span class="smallNote">
-                Comma or space-separated list of build numbers to be exclude during the retention procedure.
+                Comma or space-separated list of build numbers to be excluded during the retention procedure.
             </span>
     </td>
 </tr>

@@ -8,6 +8,9 @@ import jetbrains.buildServer.serverSide.SProject;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
+import org.jfrog.teamcity.api.ProxyInfo;
+import org.jfrog.teamcity.api.ServerConfigBean;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,5 +46,23 @@ public class ServerUtils {
         }
 
         return null;
+
+    public static ArtifactoryManager getArtifactoryManager(ServerConfigBean serverConfigBean,
+                                                           String username, String password) {
+        ArtifactoryManager artifactoryManager = new ArtifactoryManager(serverConfigBean.getUrl(), username, password, new TeamcityServerBuildInfoLog());
+        artifactoryManager.setConnectionTimeout(serverConfigBean.getTimeout());
+
+        ProxyInfo proxyInfo = ProxyInfo.getInfo();
+        if (proxyInfo == null) {
+            return artifactoryManager;
+        }
+        if (StringUtils.isNotBlank(proxyInfo.getUsername())) {
+            artifactoryManager.setProxyConfiguration(proxyInfo.getHost(), proxyInfo.getPort(), proxyInfo.getUsername(),
+                    proxyInfo.getPassword());
+        } else {
+            artifactoryManager.setProxyConfiguration(proxyInfo.getHost(), proxyInfo.getPort());
+        }
+
+        return artifactoryManager;
     }
 }

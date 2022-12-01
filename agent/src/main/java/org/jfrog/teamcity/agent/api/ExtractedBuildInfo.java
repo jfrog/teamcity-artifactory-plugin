@@ -16,8 +16,8 @@
 
 package org.jfrog.teamcity.agent.api;
 
-import org.jfrog.build.api.Build;
 import org.jfrog.build.client.DeployDetailsArtifact;
+import org.jfrog.build.extractor.ci.BuildInfo;
 
 import java.util.List;
 
@@ -26,15 +26,15 @@ import java.util.List;
  */
 public class ExtractedBuildInfo {
 
-    private Build buildInfo;
-    private List<DeployDetailsArtifact> deployableArtifacts;
+    private final BuildInfo buildInfo;
+    private final List<DeployDetailsArtifact> deployableArtifacts;
 
-    public ExtractedBuildInfo(Build buildInfo, List<DeployDetailsArtifact> deployableArtifacts) {
+    public ExtractedBuildInfo(BuildInfo buildInfo, List<DeployDetailsArtifact> deployableArtifacts) {
         this.buildInfo = buildInfo;
         this.deployableArtifacts = deployableArtifacts;
     }
 
-    public Build getBuildInfo() {
+    public BuildInfo getBuildInfo() {
         return buildInfo;
     }
 

@@ -5,11 +5,11 @@ import jetbrains.buildServer.agent.*;
 import jetbrains.buildServer.agent.artifacts.ArtifactsWatcher;
 import jetbrains.buildServer.parameters.ValueResolver;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.api.Build;
-import org.jfrog.build.api.BuildRetention;
-import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.builder.BuildInfoBuilder;
+import org.jfrog.build.extractor.ci.BuildInfo;
+import org.jfrog.build.extractor.ci.BuildRetention;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.teamcity.agent.listener.AgentListenerXrayScanHelper;
 import org.jfrog.teamcity.agent.util.AgentUtils;
 import org.jfrog.teamcity.agent.util.BuildInfoUtils;
@@ -33,7 +33,7 @@ public abstract class BaseArtifactoryBuildProcess implements BuildProcess, Calla
     protected ValueResolver valueResolver;
     protected AgentRunningBuild runningBuild;
     protected Map<String, String> environmentVariables;
-    protected Build buildInfo;
+    protected BuildInfo buildInfo;
     protected ArtifactsWatcher watcher;
 
     protected BaseArtifactoryBuildProcess(AgentRunningBuild runningBuild, BuildRunnerContext context, ArtifactsWatcher watcher) {
@@ -50,6 +50,7 @@ public abstract class BaseArtifactoryBuildProcess implements BuildProcess, Calla
     /**
      * Called by TeamCity IS.
      * Starts the build callable.
+     *
      * @throws RunBuildException in case of build failure.
      */
     public void start() throws RunBuildException {
@@ -65,8 +66,8 @@ public abstract class BaseArtifactoryBuildProcess implements BuildProcess, Calla
     /**
      * Runs as a single thread executor.
      * Calls the build-task execution method.
+     *
      * @return Build status at finish.
-     * @throws Exception
      */
     public BuildFinishedStatus call() throws Exception {
         // Report usage.
@@ -91,11 +92,11 @@ public abstract class BaseArtifactoryBuildProcess implements BuildProcess, Calla
             BuildInfoUtils.addBuildInfoProperties(buildInfoBuilder, runnerParameters, context);
         }
         BuildRetention retention = BuildRetentionFactory.createBuildRetention(runnerParameters, logger);
-        Build finalBuildInfo = buildInfoBuilder.build();
+        BuildInfo finalBuildInfo = buildInfoBuilder.build();
         finalBuildInfo.append(buildInfo);
         BuildInfoUtils.publishBuildInfoToTeamCityServer(runningBuild, finalBuildInfo, watcher);
         BuildInfoUtils.sendBuildAndBuildRetention(runningBuild, finalBuildInfo, retention,
-                Boolean.parseBoolean(runnerParameters.get(RunnerParameterKeys.DISCARD_OLD_BUILDS_ASYNC)), getBuildInfoPublishClient());
+                Boolean.parseBoolean(runnerParameters.get(RunnerParameterKeys.DISCARD_OLD_BUILDS_ASYNC)), getArtifactoryManager());
 
         // Perform Xray scan.
         AgentListenerXrayScanHelper xrayScanHelper = new AgentListenerXrayScanHelper();
@@ -115,7 +116,7 @@ public abstract class BaseArtifactoryBuildProcess implements BuildProcess, Calla
 
     protected abstract BuildFinishedStatus runBuild() throws Exception;
 
-    protected abstract ArtifactoryBuildInfoClient getBuildInfoPublishClient();
+    protected abstract ArtifactoryManager getArtifactoryManager();
 
     protected abstract ServerConfig getUsageServerConfig();
 

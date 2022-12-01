@@ -26,18 +26,18 @@ import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.serverSide.SBuildType;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
-import org.jfrog.teamcity.api.ProxyInfo;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.teamcity.api.ServerConfigBean;
 import org.jfrog.teamcity.common.TriggerParameterKeys;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
-import org.jfrog.teamcity.server.util.TeamcityServerBuildInfoLog;
 
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import static org.jfrog.teamcity.server.util.ServerUtils.getArtifactoryManager;
 
 /**
  * @author Noam Y. Tenne
@@ -121,11 +121,8 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
     private void triggerPolling(PolledTriggerContext context, ServerConfigBean serverConfig, String username, String password, String repoKey) {
         String triggerId = getUniqueTriggerId(context);
         boolean foundChange = false;
-        ArtifactoryBuildInfoClient client = getBuildInfoClient(serverConfig, username, password);
-        try {
-            Iterator<BuildWatchedItem> iterator = watchedItems.get(triggerId).iterator();
-            while (iterator.hasNext()) {
-                BuildWatchedItem buildWatchedItem = iterator.next();
+        try (ArtifactoryManager artifactoryManager = getArtifactoryManager(serverConfig, username, password)) {
+            for (BuildWatchedItem buildWatchedItem : watchedItems.get(triggerId)) {
                 //Preserve the user entered item path as is to keep it persistent with the map key
                 String itemPath = buildWatchedItem.getItemPath();
 
@@ -136,12 +133,12 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
 
                 String itemUrl = repoKey + "/" + formattedPath;
                 try {
-                    long itemLastModified = client.getItemLastModified(itemUrl).getLastModified();
+                    long itemLastModified = artifactoryManager.getItemLastModified(itemUrl).getLastModified();
                     if (itemValue != itemLastModified && itemValue != 0) {
                         if (itemLastModified != 0) {
                             buildWatchedItem.setItemLastModified(itemLastModified);
                             String message = String.format("Artifactory trigger has found changes on the watched " +
-                                    "item '%s' for build '%s'. Last modified time was %s and is now %s.", itemUrl,
+                                            "item '%s' for build '%s'. Last modified time was %s and is now %s.", itemUrl,
                                     triggerId, format.format(itemValue), itemLastModified);
                             Loggers.SERVER.info(message);
                             foundChange = true;
@@ -157,8 +154,6 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
                             + "' on path '" + serverConfig.getUrl() + "/" + itemUrl + "': " + e.getMessage());
                 }
             }
-        } finally {
-            client.close();
         }
 
         if (foundChange) {
@@ -172,23 +167,5 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
         String triggerId = context.getTriggerDescriptor().getId();
         String serverUrlId = context.getTriggerDescriptor().getProperties().get(TriggerParameterKeys.URL_ID);
         return context.getBuildType().getExtendedName() + ":" + triggerId + ":" + serverUrlId;
-    }
-
-    private ArtifactoryBuildInfoClient getBuildInfoClient(ServerConfigBean serverConfig, String username,
-                                                          String password) {
-        ArtifactoryBuildInfoClient infoClient = new ArtifactoryBuildInfoClient(serverConfig.getUrl(), username,
-                password, new TeamcityServerBuildInfoLog());
-        infoClient.setConnectionTimeout(serverConfig.getTimeout());
-
-        ProxyInfo proxyInfo = ProxyInfo.getInfo();
-        if (proxyInfo != null) {
-            if (StringUtils.isNotBlank(proxyInfo.getUsername())) {
-                infoClient.setProxyConfiguration(proxyInfo.getHost(), proxyInfo.getPort(), proxyInfo.getUsername(),
-                        proxyInfo.getPassword());
-            } else {
-                infoClient.setProxyConfiguration(proxyInfo.getHost(), proxyInfo.getPort());
-            }
-        }
-        return infoClient;
     }
 }

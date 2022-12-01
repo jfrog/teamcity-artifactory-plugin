@@ -1,0 +1,25 @@
+name: Tests
+on: [ push, pull_request ]
+
+jobs:
+  Artifactory-TeamCity-Plugin-Tests:
+    name: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-2019 ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: "8"
+          distribution: "temurin"
+
+      - name: Run tests
+        run: mvn -V -B -U --no-transfer-progress clean verify

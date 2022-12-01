@@ -17,8 +17,8 @@
 package org.jfrog.teamcity.agent.api;
 
 import com.google.common.collect.Lists;
-import org.jfrog.build.api.Build;
 import org.jfrog.build.client.DeployDetailsArtifact;
+import org.jfrog.build.extractor.ci.BuildInfo;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class ExtractedBuildInfoTest {
     }
 
     public void testInitWithValidValues() {
-        Build buildInfo = new Build();
+        BuildInfo buildInfo = new BuildInfo();
         List<DeployDetailsArtifact> deployableArtifacts = Lists.newArrayList();
 
         ExtractedBuildInfo extractedBuildInfo = new ExtractedBuildInfo(buildInfo, deployableArtifacts);

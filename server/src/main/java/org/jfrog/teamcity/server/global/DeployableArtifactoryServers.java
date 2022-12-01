@@ -23,9 +23,7 @@ import jetbrains.buildServer.serverSide.SProject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.build.client.ArtifactoryVersion;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
-import org.jfrog.build.util.VersionCompatibilityType;
-import org.jfrog.build.util.VersionException;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.teamcity.api.DeployableServerId;
 import org.jfrog.teamcity.api.ProxyInfo;
 import org.jfrog.teamcity.api.ServerConfigBean;
@@ -80,8 +78,8 @@ public class DeployableArtifactoryServers {
         for (ServerConfigBean serverConfig : serverConfigs) {
             if (Objects.equals(serverUrlId, serverConfig.getId())) {
                 CredentialsBean deployingCredentials = CredentialsHelper.getPreferredDeployingCredentials(serverConfig, overrideDeployerCredentials, username, password);
-                try (ArtifactoryBuildInfoClient client = getArtifactoryBuildInfoClient(deployingCredentials, serverConfig)) {
-                    return client.getLocalRepositoriesKeys();
+                try (ArtifactoryManager artifactoryManager = getArtifactoryManager(deployingCredentials, serverConfig)) {
+                    return artifactoryManager.getLocalRepositoriesKeys();
                 } catch (Exception e) {
                     logException(e);
                 }
@@ -98,10 +96,9 @@ public class DeployableArtifactoryServers {
         for (ServerConfigBean serverConfig : serverConfigs) {
             if (Objects.equals(serverUrlId, serverConfig.getId())) {
                 CredentialsBean deployingCredentials = CredentialsHelper.getPreferredDeployingCredentials(serverConfig, overrideDeployerCredentials, username, password);
-                try (ArtifactoryBuildInfoClient localRepoClient = getArtifactoryBuildInfoClient(deployingCredentials, serverConfig);
-                     ArtifactoryBuildInfoClient remoteReposClient = getArtifactoryBuildInfoClient(deployingCredentials, serverConfig)) {
-                    List<String> localRepos = localRepoClient.getLocalRepositoriesKeys();
-                    List<String> remoteRepos = remoteReposClient.getRemoteRepositoriesKeys();
+                try (ArtifactoryManager artifactoryManager = getArtifactoryManager(deployingCredentials, serverConfig)) {
+                    List<String> localRepos = artifactoryManager.getLocalRepositoriesKeys();
+                    List<String> remoteRepos = artifactoryManager.getRemoteRepositoriesKeys();
                     List<String> remoteCacheRepos = Lists.newArrayList();
                     remoteRepos.forEach((element) -> remoteCacheRepos.add(element + "-cache"));
                     return Stream.concat(localRepos.stream(), remoteCacheRepos.stream())
@@ -122,8 +119,8 @@ public class DeployableArtifactoryServers {
         for (ServerConfigBean serverConfig : serverConfigs) {
             if (Objects.equals(serverUrlId, serverConfig.getId())) {
                 CredentialsBean resolvingCredentials = CredentialsHelper.getPreferredResolvingCredentials(serverConfig, overrideDeployerCredentials, username, password);
-                try (ArtifactoryBuildInfoClient client = getArtifactoryBuildInfoClient(resolvingCredentials, serverConfig)) {
-                    return client.getVirtualRepositoryKeys();
+                try (ArtifactoryManager artifactoryManager = getArtifactoryManager(resolvingCredentials, serverConfig)) {
+                    return artifactoryManager.getVirtualRepositoriesKeys();
                 } catch (Exception e) {
                     logException(e);
                 }
@@ -132,17 +129,17 @@ public class DeployableArtifactoryServers {
         return Lists.newArrayList();
     }
 
-    private ArtifactoryBuildInfoClient getArtifactoryBuildInfoClient(CredentialsBean credentials, ServerConfigBean serverConfig) {
-        ArtifactoryBuildInfoClient client = new ArtifactoryBuildInfoClient(serverConfig.getUrl(),
+    private ArtifactoryManager getArtifactoryManager(CredentialsBean credentials, ServerConfigBean serverConfig) {
+        ArtifactoryManager artifactoryManager = new ArtifactoryManager(serverConfig.getUrl(),
                 credentials.getUsername(), credentials.getPassword(), new TeamcityServerBuildInfoLog());
-        client.setConnectionTimeout(serverConfig.getTimeout());
+        artifactoryManager.setConnectionTimeout(serverConfig.getTimeout());
 
         ProxyInfo proxyInfo = ProxyInfo.getInfo();
         if (proxyInfo != null) {
-            client.setProxyConfiguration(proxyInfo.getHost(), proxyInfo.getPort(), proxyInfo.getUsername(),
+            artifactoryManager.setProxyConfiguration(proxyInfo.getHost(), proxyInfo.getPort(), proxyInfo.getUsername(),
                     proxyInfo.getPassword());
         }
-        return client;
+        return artifactoryManager;
     }
 
     private void logException(Exception e) {
@@ -163,11 +160,9 @@ public class DeployableArtifactoryServers {
 
                 CredentialsBean deployerCredentials = CredentialsHelper.getPreferredResolvingCredentials(serverConfig,
                         overrideDeployerCredentials, username, password);
-                try (ArtifactoryBuildInfoClient client = getArtifactoryBuildInfoClient(deployerCredentials, serverConfig)) {
-                    ArtifactoryVersion version = client.verifyCompatibleArtifactoryVersion();
+                try (ArtifactoryManager artifactoryManager = getArtifactoryManager(deployerCredentials, serverConfig)) {
+                    ArtifactoryVersion version = artifactoryManager.getVersion();
                     return version.hasAddons();
-                } catch (VersionException ve) {
-                    return false;
                 } catch (Exception e) {
                     Loggers.SERVER.error("Error occurred while determining addon existence", e);
                 }
@@ -184,18 +179,11 @@ public class DeployableArtifactoryServers {
 
                 CredentialsBean deployerCredentials = CredentialsHelper.getPreferredResolvingCredentials(serverConfig,
                         overrideDeployerCredentials, username, password);
-                try (ArtifactoryBuildInfoClient client = getArtifactoryBuildInfoClient(deployerCredentials, serverConfig)) {
-                    ArtifactoryVersion serverVersion = client.verifyCompatibleArtifactoryVersion();
+                try (ArtifactoryManager artifactoryManager = getArtifactoryManager(deployerCredentials, serverConfig)) {
+                    ArtifactoryVersion serverVersion = artifactoryManager.getVersion();
                     boolean compatible = serverVersion.
                             isAtLeast(new ArtifactoryVersion(ConstantValues.MINIMAL_ARTIFACTORY_VERSION));
                     return compatible ? "true" : "false";
-                } catch (VersionException ve) {
-                    VersionCompatibilityType versionCompatibilityType = ve.getVersionCompatibilityType();
-                    if (versionCompatibilityType.equals(VersionCompatibilityType.NOT_FOUND)) {
-                        return "unknown";
-                    } else if (versionCompatibilityType.equals(VersionCompatibilityType.INCOMPATIBLE)) {
-                        return "false";
-                    }
                 } catch (Exception e) {
                     Loggers.SERVER.error("Error occurred while determining version compatibility", e);
                 }
