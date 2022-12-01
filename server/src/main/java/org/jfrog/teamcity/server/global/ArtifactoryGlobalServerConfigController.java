@@ -176,19 +176,9 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
 
         CredentialsBean resolvingCredentials = getPreferredResolvingCredentials(useDifferentResolverCredentials, defaultResolverUsername, defaultResolverPassword, defaultDeployerUsername, defaultDeployerPassword, !propBeanMode);
 
-        ArtifactoryBuildInfoClient client = new ArtifactoryBuildInfoClient(url, resolvingCredentials.getUsername(),
-                resolvingCredentials.getPassword(), new TeamcityServerBuildInfoLog());
-        client.setConnectionTimeout(Integer.parseInt(timeout));
-
-        ProxyInfo proxyInfo = ProxyInfo.getInfo();
-        if (proxyInfo != null) {
-            client.setProxyConfiguration(proxyInfo.getHost(), proxyInfo.getPort(), proxyInfo.getUsername(),
-                    proxyInfo.getPassword());
-        }
-
         try (ArtifactoryManager artifactoryManager = new ArtifactoryManager(url, resolvingCredentials.getUsername(),
                 resolvingCredentials.getPassword(), new TeamcityServerBuildInfoLog())) {
-            artifactoryManager.setConnectionTimeout(Integer.parseInt(request.getParameter("timeout")));
+            artifactoryManager.setConnectionTimeout(Integer.parseInt(timeout));
             ProxyInfo proxyInfo = ProxyInfo.getInfo();
             if (proxyInfo != null) {
                 artifactoryManager.setProxyConfiguration(proxyInfo.getHost(), proxyInfo.getPort(), proxyInfo.getUsername(),
@@ -201,6 +191,7 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
                 handleConnectionException(errors, url, ve);
             }
         }
+
         return errors;
     }
 
