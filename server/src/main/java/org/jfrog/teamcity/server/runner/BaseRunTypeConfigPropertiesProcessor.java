@@ -51,9 +51,6 @@ public class BaseRunTypeConfigPropertiesProcessor implements PropertiesProcessor
         }
 
         Collection<InvalidProperty> invalidProperties = Lists.newArrayList();
-        if (!deployableServers.isUrlIdConfigured(Long.parseLong(selectedUrl))) {
-            invalidProperties.add(new InvalidProperty(RunnerParameterKeys.URL_ID, "Selected URL isn't configured."));
-        }
 
         String targetRepo = properties.get(RunnerParameterKeys.TARGET_REPO);
         boolean useSpecs = BooleanUtils.toBoolean(properties.get(RunnerParameterKeys.USE_SPECS));

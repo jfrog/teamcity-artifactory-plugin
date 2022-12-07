@@ -1,5 +1,6 @@
 package org.jfrog.teamcity.server.runner.docker;
 
+import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
 import jetbrains.buildServer.serverSide.RunTypeRegistry;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
@@ -17,8 +18,9 @@ public class ArtifactoryDockerRunType extends BaseRunType {
     public ArtifactoryDockerRunType(@NotNull final RunTypeRegistry runTypeRegistry,
                                     @NotNull final WebControllerManager webControllerManager,
                                     @NotNull final PluginDescriptor pluginDescriptor,
-                                    @NotNull final DeployableArtifactoryServers deployableArtifactoryServers) {
-        super(webControllerManager, pluginDescriptor, deployableArtifactoryServers);
+                                    @NotNull final DeployableArtifactoryServers deployableArtifactoryServers,
+                                    @NotNull final ProjectManager projectManager) {
+        super(webControllerManager, pluginDescriptor, deployableArtifactoryServers, projectManager);
         registerView("viewArtifactoryDockerRunner.html", "docker/viewArtifactoryDockerRunner.jsp");
         registerEdit("editArtifactoryDockerRunner.html", "docker/editArtifactoryDockerRunner.jsp");
         setDisplayName("Artifactory Docker");

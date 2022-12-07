@@ -18,6 +18,8 @@ package org.jfrog.teamcity.server.global;
 
 import jetbrains.buildServer.controllers.ActionErrors;
 import jetbrains.buildServer.controllers.BaseFormXmlController;
+import jetbrains.buildServer.controllers.BasePropertiesBean;
+import jetbrains.buildServer.controllers.admin.projects.PluginPropertiesUtil;
 import jetbrains.buildServer.log.Loggers;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -34,6 +36,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static java.util.Collections.emptyMap;
+
 public class ArtifactoryGlobalServerConfigController extends BaseFormXmlController {
 
     private final ServerConfigPersistenceManager configPersistenceManager;
@@ -49,11 +53,18 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response, Element xmlResponse) {
+        boolean propBeanMode = Boolean.parseBoolean(request.getParameter("propBeanMode"));
+        BasePropertiesBean propBean = new BasePropertiesBean(emptyMap());
+        PluginPropertiesUtil.bindPropertiesFromRequest(request, propBean);
+
         boolean isEditMode = isEditMode(request);
         boolean isAddMode = isAddMode(request);
 
         if (isEditMode || isAddMode) {
-            ActionErrors errors = validate(request);
+            ActionErrors errors = validate(
+                    propBeanMode ? propBean.getProperties().get("url") : request.getParameter("url"),
+                    propBeanMode ? propBean.getProperties().get("timeout") : request.getParameter("timeout")
+            );
             if (errors.hasErrors()) {
                 errors.serialize(xmlResponse);
                 return;
@@ -61,7 +72,7 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
         }
 
         if (isTestConnectionRequest(request)) {
-            ActionErrors errors = testConnection(request);
+            ActionErrors errors = testConnection(request, propBean, propBeanMode);
             if (errors.hasErrors()) {
                 errors.serialize(xmlResponse);
             }
@@ -69,17 +80,16 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
         }
 
         if (isEditMode) {
-            long id = Long.parseLong(request.getParameter("id"));
             String url = request.getParameter("url");
 
             boolean useDifferentResolverCredentials =
                     Boolean.parseBoolean(request.getParameter("useDifferentResolverCredentials"));
             CredentialsBean defaultResolverCredentials = null;
             if (useDifferentResolverCredentials) {
-                defaultResolverCredentials = getResolverCredentialsFromRequest(request);
+                defaultResolverCredentials = getDeployerCredentialsFromRequest(request.getParameter("defaultResolverUsername"), request.getParameter("encryptedDefaultResolverPassword"), true);
             }
             int timeout = Integer.parseInt(request.getParameter("timeout"));
-            configPersistenceManager.updateObject(id, url, getDeployerCredentialsFromRequest(request),
+            configPersistenceManager.updateObject(request.getParameter("id"), url, getDeployerCredentialsFromRequest(request.getParameter("defaultDeployerUsername"), request.getParameter("encryptedDefaultDeployerPassword"), true),
                     useDifferentResolverCredentials, defaultResolverCredentials, timeout);
             configPersistenceManager.persist();
             getOrCreateMessages(request).addMessage("objectUpdated", "Artifactory server configuration was updated.");
@@ -92,27 +102,23 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
                     Boolean.parseBoolean(request.getParameter("useDifferentResolverCredentials"));
             CredentialsBean defaultResolverCredentials = null;
             if (useDifferentResolverCredentials) {
-                defaultResolverCredentials = getResolverCredentialsFromRequest(request);
+                defaultResolverCredentials = getDeployerCredentialsFromRequest(request.getParameter("defaultResolverUsername"), request.getParameter("encryptedDefaultResolverPassword"), true);
             }
             int timeout = Integer.parseInt(request.getParameter("timeout"));
-            configPersistenceManager.addServerConfiguration(url, getDeployerCredentialsFromRequest(request),
+            configPersistenceManager.addServerConfiguration(url, getDeployerCredentialsFromRequest(request.getParameter("defaultDeployerUsername"), request.getParameter("encryptedDefaultDeployerPassword"), true),
                     useDifferentResolverCredentials, defaultResolverCredentials, timeout);
             configPersistenceManager.persist();
             getOrCreateMessages(request).addMessage("objectCreated", "Artifactory server configuration was created.");
         }
 
         if (isDeleteMode(request)) {
-            long id = Long.parseLong(request.getParameter("deleteObject"));
-            configPersistenceManager.deleteObject(id);
+            configPersistenceManager.deleteObject(request.getParameter("deleteObject"));
             configPersistenceManager.persist();
             getOrCreateMessages(request).addMessage("objectDeleted", "Artifactory server configuration was deleted.");
         }
     }
 
-    private ActionErrors validate(final HttpServletRequest request) {
-        String url = request.getParameter("url");
-        String timeoutString = request.getParameter("timeout");
-
+    private ActionErrors validate(String url, String timeoutString) {
         ActionErrors errors = new ActionErrors();
         if (StringUtils.isBlank(url)) {
             errors.addError("errorUrl", "Please specify a URL of an Artifactory server.");
@@ -139,16 +145,40 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
         return errors;
     }
 
-    private ActionErrors testConnection(final HttpServletRequest request) {
+    private ActionErrors testConnection(final HttpServletRequest request, BasePropertiesBean propBean, boolean propBeanMode) {
+        String url;
+        String timeout;
+        String useDifferentResolverCredentials;
+        String defaultResolverUsername;
+        String defaultResolverPassword;
+        String defaultDeployerUsername;
+        String defaultDeployerPassword;
+
+        if (propBeanMode) {
+            url = propBean.getProperties().get("url");
+            timeout = propBean.getProperties().get("timeout");
+            useDifferentResolverCredentials = propBean.getProperties().get("useDifferentResolverCredentials");
+            defaultResolverUsername = propBean.getProperties().get("defaultResolverUsername");
+            defaultResolverPassword = propBean.getProperties().get("secure:defaultResolverPassword");
+            defaultDeployerUsername = propBean.getProperties().get("defaultDeployerUsername");
+            defaultDeployerPassword = propBean.getProperties().get("secure:defaultDeployerPassword");
+        } else {
+            url = request.getParameter("url");
+            timeout = request.getParameter("timeout");
+            useDifferentResolverCredentials = request.getParameter("useDifferentResolverCredentials");
+            defaultResolverUsername = request.getParameter("defaultResolverUsername");
+            defaultResolverPassword = request.getParameter("encryptedDefaultResolverPassword");
+            defaultDeployerUsername = request.getParameter("defaultDeployerUsername");
+            defaultDeployerPassword = request.getParameter("encryptedDefaultDeployerPassword");
+        }
+
         ActionErrors errors = new ActionErrors();
 
-        CredentialsBean resolvingCredentials = getPreferredResolvingCredentials(request);
-
-        String url = request.getParameter("url");
+        CredentialsBean resolvingCredentials = getPreferredResolvingCredentials(useDifferentResolverCredentials, defaultResolverUsername, defaultResolverPassword, defaultDeployerUsername, defaultDeployerPassword, !propBeanMode);
 
         try (ArtifactoryManager artifactoryManager = new ArtifactoryManager(url, resolvingCredentials.getUsername(),
                 resolvingCredentials.getPassword(), new TeamcityServerBuildInfoLog())) {
-            artifactoryManager.setConnectionTimeout(Integer.parseInt(request.getParameter("timeout")));
+            artifactoryManager.setConnectionTimeout(Integer.parseInt(timeout));
             ProxyInfo proxyInfo = ProxyInfo.getInfo();
             if (proxyInfo != null) {
                 artifactoryManager.setProxyConfiguration(proxyInfo.getHost(), proxyInfo.getPort(), proxyInfo.getUsername(),
@@ -161,32 +191,31 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
                 handleConnectionException(errors, url, ve);
             }
         }
+
         return errors;
     }
 
-    private CredentialsBean getPreferredResolvingCredentials(HttpServletRequest request) {
-
+    private CredentialsBean getPreferredResolvingCredentials(String useDifferentResolverCredentialsParam, String defaultResolverUsername, String encryptedDefaultResolverPassword, String defaultDeployerUsername, String encryptedDefaultDeployerPassword, boolean encrypted) {
         boolean useDifferentResolverCredentials =
-                Boolean.parseBoolean(request.getParameter("useDifferentResolverCredentials"));
+                Boolean.parseBoolean(useDifferentResolverCredentialsParam);
         if (useDifferentResolverCredentials) {
-            return getResolverCredentialsFromRequest(request);
+            return getDeployerCredentialsFromRequest(defaultResolverUsername, encryptedDefaultResolverPassword, encrypted);
         } else {
-            return getDeployerCredentialsFromRequest(request);
+            return getDeployerCredentialsFromRequest(defaultDeployerUsername, encryptedDefaultDeployerPassword, encrypted);
         }
     }
 
-    private CredentialsBean getDeployerCredentialsFromRequest(HttpServletRequest request) {
-        return getCredentialsFromRequest(request, "defaultDeployerUsername", "encryptedDefaultDeployerPassword");
+    private CredentialsBean getDeployerCredentialsFromRequest(String defaultDeployerUsername, String encryptedDefaultDeployerPassword, boolean encrypted) {
+        return getCredentialsFromRequest(defaultDeployerUsername, encryptedDefaultDeployerPassword, encrypted);
     }
 
-    private CredentialsBean getResolverCredentialsFromRequest(HttpServletRequest request) {
-        return getCredentialsFromRequest(request, "defaultResolverUsername", "encryptedDefaultResolverPassword");
-    }
-
-    private CredentialsBean getCredentialsFromRequest(HttpServletRequest request, String usernameKey,
-                                                      String passwordKey) {
-        CredentialsBean credentialsBean = new CredentialsBean(request.getParameter(usernameKey));
-        credentialsBean.setEncryptedPassword(request.getParameter(passwordKey));
+    private CredentialsBean getCredentialsFromRequest(String username, String password, boolean encrypted) {
+        CredentialsBean credentialsBean = new CredentialsBean(username);
+        if (encrypted) {
+            credentialsBean.setEncryptedPassword(password);
+        } else {
+            credentialsBean.setPassword(password);
+        }
         return credentialsBean;
     }
 

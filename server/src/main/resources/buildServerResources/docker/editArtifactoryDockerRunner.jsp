@@ -107,7 +107,7 @@
                 parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadTargetRepos=true'
                     + '&overrideDeployerCredentials=' + BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()
                     + '&username=' + $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value
-                    + '&password=' + encyptedPass,
+                    + '&password=' + encyptedPass + '&id=' + new URLSearchParams(window.location.search).get('id'),
                 onComplete: function (response, options) {
 
                     var publishRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.targetRepo');
@@ -120,7 +120,7 @@
                 parameters: 'selectedUrlId=' + selectedUrlId + '&onServerChange=true&loadResolvingRepos=true'
                     + '&overrideDeployerCredentials=' + BS.artifactory.isOverrideDefaultDeployerCredentialsSelected()
                     + '&username=' + $('org.jfrog.artifactory.selectedDeployableServer.deployerUsername').value
-                    + '&password=' + encyptedPass,
+                    + '&password=' + encyptedPass + '&id=' + new URLSearchParams(window.location.search).get('id'),
                 onComplete: function (response, options) {
 
                     var resolvingRepoSelect = $('org.jfrog.artifactory.selectedDeployableServer.resolvingRepo');

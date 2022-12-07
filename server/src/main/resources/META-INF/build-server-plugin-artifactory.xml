@@ -66,4 +66,6 @@
           class="org.jfrog.teamcity.server.project.gradle.GradleReleaseManagementTab"/>
 
     <bean id="dockerRunType" class="org.jfrog.teamcity.server.runner.docker.ArtifactoryDockerRunType"/>
+
+    <bean id="artifactoryConnection" class="org.jfrog.teamcity.server.global.ArtifactoryConnection"/>
 </beans>

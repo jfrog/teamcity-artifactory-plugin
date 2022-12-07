@@ -99,7 +99,7 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
         managementConfig.setSvnVcs(instance.getVcsName().equals("svn"));
 
         if (parameters.containsKey(RunnerParameterKeys.URL_ID)) {
-            long serverId = Long.parseLong(parameters.get(RunnerParameterKeys.URL_ID));
+            String serverId = parameters.get(RunnerParameterKeys.URL_ID);
             boolean overrideDeployerCredentials = false;
             String username = "";
             String password = "";
@@ -112,8 +112,8 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
                     password = parameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD);
                 }
             }
-            managementConfig.setSelectedArtifactoryServerHasAddons(deployableServers.serverHasAddons(serverId, overrideDeployerCredentials, username, password));
-            managementConfig.setDeployableRepoKeys(deployableServers.getServerDeployableRepos(serverId, overrideDeployerCredentials, username, password));
+            managementConfig.setSelectedArtifactoryServerHasAddons(deployableServers.serverHasAddons(serverId, overrideDeployerCredentials, username, password, buildType.getProject()));
+            managementConfig.setDeployableRepoKeys(deployableServers.getServerDeployableRepos(serverId, overrideDeployerCredentials, username, password, buildType.getProject()));
         }
 
         BranchEx checkoutBranch = getCheckoutBranches(buildType, ((BranchBean) model.get("branchBean")));

@@ -1,18 +1,21 @@
 package org.jfrog.teamcity.server.runner;
 
 import jetbrains.buildServer.controllers.BaseController;
-import jetbrains.buildServer.serverSide.RunType;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
+import org.jfrog.teamcity.server.util.ServerUtils;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
+
+import static org.jfrog.teamcity.server.util.ServerUtils.*;
 
 /**
  * Created by Bar Belity on 28/10/2020.
@@ -27,12 +30,16 @@ public abstract class BaseRunType extends RunType {
     private String editUrl;
     private String displayName;
     private String descriptor;
+    @NotNull
+    private final ProjectManager projectManager;
 
     public BaseRunType(@NotNull final WebControllerManager webControllerManager,
                        @NotNull final PluginDescriptor pluginDescriptor,
-                       @NotNull final DeployableArtifactoryServers deployableArtifactoryServers) {
+                       @NotNull final DeployableArtifactoryServers deployableArtifactoryServers,
+                       @NotNull final ProjectManager projectManager) {
         this.webControllerManager = webControllerManager;
         this.pluginDescriptor = pluginDescriptor;
+        this.projectManager = projectManager;
         // Gets the plugin version from the pluginDescriptor and sets it to the pluginVersion String in ConstantValues.
         ConstantValues.setPluginVersion(pluginDescriptor.getPluginVersion());
         this.deployableArtifactoryServers = deployableArtifactoryServers;
@@ -86,6 +93,7 @@ public abstract class BaseRunType extends RunType {
                 ModelAndView modelAndView = new ModelAndView(actualJsp);
                 modelAndView.getModel().put("controllerUrl", viewUrl);
                 modelAndView.getModel().put("deployableArtifactoryServers", deployableArtifactoryServers);
+                modelAndView.getModel().put("deployableServerIdUrlMap", deployableArtifactoryServers.getDeployableServerIdUrlMap(getProject(projectManager, request)));
                 return modelAndView;
             }
         });
@@ -95,6 +103,6 @@ public abstract class BaseRunType extends RunType {
         editUrl = pluginDescriptor.getPluginResourcesPath(url);
         String actualJsp = pluginDescriptor.getPluginResourcesPath(jsp);
         webControllerManager.registerController(editUrl,
-                new ArtifactoryRunTypeConfigController(editUrl, actualJsp, deployableArtifactoryServers));
+                new ArtifactoryRunTypeConfigController(editUrl, actualJsp, deployableArtifactoryServers, projectManager));
     }
 }

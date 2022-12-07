@@ -17,15 +17,14 @@
   --%>
 
 <jsp:useBean id="propertiesBean" scope="request" type="jetbrains.buildServer.controllers.BasePropertiesBean"/>
-<jsp:useBean id="deployableArtifactoryServers" scope="request"
-             type="org.jfrog.teamcity.server.global.DeployableArtifactoryServers"/>
+<%--@elvariable id="deployableServerIdUrlMap" type="java.util.Map<java.lang.String, java.lang.String>"--%>
 
 <div class="nestedParameter">
     Artifactory server:
     <strong>
         <c:choose>
-            <c:when test="${not empty deployableArtifactoryServers.deployableServerIdUrlMap[propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']]}">
-                ${deployableArtifactoryServers.deployableServerIdUrlMap[propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']]}
+            <c:when test="${not empty deployableServerIdUrlMap[propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']]}">
+                ${deployableServerIdUrlMap[propertiesBean.properties['org.jfrog.artifactory.selectedDeployableServer.urlId']]}
             </c:when>
             <c:otherwise>
                 Unfound server URL

@@ -75,11 +75,10 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
         Map<String, String> map = descriptor.getProperties();
 
         String serverUrlId = map.get(TriggerParameterKeys.URL_ID);
-        long urlIdToCheck = Long.parseLong(serverUrlId);
-        if (!deployableArtifactoryServers.isUrlIdConfigured(urlIdToCheck)) {
+        if (!deployableArtifactoryServers.isUrlIdConfigured(serverUrlId, context.getBuildType().getProject())) {
             return;
         }
-        ServerConfigBean serverConfigBy = deployableArtifactoryServers.getServerConfigById(urlIdToCheck);
+        ServerConfigBean serverConfigBy = deployableArtifactoryServers.getServerConfigById(serverUrlId, context.getBuildType().getProject());
         String targetRepo = map.get(TriggerParameterKeys.TARGET_REPO);
 
         String username = map.get(TriggerParameterKeys.DEPLOYER_USERNAME);
