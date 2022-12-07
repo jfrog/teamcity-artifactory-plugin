@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ArtifactoryConnection extends OAuthProvider {
+    public static final String JFROG_ARTIFACTORY_CONNECTION_TYPE = "JFrog_Artifactory";
     @NotNull
     private final PluginDescriptor pluginDescriptor;
 
@@ -27,7 +28,7 @@ public class ArtifactoryConnection extends OAuthProvider {
     @NotNull
     @Override
     public String getType() {
-        return "JFrog_Artifactory";
+        return JFROG_ARTIFACTORY_CONNECTION_TYPE;
     }
 
     @NotNull

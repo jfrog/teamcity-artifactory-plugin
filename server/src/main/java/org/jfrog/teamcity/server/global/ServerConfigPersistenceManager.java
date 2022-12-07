@@ -19,7 +19,6 @@ package org.jfrog.teamcity.server.global;
 import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.XStream;
 import jetbrains.buildServer.log.Loggers;
-import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.SProjectFeatureDescriptor;
 import jetbrains.buildServer.serverSide.ServerPaths;
@@ -153,7 +152,7 @@ public class ServerConfigPersistenceManager {
     public List<ServerConfigBean> getConfiguredServers(@Nullable final SProject project) {
         List<ServerConfigBean> configsFromProjects = project != null ? project.getAvailableFeaturesOfType("OAuthProvider")
                 .stream()
-                .filter(f -> "JFrog_Artifactory".equals(f.getParameters().get("providerType")))
+                .filter(f -> ArtifactoryConnection.JFROG_ARTIFACTORY_CONNECTION_TYPE.equals(f.getParameters().get("providerType")))
                 .map(this::toServerConfigBean)
                 .collect(Collectors.toList()) : Collections.emptyList();
 

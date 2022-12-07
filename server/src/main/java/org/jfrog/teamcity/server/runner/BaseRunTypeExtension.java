@@ -21,9 +21,9 @@ import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
+import org.jfrog.teamcity.server.util.ServerUtils;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -80,29 +80,10 @@ public abstract class BaseRunTypeExtension extends RunTypeExtension {
                 ModelAndView modelAndView = new ModelAndView(actualJsp);
                 modelAndView.getModel().put("controllerUrl", viewUrl);
                 modelAndView.getModel().put("deployableArtifactoryServers", deployableArtifactoryServers);
-                modelAndView.getModel().put("deployableServerIdUrlMap", deployableArtifactoryServers.getDeployableServerIdUrlMap(getProject(request)));
+                modelAndView.getModel().put("deployableServerIdUrlMap", deployableArtifactoryServers.getDeployableServerIdUrlMap(ServerUtils.getProject(projectManager, request)));
                 return modelAndView;
             }
         });
-    }
-
-    @Nullable
-    private SProject getProject(@NotNull final HttpServletRequest request) {
-        String id = request.getParameter("id");
-        if (id == null) {
-            return null;
-        }
-        if (id.startsWith("buildType:")) {
-            SBuildType bt = projectManager.findBuildTypeByExternalId(id.substring(10));
-            return bt != null ? bt.getProject() : null;
-        }
-
-        if (id.startsWith("template:")) {
-            BuildTypeTemplate t = projectManager.findBuildTypeTemplateByExternalId(id.substring(9));
-            return t != null ? t.getProject() : null;
-        }
-
-        return null;
     }
 
     protected void registerEdit(@NotNull final String url, @NotNull final String jsp) {
