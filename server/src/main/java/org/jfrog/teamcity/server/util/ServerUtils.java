@@ -12,6 +12,7 @@ import org.jfrog.build.extractor.clientConfiguration.client.artifactory.Artifact
 import org.jfrog.teamcity.api.ProxyInfo;
 import org.jfrog.teamcity.api.ServerConfigBean;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
+import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -24,7 +25,7 @@ public class ServerUtils {
     public static String getArtifactoryBuildName(Build build, Map<String, String> runParameters) {
         String customBuildName = runParameters.get(RunnerParameterKeys.COSTUME_BUILD_NAME);
         if (StringUtils.isNotBlank(customBuildName)) {
-            return customBuildName.trim();
+            return HtmlUtils.htmlEscape(customBuildName.trim(), "UTF-8");
         }
         return build.getBuildTypeExternalId().trim();
     }
