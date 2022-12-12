@@ -29,6 +29,7 @@ import org.jfrog.teamcity.api.ProxyInfo;
 import org.jfrog.teamcity.api.credentials.CredentialsBean;
 import org.jfrog.teamcity.server.util.TeamcityServerBuildInfoLog;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -86,10 +87,10 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
                     Boolean.parseBoolean(request.getParameter("useDifferentResolverCredentials"));
             CredentialsBean defaultResolverCredentials = null;
             if (useDifferentResolverCredentials) {
-                defaultResolverCredentials = getDeployerCredentialsFromRequest(request.getParameter("defaultResolverUsername"), request.getParameter("encryptedDefaultResolverPassword"), true);
+                defaultResolverCredentials = getDeployerCredentialsFromRequest(getEscapedParameter(request, "defaultResolverUsername"), request.getParameter("encryptedDefaultResolverPassword"), true);
             }
             int timeout = Integer.parseInt(request.getParameter("timeout"));
-            configPersistenceManager.updateObject(request.getParameter("id"), url, getDeployerCredentialsFromRequest(request.getParameter("defaultDeployerUsername"), request.getParameter("encryptedDefaultDeployerPassword"), true),
+            configPersistenceManager.updateObject(request.getParameter("id"), url, getDeployerCredentialsFromRequest(getEscapedParameter(request, "defaultDeployerUsername"), request.getParameter("encryptedDefaultDeployerPassword"), true),
                     useDifferentResolverCredentials, defaultResolverCredentials, timeout);
             configPersistenceManager.persist();
             getOrCreateMessages(request).addMessage("objectUpdated", "Artifactory server configuration was updated.");
@@ -102,10 +103,10 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
                     Boolean.parseBoolean(request.getParameter("useDifferentResolverCredentials"));
             CredentialsBean defaultResolverCredentials = null;
             if (useDifferentResolverCredentials) {
-                defaultResolverCredentials = getDeployerCredentialsFromRequest(request.getParameter("defaultResolverUsername"), request.getParameter("encryptedDefaultResolverPassword"), true);
+                defaultResolverCredentials = getDeployerCredentialsFromRequest(getEscapedParameter(request, "defaultResolverUsername"), request.getParameter("encryptedDefaultResolverPassword"), true);
             }
             int timeout = Integer.parseInt(request.getParameter("timeout"));
-            configPersistenceManager.addServerConfiguration(url, getDeployerCredentialsFromRequest(request.getParameter("defaultDeployerUsername"), request.getParameter("encryptedDefaultDeployerPassword"), true),
+            configPersistenceManager.addServerConfiguration(url, getDeployerCredentialsFromRequest(getEscapedParameter(request, "defaultDeployerUsername"), request.getParameter("encryptedDefaultDeployerPassword"), true),
                     useDifferentResolverCredentials, defaultResolverCredentials, timeout);
             configPersistenceManager.persist();
             getOrCreateMessages(request).addMessage("objectCreated", "Artifactory server configuration was created.");
@@ -166,9 +167,9 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
             url = request.getParameter("url");
             timeout = request.getParameter("timeout");
             useDifferentResolverCredentials = request.getParameter("useDifferentResolverCredentials");
-            defaultResolverUsername = request.getParameter("defaultResolverUsername");
+            defaultResolverUsername = getEscapedParameter(request, "defaultResolverUsername");
             defaultResolverPassword = request.getParameter("encryptedDefaultResolverPassword");
-            defaultDeployerUsername = request.getParameter("defaultDeployerUsername");
+            defaultDeployerUsername = getEscapedParameter(request, "defaultDeployerUsername");
             defaultDeployerPassword = request.getParameter("encryptedDefaultDeployerPassword");
         }
 
@@ -193,6 +194,14 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
         }
 
         return errors;
+    }
+
+    private String getEscapedParameter(HttpServletRequest request, String key) {
+        String value = request.getParameter(key);
+        if (StringUtils.isBlank(value)) {
+            return "";
+        }
+        return HtmlUtils.htmlEscape(value, "UTF-8");
     }
 
     private CredentialsBean getPreferredResolvingCredentials(String useDifferentResolverCredentialsParam, String defaultResolverUsername, String encryptedDefaultResolverPassword, String defaultDeployerUsername, String encryptedDefaultDeployerPassword, boolean encrypted) {
