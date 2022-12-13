@@ -53,8 +53,9 @@ public class BaseRunTypeConfigPropertiesProcessor implements PropertiesProcessor
         Collection<InvalidProperty> invalidProperties = Lists.newArrayList();
 
         String targetRepo = properties.get(RunnerParameterKeys.TARGET_REPO);
+        String targetRepoText = properties.get(RunnerParameterKeys.TARGET_REPO_TEXT);
         boolean useSpecs = BooleanUtils.toBoolean(properties.get(RunnerParameterKeys.USE_SPECS));
-        if (StringUtils.isBlank(targetRepo) && !useSpecs) {
+        if (StringUtils.isAllBlank(targetRepo, targetRepoText) && !useSpecs) {
             invalidProperties.add(new InvalidProperty(RunnerParameterKeys.TARGET_REPO,
                     "Please select a target repository. If the repository list is empty, make sure the specified " +
                             "Artifactory server URL is valid."));
@@ -70,7 +71,7 @@ public class BaseRunTypeConfigPropertiesProcessor implements PropertiesProcessor
     }
 
     private void validatePublishedAndBuildDependencies(Collection<InvalidProperty> invalidProperties,
-            String publishedAndBuildDependencies) {
+                                                       String publishedAndBuildDependencies) {
         Multimap<String, String> pairs = PublishedItemsHelper.getPublishedItemsPatternPairs(
                 publishedAndBuildDependencies);
         for (Map.Entry<String, String> patternEntry : pairs.entries()) {
