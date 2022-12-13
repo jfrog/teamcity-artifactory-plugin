@@ -79,9 +79,9 @@ public class DeployableArtifactoryServers {
             if (Objects.equals(serverUrlId, serverConfig.getId())) {
                 CredentialsBean deployingCredentials = CredentialsHelper.getPreferredDeployingCredentials(serverConfig, overrideDeployerCredentials, username, password);
                 try (ArtifactoryManager artifactoryManager = getArtifactoryManager(deployingCredentials, serverConfig)) {
-                    List<String> localRepositories = artifactoryManager.getLocalRepositoriesKeys();
-                    localRepositories.addAll(artifactoryManager.getFederatedRepositoriesKeys());
-                    return localRepositories;
+                    List<String> deployableRepos = artifactoryManager.getLocalRepositoriesKeys();
+                    deployableRepos.addAll(artifactoryManager.getFederatedRepositoriesKeys());
+                    return deployableRepos;
                 } catch (Exception e) {
                     logException(e);
                 }
