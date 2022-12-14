@@ -35,8 +35,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <plugin.version>${project.version}</plugin.version>
         <teamcity.version>2017.1</teamcity.version>
-        <build.info.version>2.37.3</build.info.version>
-        <build.info.gradle.version>4.29.3</build.info.gradle.version>
+        <build.info.version>2.38.0</build.info.version>
+        <build.info.gradle.version>4.30.0</build.info.gradle.version>
     </properties>
 
     <developers>
@@ -226,6 +226,12 @@
                 <groupId>org.jfrog.buildinfo</groupId>
                 <artifactId>build-info-extractor-maven3</artifactId>
                 <version>${build.info.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-all</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.jfrog.buildinfo</groupId>

@@ -32,11 +32,11 @@ import org.jfrog.teamcity.api.credentials.CredentialsHelper;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.server.util.TeamcityServerBuildInfoLog;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author Noam Y. Tenne
@@ -79,7 +79,9 @@ public class DeployableArtifactoryServers {
             if (Objects.equals(serverUrlId, serverConfig.getId())) {
                 CredentialsBean deployingCredentials = CredentialsHelper.getPreferredDeployingCredentials(serverConfig, overrideDeployerCredentials, username, password);
                 try (ArtifactoryManager artifactoryManager = getArtifactoryManager(deployingCredentials, serverConfig)) {
-                    return artifactoryManager.getLocalRepositoriesKeys();
+                    List<String> deployableRepos = artifactoryManager.getLocalRepositoriesKeys();
+                    deployableRepos.addAll(artifactoryManager.getFederatedRepositoriesKeys());
+                    return deployableRepos;
                 } catch (Exception e) {
                     logException(e);
                 }
@@ -97,12 +99,12 @@ public class DeployableArtifactoryServers {
             if (Objects.equals(serverUrlId, serverConfig.getId())) {
                 CredentialsBean deployingCredentials = CredentialsHelper.getPreferredDeployingCredentials(serverConfig, overrideDeployerCredentials, username, password);
                 try (ArtifactoryManager artifactoryManager = getArtifactoryManager(deployingCredentials, serverConfig)) {
-                    List<String> localRepos = artifactoryManager.getLocalRepositoriesKeys();
-                    List<String> remoteRepos = artifactoryManager.getRemoteRepositoriesKeys();
-                    List<String> remoteCacheRepos = Lists.newArrayList();
-                    remoteRepos.forEach((element) -> remoteCacheRepos.add(element + "-cache"));
-                    return Stream.concat(localRepos.stream(), remoteCacheRepos.stream())
-                            .collect(Collectors.toList());
+                    List<String> allRepos = new ArrayList<>();
+                    allRepos.addAll(artifactoryManager.getLocalRepositoriesKeys());
+                    allRepos.addAll(artifactoryManager.getFederatedRepositoriesKeys());
+                    allRepos.addAll(artifactoryManager.getRemoteRepositoriesKeys().stream()
+                            .map(repoKey -> repoKey + "-cache").collect(Collectors.toList()));
+                    return allRepos;
                 } catch (Exception e) {
                     logException(e);
                 }
