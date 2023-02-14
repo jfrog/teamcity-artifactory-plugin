@@ -166,6 +166,6 @@ public class ArtifactoryPolledBuildTrigger extends PolledBuildTrigger {
     private String getUniqueTriggerId(PolledTriggerContext context) {
         String triggerId = context.getTriggerDescriptor().getId();
         String serverUrlId = context.getTriggerDescriptor().getProperties().get(TriggerParameterKeys.URL_ID);
-        return context.getBuildType().getFullName() + ":" + triggerId + ":" + serverUrlId;
+        return context.getBuildType().getFullName() + ":" + triggerId + ":" + serverUrlId; 
     }
 }
