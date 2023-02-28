@@ -81,7 +81,7 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
         }
 
         if (isEditMode) {
-            String url = request.getParameter("url");
+            String url = getEscapedParameter(request, "url");
 
             boolean useDifferentResolverCredentials =
                     Boolean.parseBoolean(request.getParameter("useDifferentResolverCredentials"));
@@ -97,7 +97,7 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
         }
 
         if (isAddMode) {
-            String url = request.getParameter("url");
+            String url = getEscapedParameter(request, "url");
 
             boolean useDifferentResolverCredentials =
                     Boolean.parseBoolean(request.getParameter("useDifferentResolverCredentials"));
@@ -164,7 +164,7 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
             defaultDeployerUsername = propBean.getProperties().get("defaultDeployerUsername");
             defaultDeployerPassword = propBean.getProperties().get("secure:defaultDeployerPassword");
         } else {
-            url = request.getParameter("url");
+            url = getEscapedParameter(request, "url");
             timeout = request.getParameter("timeout");
             useDifferentResolverCredentials = request.getParameter("useDifferentResolverCredentials");
             defaultResolverUsername = getEscapedParameter(request, "defaultResolverUsername");
