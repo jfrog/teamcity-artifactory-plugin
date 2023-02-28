@@ -61,7 +61,7 @@ pipelines:
             - git tag ${NEXT_VERSION}
 
             # Run audit
-            - jf audit --fail=false
+            - jf audit
 
             # Run install and publish
             - >
@@ -69,7 +69,7 @@ pipelines:
               JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
               JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
               JFROG_CLI_BUILD_PROJECT=$JFROG_CLI_BUILD_PROJECT
-              jf rt mvn clean install -U -B
+              jf mvn clean install -U -B
             - jf rt u --flat=true target/teamcity-artifactory-plugin-$NEXT_VERSION.zip ecosys-oss-release-local/org/jfrog/teamcity/teamcity-artifactory-plugin/$NEXT_VERSION/
             - jf rt bag && jf rt bce
             - jf rt bp
