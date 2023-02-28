@@ -1,3 +1,13 @@
+## 2.10.1 (Februar 28, 2023)
+- Improve input validation of Artifactory URL - https://github.com/jfrog/teamcity-artifactory-plugin/pull/134
+
+## 2.10.0 (December 16, 2022)
+- Adding support of Connections to set up Artifactory URL - https://github.com/jfrog/teamcity-artifactory-plugin/pull/115
+- Improve input validation in the Artifactory server configuration - https://github.com/jfrog/teamcity-artifactory-plugin/pull/130
+- Fix non-empty repository verification in free text mode - https://github.com/jfrog/teamcity-artifactory-plugin/pull/128
+- Support federated repositories - https://github.com/jfrog/teamcity-artifactory-plugin/pull/129
+- Update build-info to 2.38.1 / 4.30.1
+
 ## 2.9.5 (November 28, 2022) 
 - Bug fix - Wrong build-info URL in Artifactory 7 - https://github.com/jfrog/teamcity-artifactory-plugin/pull/124
 
