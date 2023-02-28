@@ -38,7 +38,7 @@ pipelines:
               --repo-deploy-releases ecosys-oss-release-local --repo-deploy-snapshots ecosys-oss-snapshot-local
 
             # Run audit
-            - jf audit --fail=false
+            - jf audit
 
             # Delete former snapshots to make sure the release bundle will not contain the same artifacts
             - jf rt del "ecosys-oss-snapshot-local/org/jfrog/teamcity/teamcity-artifactory-plugin/*" --quiet
@@ -49,7 +49,7 @@ pipelines:
               JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
               JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
               JFROG_CLI_BUILD_PROJECT=$JFROG_CLI_BUILD_PROJECT
-              jf rt mvn install -U -B
+              jf mvn install -U -B
             - jf rt bag
             - jf rt bp
 
