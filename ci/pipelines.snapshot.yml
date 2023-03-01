@@ -54,13 +54,13 @@ pipelines:
             - jf rt bp
 
             # Distribute release bundle
-            - jf ds rbc teamcity-artifactory-plugin $run_number --spec=./ci/specs/dev-rbc-filespec.json --sign
-            - jf ds rbd teamcity-artifactory-plugin $run_number --site="releases.jfrog.io" --sync
+            - jf ds rbc ecosystem-teamcity-artifactory-plugin-snapshot $run_number --spec=./ci/specs/dev-rbc-filespec.json --sign
+            - jf ds rbd ecosystem-teamcity-artifactory-plugin-snapshot $run_number --site="releases.jfrog.io" --sync
 
           onComplete:
             # Show tests in the *Tests* tab
             - save_tests $res_teamcitySnapshotGit_resourcePath/agent/target/surefire-reports/junitreports
             - save_tests $res_teamcitySnapshotGit_resourcePath/server/target/surefire-reports/junitreports
- 
+
             # Save .m2 cache
             - add_cache_files ${HOME}/.m2 m2_home

@@ -75,8 +75,8 @@ pipelines:
             - jf rt bp
 
             # Distribute release bundle
-            - jf ds rbc teamcity-artifactory-plugin $NEXT_VERSION --spec=./ci/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
-            - jf ds rbd teamcity-artifactory-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
+            - jf ds rbc ecosystem-teamcity-artifactory-plugin $NEXT_VERSION --spec=./ci/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
+            - jf ds rbd ecosystem-teamcity-artifactory-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
 
             # Upload to Jetbrains marketplace
             - curl -i --header "Authorization:Bearer $int_jetbrains_token" -F pluginId=9082 -F file=@target/teamcity-artifactory-plugin-$NEXT_VERSION.zip https://plugins.jetbrains.com/plugin/uploadPlugin
