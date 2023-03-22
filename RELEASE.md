@@ -1,3 +1,7 @@
+## 2.10.2 (March 22, 2023)
+-  Improve input validation of fields in Project's Artifactory connection - https://github.com/jfrog/teamcity-artifactory-plugin/pull/138
+-  Bug fix - Triggers are not always unique https://github.com/jfrog/teamcity-artifactory-plugin/pull/133
+
 ## 2.10.1 (Februar 28, 2023)
 - Improve input validation of Artifactory URL - https://github.com/jfrog/teamcity-artifactory-plugin/pull/134
 
