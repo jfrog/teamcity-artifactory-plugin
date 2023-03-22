@@ -63,7 +63,7 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
 
         if (isEditMode || isAddMode) {
             ActionErrors errors = validate(
-                    propBeanMode ? propBean.getProperties().get("url") : request.getParameter("url"),
+                    propBeanMode ? getEscapedProperty(propBean, "url") : getEscapedParameter(request, "url"),
                     propBeanMode ? propBean.getProperties().get("timeout") : request.getParameter("timeout")
             );
             if (errors.hasErrors()) {
@@ -156,12 +156,12 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
         String defaultDeployerPassword;
 
         if (propBeanMode) {
-            url = propBean.getProperties().get("url");
+            url = getEscapedProperty(propBean, "url");
             timeout = propBean.getProperties().get("timeout");
             useDifferentResolverCredentials = propBean.getProperties().get("useDifferentResolverCredentials");
-            defaultResolverUsername = propBean.getProperties().get("defaultResolverUsername");
+            defaultResolverUsername = getEscapedProperty(propBean, "defaultResolverUsername");
             defaultResolverPassword = propBean.getProperties().get("secure:defaultResolverPassword");
-            defaultDeployerUsername = propBean.getProperties().get("defaultDeployerUsername");
+            defaultDeployerUsername = getEscapedProperty(propBean, "defaultDeployerUsername");
             defaultDeployerPassword = propBean.getProperties().get("secure:defaultDeployerPassword");
         } else {
             url = getEscapedParameter(request, "url");
@@ -197,7 +197,14 @@ public class ArtifactoryGlobalServerConfigController extends BaseFormXmlControll
     }
 
     private String getEscapedParameter(HttpServletRequest request, String key) {
-        String value = request.getParameter(key);
+        return escapeIfNotEmpty(request.getParameter(key));
+    }
+
+    private String getEscapedProperty(BasePropertiesBean propBean, String key) {
+        return escapeIfNotEmpty(propBean.getProperties().get(key));
+    }
+
+    private String escapeIfNotEmpty(String value) {
         if (StringUtils.isBlank(value)) {
             return "";
         }
