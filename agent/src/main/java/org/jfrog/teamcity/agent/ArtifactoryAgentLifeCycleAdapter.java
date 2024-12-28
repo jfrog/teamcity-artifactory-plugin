@@ -29,7 +29,7 @@ public class ArtifactoryAgentLifeCycleAdapter extends AgentLifeCycleAdapter {
         String artifactoryUrl = StringUtils.removeEnd(runner.getRunnerParameters().get(RunnerParameterKeys.URL), "/");
         String buildInfoUrl;
         if (StringUtils.endsWith(artifactoryUrl, "/artifactory")) {
-            buildInfoUrl = createBuildInfoUrl(StringUtils.removeEnd(artifactoryUrl, "/artifactory"), (String)runner.getRunnerParameters().get("org.jfrog.artifactory.build.name"), runner.getBuild().getBuildNumber(), (String)runner.getRunnerParameters().get("org.jfrog.artifactory.build.timestamp"));
+            buildInfoUrl = createBuildInfoUrl(StringUtils.removeEnd(artifactoryUrl, "/artifactory"), (String)runner.getRunnerParameters().get(BUILD_NAME), runner.getBuild().getBuildNumber(), (String)runner.getRunnerParameters().get("org.jfrog.artifactory.build.timestamp"));
         } else {
             // Without the platform URL it would work only on Artifactory 6
             buildInfoUrl = BuildInfoExtractorUtils.createBuildInfoUrl(artifactoryUrl, runner.getRunnerParameters().get(BUILD_NAME),
