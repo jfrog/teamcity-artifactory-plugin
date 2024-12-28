@@ -25,19 +25,22 @@ public class ArtifactoryAgentLifeCycleAdapter extends AgentLifeCycleAdapter {
         }
     }
 
-    private static void addBuildInfoUrlParam(BuildRunnerContext runner) {
+   private static void addBuildInfoUrlParam(BuildRunnerContext runner) {
         String artifactoryUrl = StringUtils.removeEnd(runner.getRunnerParameters().get(RunnerParameterKeys.URL), "/");
-
         String buildInfoUrl;
         if (StringUtils.endsWith(artifactoryUrl, "/artifactory")) {
-            // Here we can deduce the platform URL
-            buildInfoUrl = BuildInfoExtractorUtils.createBuildInfoUrl(StringUtils.removeEnd(artifactoryUrl, "/artifactory"),
-                    runner.getRunnerParameters().get(BUILD_NAME), runner.getBuild().getBuildNumber(), "", "", false, true);
+            buildInfoUrl = createBuildInfoUrl(StringUtils.removeEnd(artifactoryUrl, "/artifactory"), (String)runner.getRunnerParameters().get(BUILD_NAME), runner.getBuild().getBuildNumber(), (String)runner.getRunnerParameters().get("org.jfrog.artifactory.build.timestamp"));
         } else {
             // Without the platform URL it would work only on Artifactory 6
             buildInfoUrl = BuildInfoExtractorUtils.createBuildInfoUrl(artifactoryUrl, runner.getRunnerParameters().get(BUILD_NAME),
                     runner.getBuild().getBuildNumber(), "", "", false, false);
         }
+
         runner.getBuild().addSharedSystemProperty(BUILD_URL + "." + runner.getBuild().getBuildId() + "." + runner.getId(), buildInfoUrl);
-    }
+   }
+
+   private static String createBuildInfoUrl(String platformUrl, String buildName, String buildNumber, String timeStamp) {
+        String timestampUrlPart = StringUtils.isBlank(timeStamp) ? "" : "/" + timeStamp;
+        return String.format("%s/%s/%s%s/%s", platformUrl + "/ui/builds", buildName, buildNumber, timestampUrlPart, "published");
+   }
 }
