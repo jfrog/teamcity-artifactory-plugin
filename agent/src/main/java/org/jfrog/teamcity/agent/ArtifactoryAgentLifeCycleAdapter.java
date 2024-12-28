@@ -26,15 +26,17 @@ public class ArtifactoryAgentLifeCycleAdapter extends AgentLifeCycleAdapter {
     }
 
    private static void addBuildInfoUrlParam(BuildRunnerContext runner) {
-        String artifactoryUrl = StringUtils.removeEnd((String)runner.getRunnerParameters().get("org.jfrog.artifactory.selectedDeployableServer.url"), "/");
+        String artifactoryUrl = StringUtils.removeEnd(runner.getRunnerParameters().get(RunnerParameterKeys.URL), "/");
         String buildInfoUrl;
         if (StringUtils.endsWith(artifactoryUrl, "/artifactory")) {
             buildInfoUrl = createBuildInfoUrl(StringUtils.removeEnd(artifactoryUrl, "/artifactory"), (String)runner.getRunnerParameters().get("org.jfrog.artifactory.build.name"), runner.getBuild().getBuildNumber(), (String)runner.getRunnerParameters().get("org.jfrog.artifactory.build.timestamp"));
         } else {
-            buildInfoUrl = BuildInfoExtractorUtils.createBuildInfoUrl(artifactoryUrl, (String)runner.getRunnerParameters().get("org.jfrog.artifactory.build.name"), runner.getBuild().getBuildNumber(), "", "", false, false);
+            // Without the platform URL it would work only on Artifactory 6
+            buildInfoUrl = BuildInfoExtractorUtils.createBuildInfoUrl(artifactoryUrl, runner.getRunnerParameters().get(BUILD_NAME),
+                    runner.getBuild().getBuildNumber(), "", "", false, false);
         }
 
-        runner.getBuild().addSharedSystemProperty("org.jfrog.artifactory.build.url." + runner.getBuild().getBuildId() + "." + runner.getId(), buildInfoUrl);
+        runner.getBuild().addSharedSystemProperty(BUILD_URL + "." + runner.getBuild().getBuildId() + "." + runner.getId(), buildInfoUrl);
    }
 
    private static String createBuildInfoUrl(String platformUrl, String buildName, String buildNumber, String timeStamp) {
