@@ -23,6 +23,7 @@ pipelines:
             - name: il_automation
             - name: ecosys_entplus_deployer
             - name: jetbrains
+            - name: docker_jfrog_io_reader
         execution:
           onStart:
             - restore_cache_files m2_home ${HOME}/.m2
