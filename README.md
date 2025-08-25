@@ -14,7 +14,7 @@ The plugin integrates TeamCity and JFrog Artifactory to publish, resolve, promot
 ## Using TeamCity Artifactory plugin
 
 To learn how to use the TeamCity Artifactory plugin, please visit
-the [TeamCity Artifactory Plugin documentation](http://wiki.jfrog.org/confluence/display/RTF/TeamCity+Artifactory+Plug-in).
+the [TeamCity Artifactory Plugin documentation](https://jfrog.com/help/r/jfrog-integrations-documentation/teamcity-artifactory-plug-in).
 
 ## Release Notes
 
