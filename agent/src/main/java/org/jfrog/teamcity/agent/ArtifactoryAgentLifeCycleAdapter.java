@@ -4,10 +4,8 @@ import jetbrains.buildServer.agent.AgentLifeCycleAdapter;
 import jetbrains.buildServer.agent.BuildFinishedStatus;
 import jetbrains.buildServer.agent.BuildRunnerContext;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import java.net.URLEncoder;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 import org.jfrog.teamcity.common.ConstantValues;
 import jetbrains.buildServer.agent.BuildProgressLogger;
@@ -36,22 +34,21 @@ public class ArtifactoryAgentLifeCycleAdapter extends AgentLifeCycleAdapter {
 
    private static void addBuildInfoUrlParam(BuildRunnerContext runner) {
         String configuredUrl = StringUtils.removeEnd(runner.getRunnerParameters().get(RunnerParameterKeys.URL), "/");
-        String buildName = (String) runner.getRunnerParameters().get(BUILD_NAME);
+        String buildName =  runner.getRunnerParameters().get(BUILD_NAME);
         String buildNumber = runner.getBuild().getBuildNumber();
-        String timeStamp = (String) runner.getRunnerParameters().get(ConstantValues.PROP_BUILD_TIMESTAMP);
+        String timeStamp = runner.getRunnerParameters().getOrDefault(ConstantValues.PROP_BUILD_TIMESTAMP, "");
 
-        boolean isV7OrAbove = isArtifactoryV7OrAbove(runner, configuredUrl);
+        boolean isRTAtleastV7 = isArtifactoryAtleastV7(runner, configuredUrl);
         
         // Log build parameters for debugging
         runner.getBuild().getBuildLogger().message(String.format(
             "Artifactory Build Info Parameters - Build Name: '%s', Build Number: '%s', Timestamp: '%s', Is V7 Or Above: %s",
-            buildName, buildNumber, timeStamp != null ? timeStamp : "null", isV7OrAbove
+            buildName, buildNumber, timeStamp, isRTAtleastV7
         ));
         
         String buildInfoUrl;
-        if (isV7OrAbove) {
-            String platformBaseUrl = StringUtils.endsWith(configuredUrl, "/artifactory") ?
-                    StringUtils.removeEnd(configuredUrl, "/artifactory") : configuredUrl;
+        if (isRTAtleastV7) {
+            String platformBaseUrl = StringUtils.removeEnd(configuredUrl, "/artifactory");
             buildInfoUrl = createPlatformBuildInfoUrl(platformBaseUrl, buildName, buildNumber, timeStamp);
         } else {
             String serviceBaseUrl = StringUtils.endsWith(configuredUrl, "/artifactory") ?
@@ -64,7 +61,7 @@ public class ArtifactoryAgentLifeCycleAdapter extends AgentLifeCycleAdapter {
         runner.getBuild().getBuildLogger().message("Artifactory Build Info URL: " + buildInfoUrl);
    }
 
-   private static boolean isArtifactoryV7OrAbove(BuildRunnerContext runner, String selectedServerUrl) {
+   private static boolean isArtifactoryAtleastV7(BuildRunnerContext runner, String selectedServerUrl) {
         BuildProgressLogger logger = runner.getBuild().getBuildLogger();
         try {
             ArtifactoryManagerBuilder builder = BuildInfoUtils.getArtifactoryManagerBuilder(selectedServerUrl, runner.getRunnerParameters(), logger);
