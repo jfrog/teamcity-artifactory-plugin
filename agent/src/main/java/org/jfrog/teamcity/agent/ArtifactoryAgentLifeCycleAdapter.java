@@ -49,7 +49,7 @@ public class ArtifactoryAgentLifeCycleAdapter extends AgentLifeCycleAdapter {
         String buildInfoUrl;
         if (isRTAtleastV7) {
             String platformBaseUrl = StringUtils.removeEnd(configuredUrl, "/artifactory");
-            buildInfoUrl = createPlatformBuildInfoUrl(platformBaseUrl, buildName, buildNumber, timeStamp);
+            buildInfoUrl = createNewPlatformBuildInfoUrl(platformBaseUrl, buildName, buildNumber, timeStamp);
         } else {
             String serviceBaseUrl = StringUtils.endsWith(configuredUrl, "/artifactory") ?
                     configuredUrl : configuredUrl + "/artifactory";
@@ -75,7 +75,7 @@ public class ArtifactoryAgentLifeCycleAdapter extends AgentLifeCycleAdapter {
         }
    }
 
-   private static String createPlatformBuildInfoUrl(String platformUrl, String buildName, String buildNumber, String timeStamp) {
+   private static String createNewPlatformBuildInfoUrl(String platformUrl, String buildName, String buildNumber, String timeStamp) {
         String encodedName = UrlUtils.encodeUrlPathPart(buildName);
         String encodedNumber = UrlUtils.encodeUrlPathPart(buildNumber);
         String timestampUrlPart = StringUtils.isBlank(timeStamp) ? "" : "/" + (timeStamp);
