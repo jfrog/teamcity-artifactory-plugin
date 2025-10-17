@@ -636,10 +636,11 @@
                 <artifactId>spring-web</artifactId>
                 <version>5.3.39</version>
             </dependency>
+            <!-- Upgrade to 6+ version -->
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-webmvc</artifactId>
-                <version>5.3.39</version>
+                <version>5.2.25.RELEASE</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
