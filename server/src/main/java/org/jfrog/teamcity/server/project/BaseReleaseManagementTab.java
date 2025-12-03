@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

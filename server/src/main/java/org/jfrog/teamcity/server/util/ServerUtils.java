@@ -14,7 +14,7 @@ import org.jfrog.teamcity.api.ServerConfigBean;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 import org.springframework.web.util.HtmlUtils;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**

@@ -29,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.CustomDataStorageKeys;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 

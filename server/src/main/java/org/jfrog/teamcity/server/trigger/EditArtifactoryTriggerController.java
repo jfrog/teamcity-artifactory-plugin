@@ -21,15 +21,15 @@ import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.crypt.RSACipher;
 import org.apache.commons.lang3.StringUtils;
-import org.jdom2.Element;
+import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
 import org.jfrog.teamcity.server.util.ServerUtils;
 import org.springframework.web.servlet.ModelAndView;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**

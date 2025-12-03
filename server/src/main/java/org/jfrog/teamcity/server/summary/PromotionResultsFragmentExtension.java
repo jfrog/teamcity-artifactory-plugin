@@ -30,7 +30,7 @@ import org.jfrog.teamcity.common.ConstantValues;
 import org.jfrog.teamcity.common.ReleaseManagementParameterKeys;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**

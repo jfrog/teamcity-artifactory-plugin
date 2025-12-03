@@ -11,8 +11,8 @@ import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
 import org.jfrog.teamcity.server.util.ServerUtils;
 import org.springframework.web.servlet.ModelAndView;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 import static org.jfrog.teamcity.server.util.ServerUtils.*;

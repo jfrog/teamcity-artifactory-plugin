@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jfrog.teamcity.common.ReleaseManagementParameterKeys;
 import org.jfrog.teamcity.server.project.BaseReleaseManagementController;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
