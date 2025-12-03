@@ -628,27 +628,42 @@
             </dependency>
             <!--
                 ===================================================================================
-                SPRING FRAMEWORK VERSION LIMITATION - TEAMCITY COMPATIBILITY CONSTRAINT
+                SPRING FRAMEWORK VERSION LIMITATION - CANNOT UPGRADE
                 ===================================================================================
                 
-                Spring Framework 5.3.39 and Spring Security 5.8.16 are used to match
-                what TeamCity provides at runtime.
+                Spring Framework 5.3.39 and Spring Security 5.8.16 are the LATEST PUBLICLY 
+                AVAILABLE versions. We cannot upgrade further due to TWO constraints:
                 
-                WHY WE CANNOT UPGRADE TO SPRING 6.x:
-                - TeamCity (even version 2025.11) bundles Spring 5.3.x and javax.servlet internally
-                - Spring 6.x requires Jakarta EE namespace (jakarta.*) instead of Java EE (javax.*)
+                CONSTRAINT 1: SPRING 5.3.x END-OF-LIFE (Open Source)
+                ─────────────────────────────────────────────────────
+                - Spring Framework 5.3.x OSS support ENDED on August 31, 2024
+                - Version 5.3.39 is the LAST publicly available release on Maven Central
+                - Versions 5.3.40+ (including 5.3.42 with CVE fixes) are ONLY available 
+                  through VMware/Broadcom commercial support agreements (not public)
+                - Same applies to Spring Security 5.8.x (5.8.16 is last public release)
+                
+                CONSTRAINT 2: TEAMCITY COMPATIBILITY
+                ────────────────────────────────────
+                - TeamCity (even version 2025.11) bundles Spring 5.3.x and javax.servlet
+                - Spring 6.x requires Jakarta EE namespace (jakarta.*) instead of (javax.*)
                 - Plugins MUST be compatible with what TeamCity provides at runtime
                 - Using Spring 6.x would cause ClassNotFoundException at runtime
                 
-                UNFIXABLE CVEs (require Spring 6.x or versions not yet released):
+                UNFIXABLE CVEs (require Spring 6.x or commercial-only 5.3.40+ versions):
+                ─────────────────────────────────────────────────────────────────────────
+                - CVE-2024-38828 (spring-webmvc) - Fixed in 5.3.42 (commercial only)
+                - CVE-2025-22228 (spring-security-crypto) - Fixed in 5.8.18 (commercial only)
                 - CVE-2025-41242, CVE-2024-38820, CVE-2025-22233, CVE-2016-1000027
-                - CVE-2025-41249, CVE-2024-38819, CVE-2024-38816, CVE-2024-38828
-                - CVE-2025-41232, CVE-2025-41248 (Spring Security 6.x)
+                - CVE-2025-41249, CVE-2024-38819, CVE-2024-38816
+                - CVE-2025-41232, CVE-2025-41248 (Spring Security 6.x only)
                 
-                These CVEs are marked "Not Applicable" by contextual security analysis.
+                These CVEs are marked "Not Applicable" by JFrog contextual security analysis.
                 
-                Resolution: JetBrains must migrate TeamCity to Spring 6.x / Jakarta EE
-                before plugins can upgrade. Track: https://youtrack.jetbrains.com/issues/TW
+                RESOLUTION OPTIONS:
+                ───────────────────
+                1. Wait for JetBrains to migrate TeamCity to Spring 6.x / Jakarta EE
+                   Track: https://youtrack.jetbrains.com/issues/TW
+                2. Purchase VMware/Broadcom Spring commercial support for 5.3.40+ patches
                 ===================================================================================
             -->
             <dependency>
