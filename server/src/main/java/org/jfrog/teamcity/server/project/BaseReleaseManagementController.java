@@ -9,13 +9,13 @@ import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.vcs.VcsRootInstance;
 import jetbrains.buildServer.web.util.SessionUser;
 import org.apache.commons.lang3.StringUtils;
-import org.jdom.Element;
+import org.jdom2.Element;
 import org.jfrog.teamcity.common.CustomDataStorageKeys;
 import org.jfrog.teamcity.common.ReleaseManagementParameterKeys;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 

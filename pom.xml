@@ -156,6 +156,10 @@
                 <artifactId>snakeyaml</artifactId>
                 <version>2.3</version>
             </dependency>
+            <!--
+                svnkit 1.10.11 and sqljet 1.1.15 - Low severity vulnerabilities with no fixed versions.
+                These are the latest available versions from TMate Software.
+            -->
             <dependency>
                 <groupId>org.tmatesoft.svnkit</groupId>
                 <artifactId>svnkit</artifactId>
@@ -187,10 +191,11 @@
                 <artifactId>jose4j</artifactId>
                 <version>0.9.4</version>
             </dependency>
+            <!-- Jakarta Servlet API 6.0 for Spring 6.x compatibility -->
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>3.1.0</version>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>6.0.0</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -198,12 +203,11 @@
                 <artifactId>httpclient</artifactId>
                 <version>4.5.13</version>
             </dependency>
-            <!-- jdom is provided by TeamCity - cannot upgrade due to package name change (org.jdom vs org.jdom2) -->
+            <!-- jdom2 2.0.6.1 - fixes CVE-2021-33813 -->
             <dependency>
                 <groupId>org.jdom</groupId>
-                <artifactId>jdom</artifactId>
-                <version>1.1</version>
-                <scope>provided</scope>
+                <artifactId>jdom2</artifactId>
+                <version>2.0.6.1</version>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains.teamcity.internal</groupId>
@@ -226,6 +230,10 @@
                     <exclusion>
                         <groupId>commons-httpclient</groupId>
                         <artifactId>commons-httpclient</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jdom</groupId>
+                        <artifactId>jdom</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -251,6 +259,10 @@
                         <groupId>commons-httpclient</groupId>
                         <artifactId>commons-httpclient</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.jdom</groupId>
+                        <artifactId>jdom</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -274,6 +286,10 @@
                     <exclusion>
                         <groupId>commons-httpclient</groupId>
                         <artifactId>commons-httpclient</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jdom</groupId>
+                        <artifactId>jdom</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -299,6 +315,11 @@
                         <groupId>commons-httpclient</groupId>
                         <artifactId>commons-httpclient</artifactId>
                     </exclusion>
+                    <!-- Exclude vulnerable jdom, use jdom2 instead (CVE-2021-33813) -->
+                    <exclusion>
+                        <groupId>org.jdom</groupId>
+                        <artifactId>jdom</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -323,6 +344,10 @@
                         <groupId>commons-httpclient</groupId>
                         <artifactId>commons-httpclient</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.jdom</groupId>
+                        <artifactId>jdom</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -346,6 +371,10 @@
                     <exclusion>
                         <groupId>commons-httpclient</groupId>
                         <artifactId>commons-httpclient</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jdom</groupId>
+                        <artifactId>jdom</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -467,6 +496,11 @@
                     <exclusion>
                         <groupId>dom4j</groupId>
                         <artifactId>dom4j</artifactId>
+                    </exclusion>
+                    <!-- Exclude vulnerable jdom 2.0.2, use jdom2 2.0.6.1 instead (CVE-2021-33813) -->
+                    <exclusion>
+                        <groupId>org.jdom</groupId>
+                        <artifactId>jdom</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -615,58 +649,61 @@
                 <artifactId>owasp-java-html-sanitizer</artifactId>
                 <version>20211018.1</version>
             </dependency>
-            <!-- Force use of latest secure Spring versions (5.x for javax compatibility) -->
+            <!--
+                Spring Framework 6.2.11 - Fixes all Spring CVEs:
+                CVE-2024-38828, CVE-2025-41242, CVE-2024-38820, CVE-2025-22233,
+                CVE-2016-1000027, CVE-2025-41249, CVE-2024-38819, CVE-2024-38816
+            -->
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-core</artifactId>
-                <version>5.3.39</version>
+                <version>6.2.11</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-beans</artifactId>
-                <version>5.3.39</version>
+                <version>6.2.11</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-context</artifactId>
-                <version>5.3.39</version>
+                <version>6.2.11</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-web</artifactId>
-                <version>5.3.39</version>
+                <version>6.2.11</version>
             </dependency>
-            <!-- Upgrade to 6+ version -->
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-webmvc</artifactId>
-                <version>5.2.25.RELEASE</version>
+                <version>6.2.11</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-expression</artifactId>
-                <version>5.3.39</version>
+                <version>6.2.11</version>
             </dependency>
-            <!-- Spring Security 5.8.16 is latest 5.x (5.8.18 doesn't exist yet - CVE fix pending) -->
+            <!-- Spring Security 6.4.10 - fixes CVE-2025-41232, CVE-2025-41248 -->
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-core</artifactId>
-                <version>5.8.16</version>
+                <version>6.4.10</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-web</artifactId>
-                <version>5.8.16</version>
+                <version>6.4.10</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-config</artifactId>
-                <version>5.8.16</version>
+                <version>6.4.10</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-crypto</artifactId>
-                <version>5.8.16</version>
+                <version>6.4.10</version>
             </dependency>
             <!-- Add safer logging alternative -->
             <dependency>

@@ -1,0 +1,30 @@
+
+Vulnerable Dependencies
+┌─────┬──────────┬───────────────────────────┬─────────────────┬───────────────────────────┬───────────┬──────────┬───────┐
+│ CVE │ SEVERITY │ DIRECT                    │ DIRECT          │ AFFECTED                  │ AFFECTED  │ FIXED    │ TYPE  │
+│     │          │ DEPENDENCY                │ DEPENDENCY      │ COMPONENT                 │ COMPONENT │ VERSIONS │       │
+│     │          │                           │ VERSION         │ NAME                      │ VERSION   │          │       │
+├─────┼──────────┼───────────────────────────┼─────────────────┼───────────────────────────┼───────────┼──────────┼───────┤
+│     │ Low      │ org.jfrog.teamcity:teamci │ 2.11.x-SNAPSHOT │ org.tmatesoft.sqljet:sqlj │ 1.1.15    │          │ Maven │
+│     │          │ ty-artifactory-plugin-age │                 │ et                        │           │          │       │
+│     │          │ nt                        │                 │                           │           │          │       │
+├─────┼──────────┼───────────────────────────┼─────────────────┼───────────────────────────┼───────────┼──────────┼───────┤
+│     │ Low      │ org.jfrog.teamcity:teamci │ 2.11.x-SNAPSHOT │ org.tmatesoft.svnkit:svnk │ 1.10.11   │          │ Maven │
+│     │          │ ty-artifactory-plugin-age │                 │ it                        │           │          │       │
+│     │          │ nt                        │                 │                           │           │          │       │
+└─────┴──────────┴───────────────────────────┴─────────────────┴───────────────────────────┴───────────┴──────────┴───────┘
+
+Secrets Detection
++-------------------------+
+|  No secrets were found  |
++-------------------------+
+
+Infrastructure as Code Vulnerabilities
++--------------------------------------------------------+
+|  No Infrastructure as Code vulnerabilities were found  |
++--------------------------------------------------------+
+
+Static Application Security Testing (SAST)
++---------------------------------------------------------------------+
+|  No Static Application Security Testing vulnerabilities were found  |
++---------------------------------------------------------------------+
