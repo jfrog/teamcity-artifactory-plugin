@@ -4,14 +4,15 @@ on:
   # Run on pull requests to master
   pull_request:
     branches: [master]
-  # Allow manual trigger
-  workflow_dispatch:
+    types: [labeled]
+  
   # Run daily at 6 AM UTC
   schedule:
     - cron: "0 6 * * *"
 
 jobs:
   jf-audit:
+    if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'safe to test')
     name: JFrog Security Audit
     runs-on: ubuntu-latest
     steps:
