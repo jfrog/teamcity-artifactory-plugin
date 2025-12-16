@@ -176,8 +176,8 @@ public class GitCoordinator extends AbstractVcsCoordinator {
         try {
             git.deleteLocalBranch(branch);
         } catch (Exception e) {
-            debuggingLogger.log(Level.FINE, "Failed to delete release branch: ", e);
-            log("Failed to delete release branch: " + e.getLocalizedMessage());
+            debuggingLogger.log(Level.FINE, "Failed to delete release branch: " + sanitizeExceptionMessage(e));
+            log("Failed to delete release branch '" + branch + "'. Check debug logs for details.");
         }
     }
 
@@ -185,8 +185,8 @@ public class GitCoordinator extends AbstractVcsCoordinator {
         try {
             git.deleteRemoteBranch(remoteRepository, branch);
         } catch (Exception e) {
-            debuggingLogger.log(Level.FINE, "Failed to delete remote release branch: ", e);
-            log("Failed to delete remote release branch: " + e.getLocalizedMessage());
+            debuggingLogger.log(Level.FINE, "Failed to delete remote release branch: " + sanitizeExceptionMessage(e));
+            log("Failed to delete remote release branch '" + branch + "'. Check debug logs for details.");
         }
     }
 
@@ -194,18 +194,17 @@ public class GitCoordinator extends AbstractVcsCoordinator {
         try {
             git.deleteLocalTag(tag);
         } catch (Exception e) {
-            debuggingLogger.log(Level.FINE, "Failed to delete tag: ", e);
-            log("Failed to delete tag: " + e.getLocalizedMessage());
+            debuggingLogger.log(Level.FINE, "Failed to delete tag: " + sanitizeExceptionMessage(e));
+            log("Failed to delete tag '" + tag + "'. Check debug logs for details.");
         }
     }
 
     private void safeDeleteRemoteTag(String remoteRepository, String tag) {
         try {
-
             git.deleteRemoteTag(remoteRepository, tag);
         } catch (Exception e) {
-            debuggingLogger.log(Level.FINE, "Failed to delete remote tag: ", e);
-            log("Failed to delete remote tag: " + e.getLocalizedMessage());
+            debuggingLogger.log(Level.FINE, "Failed to delete remote tag: " + sanitizeExceptionMessage(e));
+            log("Failed to delete remote tag '" + tag + "'. Check debug logs for details.");
         }
     }
 
@@ -213,9 +212,21 @@ public class GitCoordinator extends AbstractVcsCoordinator {
         try {
             git.revertWorkingCopy(baseCommitIsh);
         } catch (Exception e) {
-            debuggingLogger.log(Level.FINE, "Failed to revert working copy: ", e);
-            log("Failed to revert working copy: " + e.getLocalizedMessage());
+            debuggingLogger.log(Level.FINE, "Failed to revert working copy: " + sanitizeExceptionMessage(e));
+            log("Failed to revert working copy. Check debug logs for details.");
         }
+    }
+
+    /**
+     * Sanitizes exception message to avoid exposing internal code structure.
+     * Returns only the exception type and message without stack trace details.
+     */
+    private String sanitizeExceptionMessage(Exception e) {
+        String message = e.getMessage();
+        if (message == null || message.isEmpty()) {
+            return e.getClass().getSimpleName();
+        }
+        return e.getClass().getSimpleName() + ": " + message;
     }
 
     private String getPushUrl() {

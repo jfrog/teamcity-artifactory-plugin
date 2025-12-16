@@ -156,6 +156,10 @@
                 <artifactId>snakeyaml</artifactId>
                 <version>2.3</version>
             </dependency>
+            <!--
+                svnkit 1.10.11 and sqljet 1.1.15 - Low severity vulnerabilities with no fixed versions.
+                These are the latest available versions from TMate Software.
+            -->
             <dependency>
                 <groupId>org.tmatesoft.svnkit</groupId>
                 <artifactId>svnkit</artifactId>
@@ -187,10 +191,11 @@
                 <artifactId>jose4j</artifactId>
                 <version>0.9.4</version>
             </dependency>
+            <!-- javax.servlet API - required for TeamCity compatibility -->
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
-                <version>3.1.0</version>
+                <version>4.0.1</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -198,11 +203,17 @@
                 <artifactId>httpclient</artifactId>
                 <version>4.5.13</version>
             </dependency>
-            <!-- jdom is provided by TeamCity - cannot upgrade due to package name change (org.jdom vs org.jdom2) -->
+            <!--
+                JDOM VERSION LIMITATION - TEAMCITY COMPATIBILITY CONSTRAINT
+                
+                TeamCity provides org.jdom:jdom at runtime (not jdom2).
+                CVE-2021-33813 requires jdom2 (org.jdom2 package) which is incompatible.
+                This CVE is marked "Not Applicable" by contextual security analysis.
+            -->
             <dependency>
                 <groupId>org.jdom</groupId>
                 <artifactId>jdom</artifactId>
-                <version>1.1</version>
+                <version>1.1.3</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -615,7 +626,46 @@
                 <artifactId>owasp-java-html-sanitizer</artifactId>
                 <version>20211018.1</version>
             </dependency>
-            <!-- Force use of latest secure Spring versions (5.x for javax compatibility) -->
+            <!--
+                ===================================================================================
+                SPRING FRAMEWORK VERSION LIMITATION - CANNOT UPGRADE
+                ===================================================================================
+                
+                Spring Framework 5.3.39 and Spring Security 5.8.16 are the LATEST PUBLICLY 
+                AVAILABLE versions. We cannot upgrade further due to TWO constraints:
+                
+                CONSTRAINT 1: SPRING 5.3.x END-OF-LIFE (Open Source)
+                ─────────────────────────────────────────────────────
+                - Spring Framework 5.3.x OSS support ENDED on August 31, 2024
+                - Version 5.3.39 is the LAST publicly available release on Maven Central
+                - Versions 5.3.40+ (including 5.3.42 with CVE fixes) are ONLY available 
+                  through VMware/Broadcom commercial support agreements (not public)
+                - Same applies to Spring Security 5.8.x (5.8.16 is last public release)
+                
+                CONSTRAINT 2: TEAMCITY COMPATIBILITY
+                ────────────────────────────────────
+                - TeamCity (even version 2025.11) bundles Spring 5.3.x and javax.servlet
+                - Spring 6.x requires Jakarta EE namespace (jakarta.*) instead of (javax.*)
+                - Plugins MUST be compatible with what TeamCity provides at runtime
+                - Using Spring 6.x would cause ClassNotFoundException at runtime
+                
+                UNFIXABLE CVEs (require Spring 6.x or commercial-only 5.3.40+ versions):
+                ─────────────────────────────────────────────────────────────────────────
+                - CVE-2024-38828 (spring-webmvc) - Fixed in 5.3.42 (commercial only)
+                - CVE-2025-22228 (spring-security-crypto) - Fixed in 5.8.18 (commercial only)
+                - CVE-2025-41242, CVE-2024-38820, CVE-2025-22233, CVE-2016-1000027
+                - CVE-2025-41249, CVE-2024-38819, CVE-2024-38816
+                - CVE-2025-41232, CVE-2025-41248 (Spring Security 6.x only)
+                
+                These CVEs are marked "Not Applicable" by JFrog contextual security analysis.
+                
+                RESOLUTION OPTIONS:
+                ───────────────────
+                1. Wait for JetBrains to migrate TeamCity to Spring 6.x / Jakarta EE
+                   Track: https://youtrack.jetbrains.com/issues/TW
+                2. Purchase VMware/Broadcom Spring commercial support for 5.3.40+ patches
+                ===================================================================================
+            -->
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-core</artifactId>
@@ -636,18 +686,17 @@
                 <artifactId>spring-web</artifactId>
                 <version>5.3.39</version>
             </dependency>
-            <!-- Upgrade to 6+ version -->
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-webmvc</artifactId>
-                <version>5.2.25.RELEASE</version>
+                <version>5.3.39</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-expression</artifactId>
                 <version>5.3.39</version>
             </dependency>
-            <!-- Spring Security 5.8.16 is latest 5.x (5.8.18 doesn't exist yet - CVE fix pending) -->
+            <!-- Spring Security 5.8.16 - latest available 5.x release -->
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-core</artifactId>
