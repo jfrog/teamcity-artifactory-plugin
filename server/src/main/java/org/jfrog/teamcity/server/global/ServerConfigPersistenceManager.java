@@ -18,6 +18,7 @@ package org.jfrog.teamcity.server.global;
 
 import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.XStreamException;
 import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.SProjectFeatureDescriptor;
@@ -60,6 +61,7 @@ public class ServerConfigPersistenceManager {
         xStream = new XStream();
         xStream.setClassLoader(SerializableServers.class.getClassLoader());
         xStream.processAnnotations(new Class[]{SerializableServer.class, SerializableServers.class});
+        xStream.allowTypes(new Class[]{SerializableServers.class, SerializableServer.class, SerializableCredentials.class});
 
         configFile = new File(serverPaths.getConfigDir(), CONFIG_FILE_NAME);
         loadSettings();
@@ -121,7 +123,7 @@ public class ServerConfigPersistenceManager {
                         } catch (NumberFormatException ignored) {}
                     }
                 }
-            } catch (FileNotFoundException e) {
+            } catch (XStreamException | FileNotFoundException e) {
                 Loggers.SERVER.error("Failed to load Artifactory config file: " + configFile, e);
             } finally {
                 IOUtils.closeQuietly(inputStream);
@@ -228,7 +230,7 @@ public class ServerConfigPersistenceManager {
                 configs.addConfiguredServer(serializableServer);
             }
             xStream.toXML(configs, outputStream);
-        } catch (FileNotFoundException e) {
+        } catch (XStreamException | FileNotFoundException e) {
             Loggers.SERVER.error("Failed to save Artifactory config file: " + configFile, e);
         } finally {
             IOUtils.closeQuietly(outputStream);
