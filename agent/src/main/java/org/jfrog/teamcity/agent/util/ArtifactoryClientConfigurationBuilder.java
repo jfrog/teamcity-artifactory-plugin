@@ -10,6 +10,7 @@ import jetbrains.buildServer.agent.impl.BuildRunnerContextImpl;
 import jetbrains.buildServer.parameters.ValueResolver;
 import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.extractor.BuildInfoExtractorUtils;
+import org.jfrog.teamcity.agent.util.TeamcityAgenBuildInfoLog;
 import org.jfrog.build.extractor.ci.BuildInfoFields;
 import org.jfrog.build.extractor.ci.BuildRetention;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryClientConfiguration;
@@ -200,7 +201,8 @@ public abstract class ArtifactoryClientConfigurationBuilder {
     private static void addMatrixParamProperties(BuildRunnerContext runnerContext,
                                                  ArtifactoryClientConfiguration clientConf) {
         Properties fileAndSystemProperties =
-                BuildInfoExtractorUtils.mergePropertiesWithSystemAndPropertyFile(new Properties());
+                BuildInfoExtractorUtils.mergePropertiesWithSystemAndPropertyFile(new Properties(),
+                        new TeamcityAgenBuildInfoLog(runnerContext.getBuild().getBuildLogger()));
         Properties filteredMatrixParams = BuildInfoExtractorUtils
                 .filterDynamicProperties(fileAndSystemProperties, BuildInfoExtractorUtils.MATRIX_PARAM_PREDICATE);
         Enumeration<Object> propertyKeys = filteredMatrixParams.keys();
