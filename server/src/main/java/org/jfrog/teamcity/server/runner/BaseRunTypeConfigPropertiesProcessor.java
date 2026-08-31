@@ -17,11 +17,11 @@
 package org.jfrog.teamcity.server.runner;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jfrog.build.api.multiMap.Multimap;
 import org.jfrog.build.extractor.clientConfiguration.util.PublishedItemsHelper;
 import org.jfrog.teamcity.common.RunnerParameterKeys;
 import org.jfrog.teamcity.server.global.DeployableArtifactoryServers;
