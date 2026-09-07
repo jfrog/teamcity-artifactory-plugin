@@ -1,0 +1,136 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      next_version:
+        description: "Version to release (e.g. 5.1.0)"
+        required: true
+        type: string
+      next_development_version:
+        description: "Next development version (e.g. 5.1.x-SNAPSHOT)"
+        required: true
+        type: string
+      audit_fail:
+        description: "Fail the run if jf audit finds issues"
+        required: false
+        type: boolean
+        default: false
+
+env:
+  CI: true
+  JFROG_CLI_BUILD_NAME: teamcity-artifactory-plugin
+  JFROG_CLI_BUILD_NUMBER: ${{ github.run_number }}
+  JFROG_CLI_BUILD_PROJECT: ecosys
+  NEXT_VERSION: ${{ inputs.next_version }}
+  NEXT_DEVELOPMENT_VERSION: ${{ inputs.next_development_version }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.IL_AUTOMATION_TOKEN }}
+
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-
+
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v4
+        env:
+          JF_URL: ${{ secrets.ARTIFACTORY_URL }}
+          JF_USER: ${{ secrets.ARTIFACTORY_USER }}
+          JF_PASSWORD: ${{ secrets.ARTIFACTORY_APIKEY }}
+
+      - name: Configure git identity
+        run: |
+          git config user.name "jfrog-ecosystem-automation"
+          git config user.email "eco-system@jfrog.com"
+
+      - name: Checkout release branch
+        run: |
+          git fetch origin release
+          git checkout release
+
+      # Make sure versions were provided
+      - name: Check variables
+        run: |
+          test -n "$NEXT_VERSION"
+          test -n "$NEXT_DEVELOPMENT_VERSION"
+
+      - name: Configure JFrog CLI Maven config
+        run: |
+          jf mvnc \
+            --repo-resolve-releases ecosys-teamcity-repos --repo-resolve-snapshots ecosys-teamcity-repos \
+            --repo-deploy-releases ecosys-oss-release-local --repo-deploy-snapshots ecosys-oss-snapshot-local
+
+      - name: Sync changes with master
+        run: git merge origin/master
+
+      - name: Update version
+        run: mvn versions:set -DnewVersion="${NEXT_VERSION}" -B
+
+      - name: Commit and tag release version
+        run: |
+          git commit -am "[artifactory-release] Release version ${NEXT_VERSION} [skipRun]" --allow-empty
+          git tag "${NEXT_VERSION}"
+
+      - name: Run audit
+        run: jf audit --fail=${{ inputs.audit_fail }}
+
+      - name: Build and publish
+        run: jf mvn clean install -U -B
+
+      - name: Upload release zip
+        run: |
+          jf rt u --flat=true "target/teamcity-artifactory-plugin-${NEXT_VERSION}.zip" \
+            "ecosys-oss-release-local/org/jfrog/teamcity/teamcity-artifactory-plugin/${NEXT_VERSION}/"
+
+      - name: Publish build info
+        run: |
+          jf rt bag
+          jf rt bce
+          jf rt bp
+
+      - name: Distribute release bundle
+        run: |
+          jf ds rbc ecosystem-teamcity-artifactory-plugin "$NEXT_VERSION" --spec=./ci/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
+          jf ds rbd ecosystem-teamcity-artifactory-plugin "$NEXT_VERSION" --site="releases.jfrog.io" --sync
+
+      # Deliberate behavior change: JetBrains Marketplace upload, ported as-is from the
+      # JFrog Pipelines step (Bearer token sourced from the `jetbrains` integration).
+      - name: Upload to JetBrains Marketplace
+        run: |
+          curl -i --header "Authorization:Bearer ${{ secrets.JETBRAINS_TOKEN }}" \
+            -F pluginId=9082 \
+            -F file=@"target/teamcity-artifactory-plugin-${NEXT_VERSION}.zip" \
+            https://plugins.jetbrains.com/plugin/uploadPlugin
+
+      - name: Update next development version
+        run: mvn versions:set -DnewVersion="${NEXT_DEVELOPMENT_VERSION}" -B
+
+      - name: Commit next development version
+        run: |
+          git commit -am "[artifactory-release] Next development version [skipRun]"
+          git push origin release
+
+      - name: Merge changes to master
+        run: |
+          git checkout master
+          git merge origin/release
+          git push origin master
+          git push origin --tags

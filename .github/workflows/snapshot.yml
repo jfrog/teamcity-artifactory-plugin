@@ -1,0 +1,67 @@
+name: Snapshot
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch: {}
+
+env:
+  CI: true
+  JFROG_CLI_BUILD_NAME: teamcity-artifactory-plugin
+  JFROG_CLI_BUILD_NUMBER: ${{ github.run_number }}
+  JFROG_CLI_BUILD_PROJECT: ecosys
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-
+
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v4
+        env:
+          JF_URL: ${{ secrets.ARTIFACTORY_URL }}
+          JF_USER: ${{ secrets.ARTIFACTORY_USER }}
+          JF_PASSWORD: ${{ secrets.ARTIFACTORY_APIKEY }}
+
+      - name: Configure JFrog CLI Maven config
+        run: |
+          jf mvnc \
+            --repo-resolve-releases ecosys-teamcity-repos --repo-resolve-snapshots ecosys-teamcity-repos \
+            --repo-deploy-releases ecosys-oss-release-local --repo-deploy-snapshots ecosys-oss-snapshot-local
+
+      - name: Run audit
+        run: jf audit
+
+      # Delete former snapshots to make sure the release bundle will not contain stale artifacts
+      - name: Delete previous snapshots
+        run: jf rt del "ecosys-oss-snapshot-local/org/jfrog/teamcity/teamcity-artifactory-plugin/*" --quiet
+
+      - name: Build and publish
+        run: jf mvn install -U -B
+
+      - name: Publish build info
+        run: |
+          jf rt bag
+          jf rt bp
+
+      - name: Distribute release bundle
+        run: |
+          jf ds rbc ecosystem-teamcity-artifactory-plugin-snapshot "${{ github.run_number }}" --spec=./ci/specs/dev-rbc-filespec.json --sign
+          jf ds rbd ecosystem-teamcity-artifactory-plugin-snapshot "${{ github.run_number }}" --site="releases.jfrog.io" --sync
