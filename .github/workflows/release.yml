@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      next_version:
+        description: "Version to release (e.g. 5.1.0)"
+        required: true
+        type: string
+      next_development_version:
+        description: "Next development version (e.g. 5.1.x-SNAPSHOT)"
+        required: true
+        type: string
+      audit_fail:
+        description: "Fail the run if jf audit finds issues"
+        required: false
+        type: boolean
+        default: false
+
+env:
+  CI: true
+  JFROG_CLI_BUILD_NAME: teamcity-artifactory-plugin
+  JFROG_CLI_BUILD_NUMBER: ${{ github.run_number }}
+  JFROG_CLI_BUILD_PROJECT: ecosys
+  NEXT_VERSION: ${{ inputs.next_version }}
+  NEXT_DEVELOPMENT_VERSION: ${{ inputs.next_development_version }}
+  AUDIT_FAIL: ${{ inputs.audit_fail }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.IL_AUTOMATION_TOKEN }}
+
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-
+
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v4
+        env:
+          JF_URL: ${{ secrets.ARTIFACTORY_URL }}
+          JF_USER: ${{ secrets.ARTIFACTORY_USER }}
+          JF_PASSWORD: ${{ secrets.ARTIFACTORY_APIKEY }}
+
+      - name: Run release
+        env:
+          JETBRAINS_TOKEN: ${{ secrets.JETBRAINS_TOKEN }}
+        run: .github/scripts/release.sh
