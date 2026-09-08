@@ -24,6 +24,7 @@ env:
   JFROG_CLI_BUILD_PROJECT: ecosys
   NEXT_VERSION: ${{ inputs.next_version }}
   NEXT_DEVELOPMENT_VERSION: ${{ inputs.next_development_version }}
+  AUDIT_FAIL: ${{ inputs.audit_fail }}
 
 jobs:
   release:
@@ -56,81 +57,7 @@ jobs:
           JF_USER: ${{ secrets.ARTIFACTORY_USER }}
           JF_PASSWORD: ${{ secrets.ARTIFACTORY_APIKEY }}
 
-      - name: Configure git identity
-        run: |
-          git config user.name "jfrog-ecosystem-automation"
-          git config user.email "eco-system@jfrog.com"
-
-      - name: Checkout release branch
-        run: |
-          git fetch origin release
-          git checkout release
-
-      # Make sure versions were provided
-      - name: Check variables
-        run: |
-          test -n "$NEXT_VERSION"
-          test -n "$NEXT_DEVELOPMENT_VERSION"
-
-      - name: Configure JFrog CLI Maven config
-        run: |
-          jf mvnc \
-            --repo-resolve-releases ecosys-teamcity-repos --repo-resolve-snapshots ecosys-teamcity-repos \
-            --repo-deploy-releases ecosys-oss-release-local --repo-deploy-snapshots ecosys-oss-snapshot-local
-
-      - name: Sync changes with master
-        run: git merge origin/master
-
-      - name: Update version
-        run: mvn versions:set -DnewVersion="${NEXT_VERSION}" -B
-
-      - name: Commit and tag release version
-        run: |
-          git commit -am "[artifactory-release] Release version ${NEXT_VERSION} [skipRun]" --allow-empty
-          git tag "${NEXT_VERSION}"
-
-      - name: Run audit
-        run: jf audit --fail=${{ inputs.audit_fail }}
-
-      - name: Build and publish
-        run: jf mvn clean install -U -B
-
-      - name: Upload release zip
-        run: |
-          jf rt u --flat=true "target/teamcity-artifactory-plugin-${NEXT_VERSION}.zip" \
-            "ecosys-oss-release-local/org/jfrog/teamcity/teamcity-artifactory-plugin/${NEXT_VERSION}/"
-
-      - name: Publish build info
-        run: |
-          jf rt bag
-          jf rt bce
-          jf rt bp
-
-      - name: Distribute release bundle
-        run: |
-          jf ds rbc ecosystem-teamcity-artifactory-plugin "$NEXT_VERSION" --spec=./ci/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
-          jf ds rbd ecosystem-teamcity-artifactory-plugin "$NEXT_VERSION" --site="releases.jfrog.io" --sync
-
-      # Deliberate behavior change: JetBrains Marketplace upload, ported as-is from the
-      # JFrog Pipelines step (Bearer token sourced from the `jetbrains` integration).
-      - name: Upload to JetBrains Marketplace
-        run: |
-          curl -i --header "Authorization:Bearer ${{ secrets.JETBRAINS_TOKEN }}" \
-            -F pluginId=9082 \
-            -F file=@"target/teamcity-artifactory-plugin-${NEXT_VERSION}.zip" \
-            https://plugins.jetbrains.com/plugin/uploadPlugin
-
-      - name: Update next development version
-        run: mvn versions:set -DnewVersion="${NEXT_DEVELOPMENT_VERSION}" -B
-
-      - name: Commit next development version
-        run: |
-          git commit -am "[artifactory-release] Next development version [skipRun]"
-          git push origin release
-
-      - name: Merge changes to master
-        run: |
-          git checkout master
-          git merge origin/release
-          git push origin master
-          git push origin --tags
+      - name: Run release
+        env:
+          JETBRAINS_TOKEN: ${{ secrets.JETBRAINS_TOKEN }}
+        run: .github/scripts/release.sh

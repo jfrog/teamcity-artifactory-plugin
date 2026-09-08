@@ -40,28 +40,5 @@ jobs:
           JF_USER: ${{ secrets.ARTIFACTORY_USER }}
           JF_PASSWORD: ${{ secrets.ARTIFACTORY_APIKEY }}
 
-      - name: Configure JFrog CLI Maven config
-        run: |
-          jf mvnc \
-            --repo-resolve-releases ecosys-teamcity-repos --repo-resolve-snapshots ecosys-teamcity-repos \
-            --repo-deploy-releases ecosys-oss-release-local --repo-deploy-snapshots ecosys-oss-snapshot-local
-
-      - name: Run audit
-        run: jf audit
-
-      # Delete former snapshots to make sure the release bundle will not contain stale artifacts
-      - name: Delete previous snapshots
-        run: jf rt del "ecosys-oss-snapshot-local/org/jfrog/teamcity/teamcity-artifactory-plugin/*" --quiet
-
-      - name: Build and publish
-        run: jf mvn install -U -B
-
-      - name: Publish build info
-        run: |
-          jf rt bag
-          jf rt bp
-
-      - name: Distribute release bundle
-        run: |
-          jf ds rbc ecosystem-teamcity-artifactory-plugin-snapshot "${{ github.run_number }}" --spec=./ci/specs/dev-rbc-filespec.json --sign
-          jf ds rbd ecosystem-teamcity-artifactory-plugin-snapshot "${{ github.run_number }}" --site="releases.jfrog.io" --sync
+      - name: Run snapshot
+        run: .github/scripts/snapshot.sh
