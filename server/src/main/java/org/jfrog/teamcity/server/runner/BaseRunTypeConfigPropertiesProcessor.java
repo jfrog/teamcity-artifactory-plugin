@@ -17,7 +17,7 @@
 package org.jfrog.teamcity.server.runner;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
+import org.jfrog.build.api.multiMap.Multimap;
 import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
 import org.apache.commons.lang3.BooleanUtils;

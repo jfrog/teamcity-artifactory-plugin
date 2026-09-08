@@ -1,7 +1,6 @@
 package org.jfrog.teamcity.agent.docker;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimaps;
+import org.jfrog.build.api.multiMap.ListMultimap;
 import jetbrains.buildServer.agent.AgentRunningBuild;
 import jetbrains.buildServer.agent.BuildFinishedStatus;
 import jetbrains.buildServer.agent.BuildRunnerContext;
@@ -78,7 +77,7 @@ public class ArtifactoryDockerBuildProcess extends BaseArtifactoryBuildProcess {
         String password = runnerParameters.get(RunnerParameterKeys.DEPLOYER_PASSWORD);
 
         return new DockerPush(buildInfoClientBuilder, imageName, host,
-                ArrayListMultimap.create(Multimaps.forMap(BuildInfoUtils.getCommonArtifactPropertiesMap(runnerParameters, context))),
+                new ListMultimap<>(BuildInfoUtils.getCommonArtifactPropertiesMap(runnerParameters, context)),
                 targetRepo, userName, password, buildInfoLog, environmentVariables).execute();
     }
 
