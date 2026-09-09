@@ -64,7 +64,7 @@ public class AgentUtils {
         UsageReporter usageReporter = new UsageReporter("teamcity-artifactory-plugin/" + pluginVersion, featureIdArray);
         try {
             usageReporter.reportUsage(serverConfig.getUrl(), serverConfig.getUsername(), serverConfig.getPassword(),
-                    "", getProxyConfiguration(runnerParameters), log);
+                    "", getProxyConfiguration(runnerParameters), null /* SSLContext: null == use default context */, log);
             log.info("Usage info sent successfully.");
         } catch (Exception ex) {
             log.info("Failed sending usage report to Artifactory: " + ex);

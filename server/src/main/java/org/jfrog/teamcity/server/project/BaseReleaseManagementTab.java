@@ -140,7 +140,7 @@ public abstract class BaseReleaseManagementTab extends BuildTypeTab {
             ArrayList<BranchEx> branchExes = Lists.newArrayList();
             BranchEx branch;
             //If the user is on the __all_branches__ view, take the default branch
-            if (branchBean.isWildcardBranch()) {
+            if (branchBean.isAllBranches()) {
                 branch = ((BuildTypeEx) buildType).getBranch("<default>");
             } else {
                 String userBranch = branchBean.getUserBranch();
