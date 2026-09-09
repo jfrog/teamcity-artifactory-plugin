@@ -37,7 +37,9 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Guards the "non-negotiable": the Build-Info JSON produced by the bundled JFrog build-info
@@ -51,8 +53,15 @@ import static org.testng.Assert.assertNotNull;
  * timestamp formatting, etc.) fails the build.
  * <p>
  * Note on the 2.38.1 -> 2.43.9 upgrade specifically: 2.43.9 adds an {@code originalDeploymentRepo}
- * field to {@code Artifact}. Because the client serializes with {@code @JsonInclude(NON_NULL)},
- * the new field is omitted when unset and the output remains byte-identical - which this test proves.
+ * field to {@code Artifact}. Two things are covered here:
+ * <ul>
+ *   <li>{@link #buildInfoJsonIsByteEquivalentToGolden()} proves that when the field is unset it is
+ *       omitted (the client serializes with {@code @JsonInclude(NON_NULL)}), so the output stays
+ *       byte-identical to the 2.38.1 golden file.</li>
+ *   <li>{@link #originalDeploymentRepoSerializesWhenSet()} proves that when the field <i>is</i> set
+ *       it serializes under the expected {@code originalDeploymentRepo} key with the expected value -
+ *       i.e. the new capability the bump introduces actually works, not just its absence.</li>
+ * </ul>
  */
 public class BuildInfoByteEquivalenceTest {
 
@@ -64,6 +73,12 @@ public class BuildInfoByteEquivalenceTest {
     public void pinTimeZone() {
         // The 'started' timestamp is formatted with the JVM default time zone at build() time.
         // Pin to UTC so the assertion is stable regardless of the CI machine's time zone.
+        //
+        // NOTE: TimeZone.setDefault(...) mutates JVM-global state for the duration of this class.
+        // This relies on TestNG/Surefire running test classes sequentially (no parallel/threadCount
+        // configured in this repo). If parallel test execution is ever enabled, this must be
+        // reworked (e.g. per-test TimeZone injection) to avoid affecting other concurrently-running
+        // tests' timestamp formatting. @AfterClass restores the original zone.
         originalTimeZone = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
@@ -82,6 +97,48 @@ public class BuildInfoByteEquivalenceTest {
         assertEquals(actual, expected,
                 "Build-Info JSON output changed - the byte-equivalence guarantee is broken. " +
                         "If this change is intentional, regenerate " + GOLDEN_RESOURCE + " and review the diff.");
+    }
+
+    /**
+     * Covers the new capability the 2.43.9 bump introduces: when {@code originalDeploymentRepo} is
+     * set on an {@link Artifact}, it must serialize under the expected key with the expected value.
+     * The byte-equivalence test above only exercises the omitted-when-unset path; this asserts the
+     * field is actually emitted (right key, right value) when populated.
+     */
+    @Test
+    public void originalDeploymentRepoSerializesWhenSet() throws Exception {
+        Artifact withRepo = new ArtifactBuilder("demo-1.0.jar")
+                .type("jar")
+                .sha1("0123456789abcdef0123456789abcdef01234567")
+                .originalDeploymentRepo("libs-release-local")
+                .build();
+
+        Module module = new ModuleBuilder()
+                .id("org.example:demo:1.0")
+                .addArtifact(withRepo)
+                .build();
+
+        BuildInfo bi = new BuildInfoBuilder("teamcity-original-repo-fixture")
+                .number("42")
+                .startedDate(new Date(1600000000000L))
+                .addModule(module)
+                .build();
+
+        String json = BuildInfoExtractorUtils.buildInfoToJsonString(bi);
+
+        assertTrue(json.contains("\"originalDeploymentRepo\" : \"libs-release-local\""),
+                "Expected originalDeploymentRepo to serialize under its key when set, but got:\n" + json);
+    }
+
+    /**
+     * Complements the golden test: with {@code originalDeploymentRepo} unset, the key must be
+     * absent entirely (NON_NULL omission), which is what keeps the output byte-identical to 2.38.1.
+     */
+    @Test
+    public void originalDeploymentRepoOmittedWhenUnset() throws Exception {
+        String json = BuildInfoExtractorUtils.buildInfoToJsonString(buildDeterministicBuildInfo());
+        assertFalse(json.contains("originalDeploymentRepo"),
+                "Expected originalDeploymentRepo to be omitted when unset, but got:\n" + json);
     }
 
     /**
