@@ -51,9 +51,9 @@ public class GitCmd {
 
             int exitCode;
             if (timeout <= 0) {
-                exitCode = CommandLineExecutor.waitForProcess(process, errorGobbler, outputGobbler);
+                exitCode = CommandLineExecutor.waitForProcess(process, gitExe, errorGobbler, outputGobbler);
             } else {
-                exitCode = CommandLineExecutor.waitForProcess(process, errorGobbler, outputGobbler, timeout);
+                exitCode = CommandLineExecutor.waitForProcess(process, gitExe, errorGobbler, outputGobbler, timeout);
             }
 
             String out = outputGobbler.getReadString(Charsets.UTF_8);

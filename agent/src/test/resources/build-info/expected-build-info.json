@@ -1,0 +1,45 @@
+{
+  "properties" : {
+    "buildInfo.env.GAMMA" : "three",
+    "buildInfo.env.BETA" : "two",
+    "buildInfo.env.ALPHA" : "one"
+  },
+  "version" : "1.0.1",
+  "name" : "teamcity-equiv-fixture",
+  "number" : "42",
+  "buildAgent" : {
+    "name" : "Maven",
+    "version" : "3.9.12"
+  },
+  "agent" : {
+    "name" : "TeamCity",
+    "version" : "2025.11"
+  },
+  "started" : "2020-09-13T12:26:40.000+0000",
+  "durationMillis" : 123456,
+  "principal" : "triggeredByUser",
+  "artifactoryPrincipal" : "deployerUser",
+  "artifactoryPluginVersion" : "2.11.x",
+  "url" : "http://teamcity/viewLog.html?buildId=42",
+  "vcs" : [ ],
+  "modules" : [ {
+    "id" : "org.example:demo:1.0",
+    "repository" : "libs-release-local",
+    "artifacts" : [ {
+      "type" : "jar",
+      "sha1" : "0123456789abcdef0123456789abcdef01234567",
+      "sha256" : "0000111122223333444455556666777788889999aaaabbbbccccddddeeeeffff",
+      "md5" : "0123456789abcdef0123456789abcdef",
+      "name" : "demo-1.0.jar",
+      "path" : "org/example/demo/1.0/demo-1.0.jar"
+    } ],
+    "dependencies" : [ {
+      "type" : "jar",
+      "sha1" : "89abcdef0123456789abcdef0123456789abcdef",
+      "sha256" : "ffffeeeeddddccccbbbbaaaa9999888877776666555544443333222211110000",
+      "md5" : "fedcba9876543210fedcba9876543210",
+      "id" : "com.google.guava:guava:32.0.1-jre",
+      "scopes" : [ "compile" ]
+    } ]
+  } ]
+}
