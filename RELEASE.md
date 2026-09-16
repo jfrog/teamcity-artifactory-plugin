@@ -1,3 +1,8 @@
+## 3.0.0 (September 16, 2026)
+- Security Fixes and Frogbot flow addition - https://github.com/jfrog/teamcity-artifactory-plugin/pull/172
+- Move plugin to Java 21 and target TeamCity 2025.11 SDK - https://github.com/jfrog/teamcity-artifactory-plugin/pull/179
+- ci: run tests + E2E build-and-publish on JDK 21 (TeamCity 2025.11) - https://github.com/jfrog/teamcity-artifactory-plugin/pull/180
+
 ## 2.11.0 (October 23, 2025)
 - Bug fix - Update build info url to be compatible with the Artifact version 7+ - https://github.com/jfrog/teamcity-artifactory-plugin/pull/166
 - Upgrade to Java version 17 - https://github.com/jfrog/teamcity-artifactory-plugin/pull/168
