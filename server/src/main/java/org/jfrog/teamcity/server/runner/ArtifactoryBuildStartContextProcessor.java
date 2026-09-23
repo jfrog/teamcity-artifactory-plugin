@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.BuildInfoConfigProperties;
 import org.jfrog.build.api.BuildInfoProperties;
 import org.jfrog.build.extractor.clientConfiguration.ClientProperties;
+import org.jfrog.build.extractor.clientConfiguration.util.PathSanitizer;
 import org.jfrog.teamcity.api.ProxyInfo;
 import org.jfrog.teamcity.api.ServerConfigBean;
 import org.jfrog.teamcity.api.credentials.CredentialsBean;
@@ -53,6 +54,12 @@ import static org.jfrog.teamcity.common.ConstantValues.*;
  * @author Noam Y. Tenne
  */
 public class ArtifactoryBuildStartContextProcessor implements BuildStartContextProcessor {
+
+    /**
+     * The build info properties file is a plain key=value list, so any legitimate file is tiny.
+     * Caps the amount of data read into memory from a server-side-resolved, build-parameter-controlled path.
+     */
+    private static final long MAX_PROPERTIES_FILE_SIZE_BYTES = 1024 * 1024; // 1MB
 
     private SBuildServer buildServer;
     private DeployableArtifactoryServers deployableServers;
@@ -250,18 +257,38 @@ public class ArtifactoryBuildStartContextProcessor implements BuildStartContextP
             String propFilePropKey = propType + BuildInfoConfigProperties.PROP_PROPS_FILE;
             String propertyFilePath = buildParams.get(propFilePropKey);
             if (StringUtils.isNotBlank(propertyFilePath)) {
-                File propertiesFile = new File(propertyFilePath);
+                File propertiesFile;
+                try {
+                    propertiesFile = PathSanitizer.validateAndNormalize(propertyFilePath);
+                } catch (SecurityException se) {
+                    Loggers.SERVER.error("Ignoring build info properties file at '" + propertyFilePath +
+                            "' given from property '" + propFilePropKey + "': " + se.getMessage());
+                    continue;
+                }
 
-                if (!propertiesFile.exists()) {
+                if (propertiesFile == null || !propertiesFile.exists()) {
                     Loggers.SERVER.error("Ignoring build info properties file at '" + propertyFilePath +
                             "' given from property '" + propFilePropKey + "': file does not exist.");
-                    return;
+                    continue;
+                }
+
+                if (!propertiesFile.isFile()) {
+                    Loggers.SERVER.error("Ignoring build info properties file at '" + propertyFilePath +
+                            "' given from property '" + propFilePropKey + "': not a regular file.");
+                    continue;
                 }
 
                 if (!propertiesFile.canRead()) {
                     Loggers.SERVER.error("Ignoring build info properties file at '" + propertyFilePath +
                             "' given from property '" + propFilePropKey + "': lacking read permissions.");
-                    return;
+                    continue;
+                }
+
+                if (propertiesFile.length() > MAX_PROPERTIES_FILE_SIZE_BYTES) {
+                    Loggers.SERVER.error("Ignoring build info properties file at '" + propertyFilePath +
+                            "' given from property '" + propFilePropKey + "': file size (" + propertiesFile.length() +
+                            " bytes) exceeds the maximum allowed size of " + MAX_PROPERTIES_FILE_SIZE_BYTES + " bytes.");
+                    continue;
                 }
 
                 FileInputStream inputStream = null;
