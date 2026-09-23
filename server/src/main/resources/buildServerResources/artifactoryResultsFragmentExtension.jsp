@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <%--
   ~ Copyright (C) 2010 JFrog Ltd.
@@ -29,7 +30,7 @@
                         <img width="48px" height="48px" src="${logoUrl}"/>
                     </td>
                     <td>
-                        <a href="${artifactoryBuildUrl.key}" target="_blank">Artifactory Build Info - ${artifactoryBuildUrl.value}</a>
+                        <a href="${fn:escapeXml(artifactoryBuildUrl.key)}" target="_blank">Artifactory Build Info - ${fn:escapeXml(artifactoryBuildUrl.value)}</a>
                     </td>
                 </tr>
             </c:forEach>
@@ -40,7 +41,7 @@
                     <img width="48px" height="48px" src="${logoUrl}"/>
                 </td>
                 <td>
-                    <a href="${artifactoryBuildUrls.keySet().toArray()[0]}" target="_blank">Artifactory Build Info</a>
+                    <a href="${fn:escapeXml(artifactoryBuildUrls.keySet().toArray()[0])}" target="_blank">Artifactory Build Info</a>
                 </td>
             </tr>
         </c:otherwise>

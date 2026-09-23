@@ -17,6 +17,7 @@
 package org.jfrog.teamcity.server.summary;
 
 import jetbrains.buildServer.controllers.BuildDataExtensionUtil;
+import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.serverSide.impl.auth.SecuredFinishedBuildImpl;
@@ -90,30 +91,53 @@ public class ArtifactoryResultsFragmentExtension extends SimplePageExtension {
         CustomDataStorage customDataStorage = buildType.getCustomDataStorage(CustomDataStorageKeys.RUN_HISTORY);
         Map<String, String> buildInfoUrls = new HashMap<String, String>();
         for (SBuildRunnerDescriptor buildRunnerDescriptor : buildType.getBuildRunners()) {
-            // Get build url from system parameters
+            // Get build url from system parameters. This value is reported by the agent at build finish and can be
+            // overridden by any build step (e.g. via a ##teamcity[setParameter] service message), so it must never
+            // be trusted as-is: only http(s) links are accepted, anything else (e.g. javascript:) is dropped.
             String buildUrl = getBuildUrlParam(build, buildRunnerDescriptor);
             if (StringUtils.isNotBlank(buildUrl)) {
-                buildInfoUrls.put(buildUrl, buildRunnerDescriptor.getName());
-                continue;
+                if (isHttpOrHttpsUrl(buildUrl)) {
+                    buildInfoUrls.put(buildUrl, buildRunnerDescriptor.getName());
+                    continue;
+                }
+                Loggers.SERVER.warn("Ignoring Artifactory build info URL for build " + build.getBuildId() +
+                        ", runner '" + buildRunnerDescriptor.getName() + "': only http/https URLs are supported.");
             }
 
             // If build url not in the system parameters, get it from CustomDataStorage
             buildUrl = customDataStorage.getValue(build.getBuildTypeExternalId() + "#" +
                     Long.toString(build.getBuildId()) + "#" + buildRunnerDescriptor.getId());
             if (StringUtils.isNotBlank(buildUrl)) {
-                buildInfoUrls.put(buildUrl, buildRunnerDescriptor.getName());
-                continue;
+                if (isHttpOrHttpsUrl(buildUrl)) {
+                    buildInfoUrls.put(buildUrl, buildRunnerDescriptor.getName());
+                    continue;
+                }
+                Loggers.SERVER.warn("Ignoring Artifactory build info URL for build " + build.getBuildId() +
+                        ", runner '" + buildRunnerDescriptor.getName() + "': only http/https URLs are supported.");
             }
 
             // Old implementation supports only single buildInfo url
             String legacyBuildUrl = customDataStorage.getValue(Long.toString(build.getBuildId()) + "#" + buildRunnerDescriptor.getId());
             if (StringUtils.isNotBlank(legacyBuildUrl)) {
-                buildInfoUrls.put(legacyBuildUrl + build.getBuildTypeExternalId() + "/" + build.getBuildNumber(),
-                        buildRunnerDescriptor.getName());
-                return buildInfoUrls;
+                if (isHttpOrHttpsUrl(legacyBuildUrl)) {
+                    buildInfoUrls.put(legacyBuildUrl + build.getBuildTypeExternalId() + "/" + build.getBuildNumber(),
+                            buildRunnerDescriptor.getName());
+                    return buildInfoUrls;
+                }
+                Loggers.SERVER.warn("Ignoring Artifactory build info URL for build " + build.getBuildId() +
+                        ", runner '" + buildRunnerDescriptor.getName() + "': only http/https URLs are supported.");
             }
         }
         return buildInfoUrls;
+    }
+
+    /**
+     * Restricts rendered build info links to http/https. The URL is rendered as-is as a link href on the build
+     * results page, and one of its sources (build finish parameters) can be set by any build step at runtime, so
+     * schemes like javascript:/data: must be rejected to prevent script execution when the link is clicked.
+     */
+    private boolean isHttpOrHttpsUrl(String url) {
+        return StringUtils.startsWithIgnoreCase(url, "http://") || StringUtils.startsWithIgnoreCase(url, "https://");
     }
 
     private String getBuildUrlParam(SBuild build, SBuildRunnerDescriptor buildRunnerDescriptor) {
