@@ -4,11 +4,10 @@ resources:
     configuration:
       path: jfrog/teamcity-artifactory-plugin
       gitProvider: il_automation
+      branches:
+        include: master|dev
       buildOn:
         commit: true
-        pullRequestCreate: true
-      cancelPendingRunsOn:
-        pullRequestUpdate: true
 
   - name: teamcityReleaseGit
     type: GitRepo

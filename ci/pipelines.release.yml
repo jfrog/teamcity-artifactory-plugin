@@ -25,8 +25,6 @@ pipelines:
             - name: ecosys_entplus_deployer
             - name: jetbrains
         execution:
-          onStart:
-            - restore_cache_files m2_home ${HOME}/.m2
           onExecute:
             - cd $res_teamcityReleaseGit_resourcePath
 
@@ -97,6 +95,3 @@ pipelines:
             # Show tests in the *Tests* tab
             - save_tests $res_teamcityReleaseGit_resourcePath/agent/target/surefire-reports/junitreports
             - save_tests $res_teamcityReleaseGit_resourcePath/server/target/surefire-reports/junitreports
-
-            # Save .m2 cache
-            - add_cache_files ${HOME}/.m2 m2_home
