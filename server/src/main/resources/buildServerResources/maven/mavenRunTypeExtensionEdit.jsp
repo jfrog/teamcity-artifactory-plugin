@@ -53,7 +53,7 @@
                 $('org.jfrog.artifactory.selectedDeployableServer.deployArtifacts').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.deployIncludePatterns').value = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.deployExcludePatterns').value = '';
-                $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = true;
+                $('org.jfrog.artifactory.selectedDeployableServer.publishBuildInfo').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.includeEnvVars').checked = false;
                 $('org.jfrog.artifactory.selectedDeployableServer.envVarsIncludePatterns').value = '';
                 $('org.jfrog.artifactory.selectedDeployableServer.envVarsExcludePatterns').value = '*password*,*secret*';
